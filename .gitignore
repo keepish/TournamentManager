@@ -1,0 +1,22 @@
+# Конфиденциальные настройки
+**/appsettings.json
+**/appsettings.*.json
+
+# Исключения - добавляем только примеры
+!**/appsettings.example.json
+
+# Файлы сборки
+bin/
+obj/
+
+# Файлы IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Файлы пакетов
+packages/
+
+# Миграции БД (можно коммитить, но по желанию)
+#**/Migrations/

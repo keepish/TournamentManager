@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Newtonsoft.Json;
 using System.Windows;
+using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
 
 namespace TournamentManager.App.ViewModels
@@ -61,35 +62,5 @@ namespace TournamentManager.App.ViewModels
                 IsLoading = false;
             }
         }
-    }
-
-    public class LoginResult
-    {
-        public string Token { get; set; } = string.Empty;
-        public UserInfo User { get; set; } = new();
-    }
-
-    public class UserInfo
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonProperty("role")]
-        public string Role { get; set; } = string.Empty;
-
-        [JsonProperty("lastName")]
-        public string LastName { get; set; } = string.Empty;
-
-        [JsonProperty("firstName")]
-        public string FirstName { get; set; } = string.Empty;
-
-        [JsonProperty("patronymic")]
-        public string? Patronymic { get; set; }
-
-        [JsonProperty("fullName")]
-        public string FullName { get; set; } = string.Empty;
     }
 }

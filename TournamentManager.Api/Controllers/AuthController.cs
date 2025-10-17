@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,14 +16,14 @@ namespace TournamentManager.Api.Controllers
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthController (AppDbContext context, IConfiguration configuration)
+        public AuthController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] Core.Models.Requests.LoginRequest request)
         {
             try
             {
@@ -41,7 +39,8 @@ namespace TournamentManager.Api.Controllers
 
                 var token = GenerateJwtToken(user);
 
-                return Ok (new {
+                return Ok(new
+                {
                     Token = token,
                     User = new
                     {
@@ -55,14 +54,14 @@ namespace TournamentManager.Api.Controllers
                     }
                 });
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Ошибка сервера: {ex.Message}" });
             }
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] Core.Models.Requests.RegisterRequest request)
         {
             try
             {
@@ -72,7 +71,7 @@ namespace TournamentManager.Api.Controllers
                 var participantRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Участник");
                 if (participantRole is null)
                     return BadRequest(new { message = "Роль Participant не найдена в системе" });
-                
+
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
                 var user = new User
@@ -123,24 +122,5 @@ namespace TournamentManager.Api.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-    }
-
-    public class LoginRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class RegisterRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string? Patronymic { get; set; }
-        public string? Email { get; set; }
-        public string? Settlement { get; set; }
-        public DateTime? Birthday { get; set; }
-        public string? BeltLevel { get; set; }
     }
 }

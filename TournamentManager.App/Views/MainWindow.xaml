@@ -1,0 +1,74 @@
+﻿<Window x:Class="TournamentManager.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Tournament Manager"
+        Height="700" Width="1200"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0">
+            <Grid Margin="16,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="AccountCircle" Foreground="White" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding CurrentUser.FullName}" Foreground="White" FontWeight="Bold"/>
+                    <TextBlock Text=" | " Foreground="White" Margin="8,0"/>
+                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="White"/>
+                </StackPanel>
+
+                <TextBlock Grid.Column="1" Text="Федерация Тхэквондо - Система управления соревнованиями" 
+                          Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                <Button Grid.Column="2" Content="Выход" Command="{Binding LogoutCommand}"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" BorderThickness="0,0,1,0">
+                <ScrollViewer>
+                    <StackPanel Margin="8">
+                        <TextBlock Text="НАВИГАЦИЯ" FontWeight="Bold" Margin="0,8"/>
+
+                        <Button Content="Главная" Command="{Binding NavigateCommand}" 
+                                CommandParameter="Dashboard"
+                                Margin="0,2"/>
+                        <Button Content="Турниры" Command="{Binding NavigateCommand}" 
+                                CommandParameter="Tournaments"
+                                Margin="0,2"/>
+
+                        <ItemsControl ItemsSource="{Binding MenuItems}" Margin="0,10,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Title}" 
+                                            Command="{Binding Command}" 
+                                            Margin="0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
+        </Grid>
+    </Grid>
+</Window>

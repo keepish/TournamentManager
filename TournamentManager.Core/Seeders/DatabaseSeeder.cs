@@ -19,7 +19,18 @@ namespace TournamentManager.Core.Seeders
                     Email = "admin@taekwondo.ru"
                 };
 
+                var judge = new User
+                {
+                    Name = "judge",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("judge"),
+                    FirstName = "Матвей",
+                    LastName = "Филоненко",
+                    RoleId = 2,
+                    Email = "judge@taekwondo.ru"
+                };
+
                 context.Users.Add(organizer);
+                context.Users.Add(judge);
                 context.SaveChanges();
 
                 var tournament = new Tournament

@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="TournamentManager.Client.Views.TournamentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <ScrollViewer>
+        <StackPanel Margin="20">
+            <TextBlock Text="🏆 Управление турнирами" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Margin="0,0,0,20"/>
+
+            <Border CornerRadius="8" 
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Список турниров" 
+                               FontSize="18" 
+                               FontWeight="SemiBold" 
+                               Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Функциональность турниров будет реализована в ближайшее время" 
+                               FontSize="14" 
+                               TextWrapping="Wrap"
+                               HorizontalAlignment="Center"
+                               Margin="0,20"/>
+
+                    <Button Content="Создать турнир" 
+                            Margin="0,10,0,0"
+                            Width="120"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

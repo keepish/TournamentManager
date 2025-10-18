@@ -12,17 +12,6 @@ namespace TournamentManager.App
         public MainWindow()
         {
             InitializeComponent();
-
-            var apiService = new ApiService();
-            DataContext = new LoginViewModel(apiService);
-
-            PasswordBox.PasswordChanged += (s, e) =>
-            {
-                if (DataContext is LoginViewModel vm)
-                {
-                    vm.Password = PasswordBox.Password;
-                }
-            };
         }
     }
 }

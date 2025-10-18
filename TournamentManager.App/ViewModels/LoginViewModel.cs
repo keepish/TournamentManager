@@ -1,15 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Newtonsoft.Json;
 using System.Windows;
+using TournamentManager.Client;
+using TournamentManager.Client.ViewModels;
+using TournamentManager.Core.Models;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
+using TournamentManager.Core.Services.Navigation;
 
 namespace TournamentManager.App.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
+        private readonly INavigationService _navigationService;
 
         [ObservableProperty]
         private string username;
@@ -51,15 +55,31 @@ namespace TournamentManager.App.ViewModels
                 Application.Current.Properties["User"] = result.User;
                 Application.Current.Properties["Token"] = result.Token;
 
-                MessageBox.Show($"Добро пожаловать, {result.User.FullName}!", "Успешный вход");
+                var mainWindow = new MainWindow();
+                var mainViewModel = new MainViewModel(_apiService, result.User);
+                mainWindow.DataContext = mainViewModel;
+                mainWindow.Show();
+
+                CloseLoginWindow();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка входа: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка");
             }
             finally
             {
                 IsLoading = false;
+            }
+        }
+        private void CloseLoginWindow()
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is LoginWindow)
+                {
+                    window.Close();
+                    break;
+                }
             }
         }
     }

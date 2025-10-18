@@ -3,20 +3,17 @@ using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 using TournamentManager.Client;
 using TournamentManager.Client.ViewModels;
-using TournamentManager.Core.Models;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
-using TournamentManager.Core.Services.Navigation;
 
 namespace TournamentManager.App.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
-        private readonly INavigationService _navigationService;
 
         [ObservableProperty]
-        private string username;
+        private string login;
 
         [ObservableProperty]
         private string password;
@@ -30,9 +27,9 @@ namespace TournamentManager.App.ViewModels
         }
 
         [RelayCommand]
-        private async Task Login()
+        private async Task Authorize()
         {
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
             {
                 MessageBox.Show("Введите имя пользователя и пароль");
                 return;
@@ -44,7 +41,7 @@ namespace TournamentManager.App.ViewModels
             {
                 var loginData = new
                 {
-                    name = Username,
+                    login = Login,
                     password = Password
                 };
 
@@ -71,6 +68,7 @@ namespace TournamentManager.App.ViewModels
                 IsLoading = false;
             }
         }
+
         private void CloseLoginWindow()
         {
             foreach (Window window in Application.Current.Windows)

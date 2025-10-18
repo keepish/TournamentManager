@@ -11,7 +11,7 @@ namespace TournamentManager.Core.Seeders
             {
                 var organizer = new User
                 {
-                    Name = "admin",
+                    Login = "admin",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                     FirstName = "Алексей",
                     LastName = "Колосов",
@@ -21,7 +21,7 @@ namespace TournamentManager.Core.Seeders
 
                 var judge = new User
                 {
-                    Name = "judge",
+                    Login = "judge",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("judge"),
                     FirstName = "Матвей",
                     LastName = "Филоненко",

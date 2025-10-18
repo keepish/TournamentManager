@@ -16,14 +16,14 @@
                        HorizontalAlignment="Center"
                        Margin="0,0,0,30"/>
 
-            <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"
                      Margin="0,0,0,15"/>
 
             <PasswordBox x:Name="PasswordBox"
                          Margin="0,0,0,25"/>
 
             <Button Content="ВОЙТИ" 
-                    Command="{Binding LoginCommand}"
+                    Command="{Binding AuthorizeCommand}"
                     Height="40"
                     FontSize="14"
                     FontWeight="Bold"/>

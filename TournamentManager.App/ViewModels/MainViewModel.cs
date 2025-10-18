@@ -13,7 +13,6 @@ namespace TournamentManager.Client.ViewModels
     public partial class MainViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
-        private readonly Core.Services.Navigation.NavigationService _navigationService;
 
         [ObservableProperty]
         private UserInfo _currentUser;
@@ -38,7 +37,7 @@ namespace TournamentManager.Client.ViewModels
 
             switch (CurrentUser.Role)
             {
-                case "Организотор":
+                case "Организатор":
                     MenuItems.Add(new MenuItem("Управление заявками", new RelayCommand(() => Navigate("Applications"))));
                     MenuItems.Add(new MenuItem("Управление пользователями", new RelayCommand(() => Navigate("Users"))));
                     MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports"))));

@@ -8,7 +8,7 @@ namespace TournamentManager.Core.Models
 
         [Required(ErrorMessage = "Имя пользователя обязательно")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Имя пользователя должно быть от 3 до 50 символов")]
-        public string Name { get; set; }
+        public string Login { get; set; }
 
         [Required(ErrorMessage = "Хеш пароля обязателен")]
         public string PasswordHash { get; set; }

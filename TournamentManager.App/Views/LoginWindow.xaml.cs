@@ -11,8 +11,6 @@ namespace TournamentManager.Client
     /// </summary>
     public partial class LoginWindow : Window
     {
-        private readonly Core.Services.Navigation.NavigationService navigationService;
-
         public LoginWindow()
         {
             InitializeComponent();

@@ -29,7 +29,7 @@ namespace TournamentManager.Api.Controllers
             {
                 var user = await _context.Users
                     .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.Name == request.Name);
+                    .FirstOrDefaultAsync(u => u.Login == request.Login);
 
                 if (user is null)
                     return Unauthorized(new { message = "Пользователь не найден" });
@@ -45,7 +45,7 @@ namespace TournamentManager.Api.Controllers
                     User = new
                     {
                         user.Id,
-                        user.Name,
+                        user.Login,
                         Role = user.Role.Name,
                         user.FullName,
                         user.FirstName,
@@ -65,7 +65,7 @@ namespace TournamentManager.Api.Controllers
         {
             try
             {
-                if (await _context.Users.AnyAsync(u => u.Name == request.Name))
+                if (await _context.Users.AnyAsync(u => u.Login == request.Login))
                     return BadRequest(new { message = "Пользователь с таким именем уже существует" });
 
                 var participantRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Участник");
@@ -76,7 +76,7 @@ namespace TournamentManager.Api.Controllers
 
                 var user = new User
                 {
-                    Name = request.Name,
+                    Login = request.Login,
                     PasswordHash = passwordHash,
                     RoleId = participantRole.Id,
                     LastName = request.LastName,
@@ -108,7 +108,7 @@ namespace TournamentManager.Api.Controllers
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Name, user.Login),
                 new Claim(ClaimTypes.Role, user.Role.Name),
                 new Claim("FullName", user.FullName)
             };

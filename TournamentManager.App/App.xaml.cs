@@ -7,7 +7,6 @@ using TournamentManager.App.ViewModels;
 using TournamentManager.Client;
 using TournamentManager.Client.ViewModels;
 using TournamentManager.Core.Services;
-using TournamentManager.Core.Services.Navigation;
 
 namespace TournamentManager.App
 {

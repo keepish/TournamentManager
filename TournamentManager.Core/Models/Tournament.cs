@@ -28,6 +28,6 @@ namespace TournamentManager.Core.Models
 
         public User Organizer { get; set; } = null!;
 
-        public DateTime CrearedDate { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     }
 }

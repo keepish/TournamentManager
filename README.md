@@ -7,6 +7,6 @@
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "server=localhost;database=taekwondo_tournaments;user=your_username;password=your_password;"
+    "DefaultConnection": "server=localhost;database=sport_tournaments;user=your_username;password=your_password;"
   }
 }

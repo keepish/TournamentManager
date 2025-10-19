@@ -1,15 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TournamentManager.Core.Models
+namespace TournamentManager.Core.DTOs.Tournaments
 {
-    public class Tournament
+    public class TournamentDto
     {
         public int Id { get; set; }
 
         [Required]
         [StringLength(100)]
         public string Name { get; set; }
-
         public string? Description { get; set; }
 
         [Required]
@@ -17,17 +16,13 @@ namespace TournamentManager.Core.Models
 
         [Required]
         public DateTime EndDate { get; set; }
-
         public string? Address { get; set; }
 
         [Required]
         [StringLength(15)]
         public string Status { get; set; } = "Предстоящий";
 
+        [Required]
         public int OrganizerId { get; set; }
-
-        public User Organizer { get; set; } = null!;
-
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     }
 }

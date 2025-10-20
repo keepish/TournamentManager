@@ -1,8 +1,6 @@
 ﻿using System.Windows;
-using TournamentManager.App.ViewModels;
-using TournamentManager.Core.Services;
 
-namespace TournamentManager.App
+namespace TournamentManager.Client.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

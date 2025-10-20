@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using TournamentManager.Core.Models;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
 

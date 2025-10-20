@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	<RootNamespace>TournamentManager.Client</RootNamespace>
+	<AssemblyName>TournamentManager.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

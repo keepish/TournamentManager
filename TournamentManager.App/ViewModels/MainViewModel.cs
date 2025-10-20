@@ -1,10 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Net.Http;
 using System.Windows;
-using TournamentManager.App;
-using TournamentManager.App.ViewModels;
+using TournamentManager.Client;
 using TournamentManager.Client.Views;
+using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
 
@@ -13,6 +14,7 @@ namespace TournamentManager.Client.ViewModels
     public partial class MainViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
+        private readonly IService<TournamentDto> _tournamentService;
 
         [ObservableProperty]
         private UserInfo _currentUser;
@@ -23,10 +25,13 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private ObservableCollection<MenuItem> _menuItems;
 
-        public MainViewModel(ApiService apiService, UserInfo user)
+        public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService, UserInfo user)
         {
             _apiService = apiService;
+            _tournamentService = tournamentService;
             CurrentUser = user;
+
+            CurrentView = new TournamentsViewModel(_apiService, _tournamentService);
 
             InitializeNavigation();
         }
@@ -61,7 +66,7 @@ namespace TournamentManager.Client.ViewModels
             CurrentView = viewName switch
             {
                 "Dashboard" => new DashboardView(),
-                "Tournaments" => new TournamentsView(),
+                "Tournaments" => new TournamentsView { DataContext = new TournamentsViewModel(_apiService, _tournamentService) },
                 "Applications" => new PlaceholderView("Заявки"),
                 "Users" => new PlaceholderView("Пользователи"),
                 "Reports" => new PlaceholderView("Отчеты"),
@@ -76,8 +81,18 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void Logout()
         {
+            _apiService.ClearToken();
+            Application.Current.Properties["User"] = null;
+            Application.Current.Properties["Token"] = null;
+
             var loginWindow = new LoginWindow();
-            loginWindow.DataContext = new LoginViewModel(_apiService);
+
+            var apiService = new ApiService();
+            var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
+            var tournamentService = new TournamentService(httpClient);
+            loginWindow.DataContext = new LoginViewModel(apiService, tournamentService);
+
             loginWindow.Show();
 
             CloseMainWindow();

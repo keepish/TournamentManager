@@ -6,12 +6,11 @@ namespace TournamentManager.Core.Services
     public class TournamentService : IService<TournamentDto>
     {
         private readonly HttpClient _client;
-        private readonly string _url = "";
+        private readonly string _url = "https://localhost:7074/api/Tournaments/";
 
         public TournamentService(HttpClient client)
         {
             _client = client;
-            _client.BaseAddress = new Uri(_url);
         }
 
         public async Task<List<TournamentDto?>?> GetAllAsync()

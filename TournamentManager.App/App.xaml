@@ -1,8 +1,10 @@
 ﻿<Application x:Class="TournamentManager.Client.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:TournamentManager.App"
-             StartupUri="Views/LoginWindow.xaml">
+             xmlns:converters="clr-namespace:TournamentManager.Client.Converters">
     <Application.Resources>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Application.Resources>
 </Application>

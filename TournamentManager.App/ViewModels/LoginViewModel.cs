@@ -1,16 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using TournamentManager.Client;
-using TournamentManager.Client.ViewModels;
+using TournamentManager.Client.Views;
+using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
 
-namespace TournamentManager.App.ViewModels
+namespace TournamentManager.Client.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
+        private readonly IService<TournamentDto> _tournamentService;
 
         [ObservableProperty]
         private string login;
@@ -21,9 +23,10 @@ namespace TournamentManager.App.ViewModels
         [ObservableProperty]
         private bool isLoading = false;
 
-        public LoginViewModel(ApiService apiService)
+        public LoginViewModel(ApiService apiService, IService<TournamentDto> tournamentService)
         {
             _apiService = apiService;
+            _tournamentService = tournamentService;
         }
 
         [RelayCommand]
@@ -53,7 +56,8 @@ namespace TournamentManager.App.ViewModels
                 Application.Current.Properties["Token"] = result.Token;
 
                 var mainWindow = new MainWindow();
-                var mainViewModel = new MainViewModel(_apiService, result.User);
+                var mainViewModel = new MainViewModel(_apiService, _tournamentService, result.User);
+                
                 mainWindow.DataContext = mainViewModel;
                 mainWindow.Show();
 

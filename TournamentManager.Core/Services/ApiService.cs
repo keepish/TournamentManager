@@ -20,6 +20,11 @@ namespace TournamentManager.Core.Services
                 = new AuthenticationHeaderValue("Bearer", token);
         }
 
+        public void ClearToken()
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+        }
+
         public async Task<T> GetAsync<T>(string endpoint)
         {
             var response = await _httpClient.GetAsync(endpoint);

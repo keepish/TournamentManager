@@ -1,10 +1,10 @@
-﻿using System.Windows;
+﻿using System.Net.Http;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Navigation;
-using TournamentManager.App.ViewModels;
+using TournamentManager.Client.ViewModels;
 using TournamentManager.Core.Services;
 
-namespace TournamentManager.Client
+namespace TournamentManager.Client.Views
 {
     /// <summary>
     /// Логика взаимодействия для LoginWindow.xaml
@@ -16,7 +16,12 @@ namespace TournamentManager.Client
             InitializeComponent();
 
             var apiService = new ApiService();
-            DataContext = new LoginViewModel(apiService);
+            var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
+
+            var tournamentService = new TournamentService(httpClient);
+
+            DataContext = new LoginViewModel(apiService, tournamentService);
 
             PasswordBox.PasswordChanged += (s, e) =>
             {

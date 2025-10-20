@@ -70,7 +70,7 @@
                           Style="{StaticResource ComboBoxStyle}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding}" Padding="4"/>
+                            <TextBlock Text="{Binding}" Style="{StaticResource BodyTextStyle}" Padding="4"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>

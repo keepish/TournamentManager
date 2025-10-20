@@ -15,7 +15,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0">
+        <Border Background="{StaticResource PrimaryBrush}">
             <Grid Margin="16,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -23,17 +23,21 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="AccountCircle" Foreground="White" Margin="0,0,8,0"/>
-                    <TextBlock Text="{Binding CurrentUser.FullName}" Foreground="White" FontWeight="Bold"/>
-                    <TextBlock Text=" | " Foreground="White" Margin="8,0"/>
-                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="White"/>
+                    <TextBlock Text="{Binding CurrentUser.FullName}" Foreground="{StaticResource WhiteBrush}" FontWeight="Bold"/>
+                    <TextBlock Text=" | " Foreground="{StaticResource WhiteBrush}" Margin="8,0"/>
+                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="{StaticResource WhiteBrush}"/>
                 </StackPanel>
 
                 <TextBlock Grid.Column="1" Text="Федерация Тхэквондо - Система управления соревнованиями" 
-                          Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                           Foreground="{StaticResource WhiteBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-                <Button Grid.Column="2" Content="Выход" Command="{Binding LogoutCommand}"/>
+                <Button Grid.Column="2" 
+                        Foreground="{StaticResource WhiteBrush}" 
+                        Content="Выход" 
+                        Command="{Binding LogoutCommand}"
+                        BorderBrush="{StaticResource WhiteBrush}"/>
             </Grid>
         </Border>
 
@@ -43,16 +47,21 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" BorderThickness="0,0,1,0">
-                <ScrollViewer>
+            <Border BorderThickness="0,0,1,0"
+                    Background="{StaticResource WhiteBrush}"
+                    BorderBrush="{StaticResource BorderBrush}">
+                <ScrollViewer Style="{StaticResource ScrollViewerStyle}">
                     <StackPanel Margin="8">
-                        <TextBlock Text="НАВИГАЦИЯ" FontWeight="Bold" Margin="0,8"/>
+                        <TextBlock Text="НАВИГАЦИЯ" FontWeight="Bold" Margin="0,8"
+                                   Style="{StaticResource SubHeaderTextStyle}"/>
 
                         <Button Content="Главная" Command="{Binding NavigateCommand}" 
                                 CommandParameter="Dashboard"
-                                Margin="0,2"/>
+                                Margin="0,2"
+                                Style="{StaticResource SecondaryButtonStyle}"/>
                         <Button Content="Турниры" Command="{Binding NavigateCommand}" 
                                 CommandParameter="Tournaments"
+                                Style="{StaticResource SecondaryButtonStyle}"
                                 Margin="0,2"/>
 
                         <ItemsControl ItemsSource="{Binding MenuItems}" Margin="0,10,0,0">
@@ -60,6 +69,7 @@
                                 <DataTemplate>
                                     <Button Content="{Binding Title}" 
                                             Command="{Binding Command}" 
+                                            Style="{StaticResource SecondaryButtonStyle}"
                                             Margin="0,2"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -68,7 +78,8 @@
                 </ScrollViewer>
             </Border>
 
-            <ContentControl Grid.Column="1" Grid.Row="1" Content="{Binding CurrentView}"/>
+            <ContentControl Grid.Column="1" Grid.Row="1" Content="{Binding CurrentView}"
+                            Background="{StaticResource SecondaryBrush}"/>
         </Grid>
     </Grid>
 </Window>

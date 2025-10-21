@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Windows;
-using TournamentManager.Client;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
@@ -31,7 +30,7 @@ namespace TournamentManager.Client.ViewModels
             _tournamentService = tournamentService;
             CurrentUser = user;
 
-            CurrentView = new TournamentsViewModel(_apiService, _tournamentService);
+            CurrentView = new DashboardView { DataContext = new DashboardViewModel(_apiService, CurrentUser) };
 
             InitializeNavigation();
         }
@@ -86,7 +85,6 @@ namespace TournamentManager.Client.ViewModels
             Application.Current.Properties["Token"] = null;
 
             var loginWindow = new LoginWindow();
-
             var apiService = new ApiService();
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");

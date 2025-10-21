@@ -62,6 +62,16 @@
         <Setter Property="FontSize" Value="13"/>
     </Style>
 
+	<!-- Стиль для поля ввода пароля -->
+	<Style x:Key="PasswordBoxStyle" TargetType="PasswordBox">
+		<Setter Property="Padding" Value="8"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+		<Setter Property="Background" Value="{StaticResource WhiteBrush}"/>
+		<Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+		<Setter Property="FontSize" Value="13"/>
+	</Style>
+
     <!-- Стиль для комбобокса -->
     <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
         <Setter Property="Padding" Value="8"/>
@@ -115,6 +125,13 @@
         <Setter Property="Foreground" Value="{StaticResource TextHintBrush}"/>
     </Style>
 
+	<!-- Стиль для подписей -->
+	<Style x:Key="LabelTextStyle" TargetType="TextBlock">
+		<Setter Property="FontSize" Value="12"/>
+		<Setter Property="Foreground" Value="{StaticResource TextHintBrush}"/>
+		<Setter Property="Margin" Value="0,0,0,4"/>
+	</Style>
+
     <!-- Стиль для прогресс-бара -->
     <Style x:Key="ProgressBarStyle" TargetType="ProgressBar">
         <Setter Property="Height" Value="4"/>
@@ -129,5 +146,24 @@
         <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
         <Setter Property="Padding" Value="4"/>
     </Style>
+
+	<!-- Стиль для системных кнопок -->
+	<Style x:Key="SystemButtonStyle" TargetType="Button">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="Transparent"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Width" Value="35"/>
+		<Setter Property="Height" Value="30"/>
+		<Setter Property="Margin" Value="2,0,0,0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Style.Triggers>
+			<Trigger Property="IsMouseOver" Value="True">
+				<Setter Property="Background" Value="#40FFFFFF"/>
+			</Trigger>
+			<Trigger Property="IsPressed" Value="True">
+				<Setter Property="Background" Value="#60FFFFFF"/>
+			</Trigger>
+		</Style.Triggers>
+	</Style>
 
 </ResourceDictionary>

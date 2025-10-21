@@ -5,10 +5,10 @@
 
     <ScrollViewer Style="{StaticResource ScrollViewerStyle}">
         <StackPanel Margin="20" Background="{StaticResource SecondaryBrush}">
-            <TextBlock Text="🏠 Главная панель"
+            <TextBlock Text="🏠 Главная панель" Margin="20"
                        Style="{StaticResource HeaderTextStyle}"/>
 
-            <Border Style="{StaticResource CardStyle}">
+            <Border Style="{StaticResource CardStyle}" Margin="20">
                 <StackPanel>
                     <TextBlock Text="Добро пожаловать в систему управления соревнованиями!" 
                                Style="{StaticResource SubHeaderTextStyle}"

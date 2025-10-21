@@ -3,35 +3,40 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TournamentManager.Client"
+        xmlns:local="clr-namespace:TournamentManager.Client.Views"
         mc:Ignorable="d"
-        Title="Tournament Manager - Авторизация"
-        Height="400" Width="400"
+        WindowState="Maximized"
+        WindowStyle="None"
         WindowStartupLocation="CenterScreen">
 
     <Grid Margin="20">
-        <StackPanel VerticalAlignment="Center">
-            <TextBlock Text="Tournament Manger"
-                       Style="{StaticResource HeaderTextStyle}"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,30"/>
+        <local:WindowControls HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Background="{StaticResource PrimaryBrush}"/>
+        
+        <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Авторизация"
+                           Style="{StaticResource HeaderTextStyle}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,30"/>
 
+            <TextBlock Text="Логин" Style="{StaticResource LabelTextStyle}"/>
             <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource TextBoxStyle}"
-                     Margin="0,0,0,15"/>
+                         Style="{StaticResource TextBoxStyle}"
+                         Margin="0,0,0,15"/>
 
+            <TextBlock Text="Пароль" Style="{StaticResource LabelTextStyle}"/>
             <PasswordBox x:Name="PasswordBox"
-                         Margin="0,0,0,25"/>
+                             Style="{StaticResource PasswordBoxStyle}"
+                             Margin="0,0,0,25"/>
 
             <Button Content="ВОЙТИ" 
-                    Command="{Binding AuthorizeCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    FontWeight="Bold"/>
+                        Command="{Binding AuthorizeCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        FontWeight="Bold"/>
 
             <ProgressBar Style="{StaticResource ProgressBarStyle}"
-                         IsIndeterminate="True" 
-                         Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                         Margin="0,10,0,0"/>
+                             IsIndeterminate="True" 
+                             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                             Margin="0,10,0,0"/>
         </StackPanel>
     </Grid>
 </Window>

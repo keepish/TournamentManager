@@ -14,6 +14,7 @@ namespace TournamentManager.Client.ViewModels
     {
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
+        private readonly SecureStorage _secureStorage;
 
         [ObservableProperty]
         private UserInfo _currentUser;
@@ -24,10 +25,11 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private ObservableCollection<MenuItem> _menuItems;
 
-        public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService, UserInfo user)
+        public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService, UserInfo user, SecureStorage secureStorage)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
+            _secureStorage = secureStorage;
             CurrentUser = user;
 
             CurrentView = new DashboardView { DataContext = new DashboardViewModel(_apiService, CurrentUser) };
@@ -81,15 +83,16 @@ namespace TournamentManager.Client.ViewModels
         private void Logout()
         {
             _apiService.ClearToken();
-            Application.Current.Properties["User"] = null;
-            Application.Current.Properties["Token"] = null;
 
             var loginWindow = new LoginWindow();
-            var apiService = new ApiService();
+
+            var secureStorage = new SecureStorage();
+            var apiService = new ApiService(secureStorage);
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
             var tournamentService = new TournamentService(httpClient);
-            loginWindow.DataContext = new LoginViewModel(apiService, tournamentService);
+
+            loginWindow.DataContext = new LoginViewModel(apiService, tournamentService, secureStorage);
 
             loginWindow.Show();
 

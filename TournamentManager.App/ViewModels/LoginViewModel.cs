@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Tournaments;
@@ -13,6 +12,7 @@ namespace TournamentManager.Client.ViewModels
     {
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
+        private readonly SecureStorage _secureStorage;
 
         [ObservableProperty]
         private string login;
@@ -23,10 +23,13 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private bool isLoading = false;
 
-        public LoginViewModel(ApiService apiService, IService<TournamentDto> tournamentService)
+        public LoginViewModel(ApiService apiService,
+            IService<TournamentDto> tournamentService,
+            SecureStorage secureStorage)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
+            _secureStorage = secureStorage;
         }
 
         [RelayCommand]
@@ -51,13 +54,16 @@ namespace TournamentManager.Client.ViewModels
                 var result = await _apiService.PostAsync<LoginResult>("/api/Auth/login", loginData);
 
                 _apiService.SetToken(result.Token);
+                _apiService.SaveUser(result.User);
 
-                Application.Current.Properties["User"] = result.User;
-                Application.Current.Properties["Token"] = result.Token;
+                _secureStorage.Save("AuthToken", result.Token);
+
+                var userJson = System.Text.Json.JsonSerializer.Serialize(result.User);
+                _secureStorage.Save("UserData", userJson);
 
                 var mainWindow = new MainWindow();
-                var mainViewModel = new MainViewModel(_apiService, _tournamentService, result.User);
-                
+                var mainViewModel = new MainViewModel(_apiService, _tournamentService, result.User, _secureStorage);
+
                 mainWindow.DataContext = mainViewModel;
                 mainWindow.Show();
 

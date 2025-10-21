@@ -1,8 +1,7 @@
-﻿using System.Net.Http;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
 using TournamentManager.Client.ViewModels;
-using TournamentManager.Core.Services;
 
 namespace TournamentManager.Client.Views
 {
@@ -15,13 +14,7 @@ namespace TournamentManager.Client.Views
         {
             InitializeComponent();
 
-            var apiService = new ApiService();
-            var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
-
-            var tournamentService = new TournamentService(httpClient);
-
-            DataContext = new LoginViewModel(apiService, tournamentService);
+            DataContext = App.ServiceProvider.GetService<LoginViewModel>();
 
             PasswordBox.PasswordChanged += (s, e) =>
             {

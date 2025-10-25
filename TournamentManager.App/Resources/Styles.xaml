@@ -11,6 +11,8 @@
     <Color x:Key="BorderColor">#FFE0E0E0</Color>
     <Color x:Key="WhiteColor">#FFFFFFFF</Color>
     <Color x:Key="ErrorColor">#FFD32F2F</Color>
+    <Color x:Key="ProgressBarColor">#CCFFFFFF</Color>
+    <Color x:Key="GoldenColor">#B8860B</Color>
 
     <!-- КИСТИ -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
@@ -22,6 +24,8 @@
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource WhiteColor}"/>
     <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="ProgressBarBrush" Color="{StaticResource ProgressBarColor}"/>
+    <SolidColorBrush x:Key="GoldenBrush" Color="{StaticResource GoldenColor}"/>
 
     <!-- ОСНОВНЫЕ СТИЛИ -->
 
@@ -115,6 +119,7 @@
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
     </Style>
 
+    <!-- Особый стиль для текста -->
     <Style x:Key="BodyTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>

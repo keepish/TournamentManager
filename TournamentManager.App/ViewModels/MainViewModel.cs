@@ -30,7 +30,8 @@ namespace TournamentManager.Client.ViewModels
             _apiService = apiService;
             _tournamentService = tournamentService;
             _secureStorage = secureStorage;
-            CurrentUser = user;
+
+            CurrentUser = _apiService.GetStoredUser();
 
             CurrentView = new DashboardView { DataContext = new DashboardViewModel(_apiService, CurrentUser) };
 
@@ -67,7 +68,8 @@ namespace TournamentManager.Client.ViewModels
             CurrentView = viewName switch
             {
                 "Dashboard" => new DashboardView(),
-                "Tournaments" => new TournamentsView { DataContext = new TournamentsViewModel(_apiService, _tournamentService) },
+                "Tournaments" => new TournamentsView { DataContext = new TournamentsViewModel(_apiService, _tournamentService, this) },
+                "CreateTournament" => new TournamentCreationView { DataContext = new TournamentCreationViewModel(_tournamentService, this) },
                 "Applications" => new PlaceholderView("Заявки"),
                 "Users" => new PlaceholderView("Пользователи"),
                 "Reports" => new PlaceholderView("Отчеты"),

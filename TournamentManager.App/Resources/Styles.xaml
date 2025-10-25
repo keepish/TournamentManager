@@ -170,5 +170,87 @@
 			</Trigger>
 		</Style.Triggers>
 	</Style>
+    
+    <!-- Стиль для DatePicker -->
+    <Style x:Key="DatePickerStyle" TargetType="DatePicker">
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="Background" Value="{StaticResource WhiteBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DatePicker">
+                    <Grid>
+                        <Grid.Resources>
+                            <Style x:Key="DatePickerTextBoxStyle" TargetType="DatePickerTextBox">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DatePickerTextBox">
+                                            <Grid>
+                                                <Border x:Name="Border"
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="2"/>
+                                                <ScrollViewer x:Name="PART_ContentHost"
+                                                              Margin="8"
+                                                              VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Grid.Resources>
 
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <DatePickerTextBox Style="{StaticResource DatePickerTextBoxStyle}"
+                                           Background="{TemplateBinding Background}"
+                                           BorderBrush="{TemplateBinding BorderBrush}"
+                                           BorderThickness="{TemplateBinding BorderThickness}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           Padding="{TemplateBinding Padding}"
+                                           HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                           VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+
+                        <Button Grid.Column="1"
+                                x:Name="PART_Button"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Margin="4,0,0,0"
+                                Width="20"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Focusable="False">
+                            <Path Data="M0,2 L4,6 8,2 0,2"
+                                  Fill="{StaticResource TextSecondaryBrush}"
+                                  Stretch="Uniform"/>
+                        </Button>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextHintBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

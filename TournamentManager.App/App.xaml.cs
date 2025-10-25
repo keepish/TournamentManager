@@ -72,9 +72,15 @@ namespace TournamentManager.Client
             services.AddTransient<LoginViewModel>();
             services.AddTransient<MainViewModel>();
             services.AddTransient<TournamentsViewModel>();
+            services.AddTransient<TournamentCreationViewModel>();
+            services.AddTransient<DashboardViewModel>();
 
             services.AddTransient<LoginWindow>();
             services.AddTransient<MainWindow>();
+            services.AddTransient<TournamentsView>();
+            services.AddTransient<DashboardView>();
+            services.AddTransient<PlaceholderView>();
+            services.AddTransient<TournamentCreationView>();
         }
 
         protected override void OnExit(ExitEventArgs e)

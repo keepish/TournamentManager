@@ -106,7 +106,7 @@
                                                        FontSize="12"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        FontWeight="Medium"/>
-                                            <TextBlock Text="{Binding EndDate, StringFormat='Конец:  {0:dd.MM.yyyy}'}"
+                                            <TextBlock Text="{Binding EndDate, StringFormat='Конец:   {0:dd.MM.yyyy}'}"
                                                        FontSize="12"
                                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                                         </StackPanel>

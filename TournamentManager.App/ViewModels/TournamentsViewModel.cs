@@ -11,6 +11,7 @@ namespace TournamentManager.Client.ViewModels
     {
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
+        private readonly MainViewModel _mainViewModel;
 
         private ObservableCollection<TournamentDto> _allTournaments = new();
 
@@ -37,10 +38,13 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private string _selectedStatusFilter = "Все";
 
-        public TournamentsViewModel(ApiService apiService, IService<TournamentDto> tournamentService)
+        public TournamentsViewModel(ApiService apiService,
+            IService<TournamentDto> tournamentService,
+            MainViewModel mainViewModel)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
+            _mainViewModel = mainViewModel;
 
             LoadTournaments();
         }
@@ -88,7 +92,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void CreateTournament()
         {
-            MessageBox.Show("Переход к созданию турнира", "Создание турнира");
+            _mainViewModel.NavigateCommand.Execute("CreateTournament");
         }
 
         [RelayCommand]

@@ -12,6 +12,8 @@ namespace TournamentManager.Client.ViewModels
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
 
+        private ObservableCollection<TournamentDto> _allTournaments = new();
+
         [ObservableProperty]
         private ObservableCollection<TournamentDto> _tournaments = new();
 
@@ -54,11 +56,11 @@ namespace TournamentManager.Client.ViewModels
 
                 if (tournaments is not null)
                 {
-                    Tournaments.Clear();
+                    _allTournaments.Clear();
                     foreach (var tournament in tournaments)
                     {
                         if (tournament is not null)
-                            Tournaments.Add(tournament);
+                            _allTournaments.Add(tournament);
                     }
                 }
 
@@ -72,6 +74,15 @@ namespace TournamentManager.Client.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        [RelayCommand]
+        private void ResetFilters()
+        {
+            SearchText = string.Empty;
+            SelectedStatusFilter = StatusFilters[0];
+
+            ApplyFilters();
         }
 
         [RelayCommand]
@@ -115,9 +126,15 @@ namespace TournamentManager.Client.ViewModels
                 try
                 {
                     await _tournamentService.DeleteAsync(SelectedTournament.Id);
-
                     MessageBox.Show("Турнир успешно удален", "Успех");
-                    await LoadTournaments();
+
+                    var tournamentToRemove = _allTournaments.FirstOrDefault(t => t.Id == SelectedTournament.Id);
+
+                    if (tournamentToRemove != null)
+                    {
+                        _allTournaments.Remove(tournamentToRemove);
+                        ApplyFilters();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -151,11 +168,12 @@ namespace TournamentManager.Client.ViewModels
 
         private void ApplyFilters()
         {
-            var filtred = Tournaments.Where(t =>
-                SelectedStatusFilter == "Все" || t.Status == SelectedStatusFilter
-            ).Where(t =>
-                string.IsNullOrEmpty(SearchText) ||
-                t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
+            var filtred = _allTournaments.Where(t =>
+                (SelectedStatusFilter == "Все" || t.Status == SelectedStatusFilter) &&
+                (string.IsNullOrEmpty(SearchText) ||
+                 t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                 (t.Description?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true) ||
+                 (t.Address?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true))
             ).ToList();
 
             Tournaments.Clear();
@@ -164,11 +182,5 @@ namespace TournamentManager.Client.ViewModels
                 Tournaments.Add(tournament);
             }
         }
-
-        public ObservableCollection<TournamentDto> FiltredTournaments => new(
-            Tournaments.Where(t =>
-                (SelectedStatusFilter == "Все" || t.Status == SelectedStatusFilter) &&
-                (string.IsNullOrEmpty(SearchText) || t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)))
-            );
     }
 }

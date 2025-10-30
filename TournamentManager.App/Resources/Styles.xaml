@@ -1,7 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
-                    xmlns:components="clr-namespace:System.Windows.Controls;assembly=PresentationFramework">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ЦВЕТА -->
     <Color x:Key="PrimaryColor">#FF1976D2</Color>
@@ -421,52 +419,122 @@
     </Style>
 
     <!-- Стиль для DatePicker -->
+    <Style x:Key="RoundDatePickerTextBoxStyle" TargetType="DatePickerTextBox">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DatePickerTextBox">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4,0,0,4">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      VerticalAlignment="Center"
+                                      Margin="8,0"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Стиль для кнопки DatePicker -->
+    <Style x:Key="RoundDatePickerButtonStyle" TargetType="Button">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Border"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0,1,1,1"
+                            CornerRadius="0,4,4,0">
+                        <Path x:Name="ButtonPath"
+                              Fill="{StaticResource TextSecondaryBrush}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Data="M0,2 L4,6 8,2 0,2"
+                              Stretch="Uniform"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource SecondaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BorderBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ОСНОВНОЙ СТИЛЬ DATEPICKER -->
     <Style x:Key="DatePickerStyle" TargetType="DatePicker">
-        <Setter Property="Background" Value="{StaticResource WhiteBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Background" Value="{StaticResource WhiteBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="8"/>
+        <Setter Property="Padding" Value="8,6"/>
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="IsTodayHighlighted" Value="True"/>
+        <Setter Property="SelectedDateFormat" Value="Short"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DatePicker">
-                    <Border Background="{TemplateBinding Background}"
+                    <Border BorderThickness="{TemplateBinding BorderThickness}"
                             BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
                             CornerRadius="4"
                             Padding="2">
-                        <Grid>
+                        <Grid x:Name="PART_Root" 
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Основное текстовое поле -->
+                            <!-- Текстовое поле -->
                             <DatePickerTextBox x:Name="PART_TextBox"
                                                Grid.Column="0"
-                                               Background="Transparent"
-                                               BorderThickness="0"
+                                               Style="{StaticResource RoundDatePickerTextBoxStyle}"
                                                Foreground="{TemplateBinding Foreground}"
+                                               Background="Transparent"
                                                FontSize="{TemplateBinding FontSize}"
-                                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                               Margin="2,0"/>
+                                               HorizontalContentAlignment="Left"
+                                               VerticalContentAlignment="Center"/>
 
                             <!-- Кнопка календаря -->
                             <Button x:Name="PART_Button"
                                     Grid.Column="1"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Width="24"
-                                    Height="Auto"
-                                    Focusable="False">
-                                <Path Data="M0,2 L4,6 8,2 0,2"
-                                      Fill="{StaticResource TextSecondaryBrush}"
-                                      Stretch="Uniform"/>
-                            </Button>
+                                    Style="{StaticResource RoundDatePickerButtonStyle}"
+                                    Foreground="{TemplateBinding Foreground}"
+                                    Focusable="False"
+                                    Margin="2,0,2,0"/>
+
+                            <!-- Popup с календарем -->
+                            <Popup x:Name="PART_Popup"
+                                   Grid.ColumnSpan="2"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   PlacementTarget="{Binding ElementName=PART_TextBox}"
+                                   StaysOpen="False">
+                                <Border Background="{StaticResource WhiteBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4">
+                                    <Calendar x:Name="PART_Calendar"
+                                              Background="{StaticResource WhiteBrush}"
+                                              BorderThickness="0"/>
+                                </Border>
+                            </Popup>
+
+                            <!-- Визуал для отключенного состояния -->
+                            <Grid x:Name="PART_DisabledVisual"
+                                  Grid.ColumnSpan="2"
+                                  Background="{StaticResource SecondaryBrush}"
+                                  Opacity="0"
+                                  IsHitTestVisible="False"/>
                         </Grid>
                     </Border>
 
@@ -478,7 +546,7 @@
                             <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+                            <Setter TargetName="PART_DisabledVisual" Property="Opacity" Value="0.6"/>
                             <Setter Property="Foreground" Value="{StaticResource TextHintBrush}"/>
                             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                         </Trigger>

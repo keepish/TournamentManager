@@ -51,7 +51,7 @@
                     BorderBrush="{StaticResource BorderBrush}">
                 <ScrollViewer Style="{StaticResource ScrollViewerStyle}">
                     <Grid>
-                        <StackPanel Margin="8">
+                        <StackPanel Margin="8,25,8,8">
 
                             <Button Content="Главная" Command="{Binding NavigateCommand}" 
                                 CommandParameter="Dashboard"

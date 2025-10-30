@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.7 Chrome/138.0.7204.251 Electron/37.7.1 Safari/537.36" version="28.2.7">
   <diagram name="Страница — 1" id="Lp5AID1xuDNIH6iBX48G">
-    <mxGraphModel dx="938" dy="2263" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="350" dy="1898" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -20,7 +20,7 @@
           <mxGeometry x="1418" y="-808" width="130" height="90" as="geometry" />
         </mxCell>
         <mxCell id="HCRX71O3AeJAIBkIGJcl-8" value="Просмотр списка турниров" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
-          <mxGeometry x="1418" y="-542" width="130" height="90" as="geometry" />
+          <mxGeometry x="1443" y="-542" width="130" height="90" as="geometry" />
         </mxCell>
         <mxCell id="HCRX71O3AeJAIBkIGJcl-10" value="Редактирование турниров" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="1104" y="-808" width="130" height="90" as="geometry" />
@@ -28,7 +28,7 @@
         <mxCell id="HCRX71O3AeJAIBkIGJcl-13" value="Импорт данных об участниках" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="958" y="-806" width="130" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="HCRX71O3AeJAIBkIGJcl-14" value="Эксопрт данных об участниках" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+        <mxCell id="HCRX71O3AeJAIBkIGJcl-14" value="Экспорт данных об участниках" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="954" y="-337" width="130" height="90" as="geometry" />
         </mxCell>
         <mxCell id="HCRX71O3AeJAIBkIGJcl-16" value="" style="endArrow=none;html=1;rounded=0;endFill=0;fontSize=13;" parent="1" source="HCRX71O3AeJAIBkIGJcl-1" target="HCRX71O3AeJAIBkIGJcl-7" edge="1">
@@ -91,11 +91,11 @@
             <mxPoint x="366" y="-177" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="VO6wKqAw6q-A9SE_Agij-11" value="Просмтор записей&lt;div&gt;&amp;nbsp;о результатов поединка&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+        <mxCell id="VO6wKqAw6q-A9SE_Agij-11" value="Просмтор записей&lt;div&gt;&amp;nbsp;о результатах поединка&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
           <mxGeometry x="1223" y="-447" width="131" height="81" as="geometry" />
         </mxCell>
-        <mxCell id="VO6wKqAw6q-A9SE_Agij-12" value="Формирование отчетов по турниру" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
-          <mxGeometry x="1109" y="-337" width="130" height="90" as="geometry" />
+        <mxCell id="VO6wKqAw6q-A9SE_Agij-12" value="Формирование отчетов по результатам&lt;div&gt;турнира&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="1167" y="-337" width="130" height="90" as="geometry" />
         </mxCell>
         <mxCell id="VO6wKqAw6q-A9SE_Agij-13" value="" style="endArrow=none;html=1;rounded=0;endFill=0;fontSize=13;" parent="1" source="HCRX71O3AeJAIBkIGJcl-2" target="VO6wKqAw6q-A9SE_Agij-12" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -115,7 +115,7 @@
             <mxPoint x="605" y="190" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="DCoVYNIKLy8Fjtef3BYv-6" value="" style="endArrow=block;html=1;rounded=0;endFill=0;fontSize=13;" edge="1" parent="1" source="HCRX71O3AeJAIBkIGJcl-2" target="HCRX71O3AeJAIBkIGJcl-3">
+        <mxCell id="DCoVYNIKLy8Fjtef3BYv-6" value="" style="endArrow=block;html=1;rounded=0;endFill=0;fontSize=13;" parent="1" source="HCRX71O3AeJAIBkIGJcl-2" target="HCRX71O3AeJAIBkIGJcl-3" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="1109" y="-427" as="sourcePoint" />
             <mxPoint x="1159" y="-477" as="targetPoint" />

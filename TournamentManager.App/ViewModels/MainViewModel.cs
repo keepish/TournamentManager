@@ -45,8 +45,8 @@ namespace TournamentManager.Client.ViewModels
             switch (CurrentUser.Role)
             {
                 case "Организатор":
-                    MenuItems.Add(new MenuItem("Управление заявками", new RelayCommand(() => Navigate("Applications"))));
-                    MenuItems.Add(new MenuItem("Управление пользователями", new RelayCommand(() => Navigate("Users"))));
+                    MenuItems.Add(new MenuItem("Заявки", new RelayCommand(() => Navigate("Applications"))));
+                    MenuItems.Add(new MenuItem("Пользователи", new RelayCommand(() => Navigate("Users"))));
                     MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports"))));
                     break;
 

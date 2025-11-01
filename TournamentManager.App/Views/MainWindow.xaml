@@ -62,7 +62,7 @@
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Margin="0,2"/>
 
-                            <ItemsControl ItemsSource="{Binding MenuItems}" Margin="0,10,0,0">
+                            <ItemsControl ItemsSource="{Binding MenuItems}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Button Content="{Binding Title}" 

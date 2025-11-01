@@ -10,7 +10,9 @@
         WindowStartupLocation="CenterScreen">
 
     <Grid Margin="20">
-        <local:WindowControls HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Background="{StaticResource PrimaryBrush}"/>
+        <Border CornerRadius="5" Background="{StaticResource PrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="-6,-8">
+            <local:WindowControls HorizontalAlignment="Right" VerticalAlignment="Top"/>
+        </Border>
         
         <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">
             <TextBlock Text="Авторизация"
@@ -33,11 +35,13 @@
                         Style="{StaticResource PrimaryButtonStyle}"
                         FontWeight="Bold" IsDefault="True"/>
 
-            <ProgressBar Style="{StaticResource ProgressBarStyle}"
+            <Border Height="15">
+                <ProgressBar Style="{StaticResource ProgressBarStyle}"
                          Height="4"
                          IsIndeterminate="True" 
                          Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
                          Margin="0,10,0,0"/>
+            </Border>
         </StackPanel>
     </Grid>
 </Window>

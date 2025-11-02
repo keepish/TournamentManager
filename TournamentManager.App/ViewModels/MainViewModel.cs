@@ -17,13 +17,16 @@ namespace TournamentManager.Client.ViewModels
         private readonly SecureStorage _secureStorage;
 
         [ObservableProperty]
-        private UserInfo _currentUser;
+        private UserInfo currentUser;
 
         [ObservableProperty]
-        private object _currentView;
+        private object currentView;
 
         [ObservableProperty]
-        private ObservableCollection<MenuItem> _menuItems;
+        private ObservableCollection<MenuItem> menuItems;
+
+        [ObservableProperty]
+        private bool isMenuCollapsed = false;
 
         public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService, UserInfo user, SecureStorage secureStorage)
         {
@@ -32,7 +35,6 @@ namespace TournamentManager.Client.ViewModels
             _secureStorage = secureStorage;
 
             CurrentUser = _apiService.GetStoredUser();
-
             CurrentView = new DashboardView { DataContext = new DashboardViewModel(_apiService, CurrentUser) };
 
             InitializeNavigation();
@@ -45,19 +47,19 @@ namespace TournamentManager.Client.ViewModels
             switch (CurrentUser.Role)
             {
                 case "Организатор":
-                    MenuItems.Add(new MenuItem("Заявки", new RelayCommand(() => Navigate("Applications"))));
-                    MenuItems.Add(new MenuItem("Пользователи", new RelayCommand(() => Navigate("Users"))));
-                    MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports"))));
+                    MenuItems.Add(new MenuItem("Заявки", new RelayCommand(() => Navigate("Applications")), "ClipboardList"));
+                    MenuItems.Add(new MenuItem("Пользователи", new RelayCommand(() => Navigate("Users")), "AccountGroup"));
+                    MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports")), "ChartBar"));
                     break;
 
                 case "Судья":
-                    MenuItems.Add(new MenuItem("Мои площадки", new RelayCommand(() => Navigate("MyMatches"))));
-                    MenuItems.Add(new MenuItem("Судьи", new RelayCommand(() => Navigate("Judges"))));
+                    MenuItems.Add(new MenuItem("Мои площадки", new RelayCommand(() => Navigate("MyMatches")), "Stadium"));
+                    MenuItems.Add(new MenuItem("Судьи", new RelayCommand(() => Navigate("Judges")), "Gavel"));
                     break;
 
                 case "Участник":
-                    MenuItems.Add(new MenuItem("Мои заявки", new RelayCommand(() => Navigate("MyApplications"))));
-                    MenuItems.Add(new MenuItem("Мои результаты", new RelayCommand(() => Navigate("MyResults"))));
+                    MenuItems.Add(new MenuItem("Мои заявки", new RelayCommand(() => Navigate("MyApplications")), "Application"));
+                    MenuItems.Add(new MenuItem("Мои результаты", new RelayCommand(() => Navigate("MyResults")), "Trophy"));
                     break;
             }
         }
@@ -79,6 +81,12 @@ namespace TournamentManager.Client.ViewModels
                 "MyResults" => new PlaceholderView("Мои результаты"),
                 _ => new DashboardView()
             };
+        }
+
+        [RelayCommand]
+        private void ToggleMenu()
+        {
+            IsMenuCollapsed = !IsMenuCollapsed;
         }
 
         [RelayCommand]
@@ -117,12 +125,14 @@ namespace TournamentManager.Client.ViewModels
     public class MenuItem
     {
         public string Title { get; set; }
+        public string Icon { get; set; }
         public IRelayCommand Command { get; set; }
 
-        public MenuItem(string title, IRelayCommand command)
+        public MenuItem(string title, IRelayCommand command, string icon)
         {
             Title = title;
             Command = command;
+            Icon = icon;
         }
     }
 }

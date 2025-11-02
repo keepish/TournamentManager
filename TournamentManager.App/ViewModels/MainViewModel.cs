@@ -120,6 +120,17 @@ namespace TournamentManager.Client.ViewModels
                 }
             }
         }
+
+        public void NavigateToEditTournament(TournamentDto tournament)
+        {
+            if (tournament == null)
+                return;
+
+            CurrentView = new TournamentEditionView
+            {
+                DataContext = new TournamentEditionViewModel(tournament, _tournamentService, this)
+            };
+        }
     }
 
     public class MenuItem

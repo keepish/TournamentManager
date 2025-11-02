@@ -19,9 +19,6 @@ namespace TournamentManager.Client.ViewModels
         private ObservableCollection<TournamentDto> _tournaments = new();
 
         [ObservableProperty]
-        private TournamentDto? _selectedTournament;
-
-        [ObservableProperty]
         private bool isLoading;
 
         [ObservableProperty]
@@ -96,22 +93,21 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
-        private void EditTournament()
+        private void EditTournament(TournamentDto tournament)
         {
-            if (SelectedTournament is null)
+            if (tournament is null)
             {
                 MessageBox.Show("Выберите турнир для редактирования", "Внимание");
-
                 return;
             }
 
-            MessageBox.Show($"Редактирование турнира: {SelectedTournament.Name}", "Редактирование");
+            _mainViewModel.NavigateToEditTournament(tournament);
         }
 
         [RelayCommand]
-        private async Task DeleteTournament()
+        private async Task DeleteTournament(TournamentDto tournament)
         {
-            if (SelectedTournament is null)
+            if (tournament is null)
             {
                 MessageBox.Show("Выберите турнир для удаления", "Внимание");
 
@@ -119,7 +115,7 @@ namespace TournamentManager.Client.ViewModels
             }
 
             var result = MessageBox.Show(
-                $"Вы уверены, что хотите удалить турнир \"{SelectedTournament.Name}\"?",
+                $"Вы уверены, что хотите удалить турнир \"{tournament.Name}\"?",
                 "Подтверждение удаления",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question
@@ -129,10 +125,10 @@ namespace TournamentManager.Client.ViewModels
             {
                 try
                 {
-                    await _tournamentService.DeleteAsync(SelectedTournament.Id);
+                    await _tournamentService.DeleteAsync(tournament.Id);
                     MessageBox.Show("Турнир успешно удален", "Успех");
 
-                    var tournamentToRemove = _allTournaments.FirstOrDefault(t => t.Id == SelectedTournament.Id);
+                    var tournamentToRemove = _allTournaments.FirstOrDefault(t => t.Id == tournament.Id);
 
                     if (tournamentToRemove != null)
                     {
@@ -148,16 +144,16 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
-        private void ViewTournamentDetails()
+        private void ViewTournamentDetails(TournamentDto tournament)
         {
-            if (SelectedTournament is null)
+            if (tournament is null)
             {
                 MessageBox.Show("Выберите турнир для просмотра", "Внимание");
 
                 return;
             }
 
-            MessageBox.Show($"Детали турнира: {SelectedTournament.Name}", "Просмотр");
+            MessageBox.Show($"Детали турнира: {tournament.Name}", "Просмотр");
         }
 
         partial void OnSearchTextChanged(string value)

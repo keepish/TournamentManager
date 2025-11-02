@@ -137,19 +137,22 @@
                                 <StackPanel Grid.Column="1"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Top">
-                                    <Button Content="Просмотр"
-                                            Command="{Binding DataContext.ViewTournamentDetailsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    <Button Command="{Binding DataContext.ViewTournamentDetailsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource PrimaryButtonStyle}"/>
-                                    <Button Content="Редактировать"
-                                            Command="{Binding DataContext.EditTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            Style="{StaticResource IconButtonStyle}">
+                                        <materialDesign:PackIcon Kind="Eye"/>
+                                    </Button>
+                                    <Button Command="{Binding DataContext.EditTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource SecondaryButtonStyle}"/>
-                                    <Button Content="Удалить"
-                                            Command="{Binding DataContext.DeleteTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            Style="{StaticResource IconButtonStyle}">
+                                        <materialDesign:PackIcon Kind="Pencil"/>
+                                    </Button>
+                                    <Button Command="{Binding DataContext.DeleteTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource SecondaryButtonStyle}"
-                                            Foreground="{StaticResource ErrorBrush}"/>
+                                            Style="{StaticResource IconButtonStyle}"
+                                            Foreground="{StaticResource ErrorBrush}">
+                                        <materialDesign:PackIcon Kind="Delete"/>
+                                    </Button>
                                 </StackPanel>
                             </Grid>
                         </Border>

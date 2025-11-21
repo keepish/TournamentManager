@@ -8,7 +8,7 @@ namespace TournamentManager.Core.DTOs.Tournaments
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
 
         [Required]
@@ -16,11 +16,9 @@ namespace TournamentManager.Core.DTOs.Tournaments
 
         [Required]
         public DateTime EndDate { get; set; }
-        public string? Address { get; set; }
 
         [Required]
-        [StringLength(15)]
-        public string Status { get; set; } = "Предстоящий";
+        public string Address { get; set; }
 
         [Required]
         public int OrganizerId { get; set; }

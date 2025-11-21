@@ -32,7 +32,6 @@ namespace TournamentManager.Client.ViewModels
 
             Tournament.StartDate = DateTime.Today;
             Tournament.EndDate = DateTime.Today.AddDays(1);
-            Tournament.Status = "Предстоящий";
 
             Tournament.OrganizerId = _mainViewModel.CurrentUser.Id;
         }

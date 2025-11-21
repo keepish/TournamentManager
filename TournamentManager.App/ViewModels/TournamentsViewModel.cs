@@ -169,7 +169,7 @@ namespace TournamentManager.Client.ViewModels
         private void ApplyFilters()
         {
             var filtred = _allTournaments.Where(t =>
-                (SelectedStatusFilter == "Все" || t.Status == SelectedStatusFilter) &&
+                SelectedStatusFilter == "Все" &&
                 (string.IsNullOrEmpty(SearchText) ||
                  t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                  (t.Description?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true) ||

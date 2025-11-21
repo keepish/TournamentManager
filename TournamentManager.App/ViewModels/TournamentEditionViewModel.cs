@@ -39,10 +39,8 @@ namespace TournamentManager.Client.ViewModels
                 Id = existingTournament.Id,
                 Name = existingTournament.Name,
                 Description = existingTournament.Description,
-                Address = existingTournament.Address,
                 StartDate = existingTournament.StartDate,
                 EndDate = existingTournament.EndDate,
-                Status = existingTournament.Status,
                 OrganizerId = existingTournament.OrganizerId
             };
         }

@@ -8,6 +8,7 @@ namespace TournamentManager.Core.DTOs.Tournaments
         {
             if (tournament is null)
                 throw new ArgumentNullException(nameof(tournament));
+
             return new TournamentDto
             {
                 Id = tournament.Id,
@@ -15,9 +16,8 @@ namespace TournamentManager.Core.DTOs.Tournaments
                 Description = tournament.Description,
                 StartDate = tournament.StartDate,
                 EndDate = tournament.EndDate,
+                OrganizerId = tournament.OrganizerId,
                 Address = tournament.Address,
-                Status = tournament.Status,
-                OrganizerId = tournament.OrganizerId
             };
         }
     }

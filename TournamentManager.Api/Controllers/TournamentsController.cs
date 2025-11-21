@@ -49,7 +49,6 @@ namespace TournamentManager.Api.Controllers
                     StartDate = tournamentDto.StartDate,
                     EndDate = tournamentDto.EndDate,
                     Address = tournamentDto.Address,
-                    Status = tournamentDto.Status,
                     OrganizerId = tournamentDto.OrganizerId
                 };
 
@@ -77,7 +76,6 @@ namespace TournamentManager.Api.Controllers
                 StartDate = tournamentDto.StartDate,
                 EndDate = tournamentDto.EndDate,
                 Address = tournamentDto.Address,
-                Status = tournamentDto.Status,
                 OrganizerId = tournamentDto.OrganizerId
             };
 

@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Headers;
-using Microsoft.EntityFrameworkCore.Storage.Json;
 using Newtonsoft.Json;
 using TournamentManager.Core.Models.Responses;
 
@@ -80,6 +79,24 @@ namespace TournamentManager.Core.Services
 
             var responseContent = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<T>(responseContent);
+        }
+
+        public async Task<T> PutAsync<T>(string endpoing, object data)
+        {
+            var json = JsonConvert.SerializeObject(data);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync(endpoing, content);
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseContent);
+        }
+
+        public async Task DeleteAsync(string endpoint)
+        {
+            var response = await _httpClient.DeleteAsync(endpoint);
+            response.EnsureSuccessStatusCode();
         }
     }
 }

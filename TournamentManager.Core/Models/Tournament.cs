@@ -1,33 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
-namespace TournamentManager.Core.Models
+namespace TournamentManager.Core.Models;
+
+public partial class Tournament
 {
-    public class Tournament
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
+    public int OrganizerId { get; set; }
 
-        public string? Description { get; set; }
+    public string Name { get; set; } = null!;
 
-        [Required]
-        public DateTime StartDate { get; set; }
+    public string? Description { get; set; }
 
-        [Required]
-        public DateTime EndDate { get; set; }
+    public DateTime StartDate { get; set; }
 
-        public string? Address { get; set; }
+    public DateTime EndDate { get; set; }
 
-        [Required]
-        [StringLength(15)]
-        public string Status { get; set; } = "Предстоящий";
+    public string Address { get; set; } = null!;
 
-        public int OrganizerId { get; set; }
+    public virtual User Organizer { get; set; } = null!;
 
-        public User Organizer { get; set; } = null!;
-
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-    }
+    public virtual ICollection<TournamentCategory> TournamentCategories { get; set; } = new List<TournamentCategory>();
 }

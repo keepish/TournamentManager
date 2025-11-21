@@ -28,7 +28,6 @@ namespace TournamentManager.Api.Controllers
             try
             {
                 var user = await _context.Users
-                    .Include(u => u.Role)
                     .FirstOrDefaultAsync(u => u.Login == request.Login);
 
                 if (user is null)
@@ -37,7 +36,8 @@ namespace TournamentManager.Api.Controllers
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                     return Unauthorized(new { message = "Неверный пароль" });
 
-                var token = GenerateJwtToken(user);
+                var role = await DetermineUserRoleAsync(user.Id);
+                var token = GenerateJwtToken(user, role);
 
                 return Ok(new
                 {
@@ -46,11 +46,11 @@ namespace TournamentManager.Api.Controllers
                     {
                         user.Id,
                         user.Login,
-                        Role = user.Role.Name,
-                        user.FullName,
-                        user.FirstName,
-                        user.LastName,
-                        user.Patronymic
+                        Role = role,
+                        user.Name,
+                        user.Surname,
+                        user.Patronymic,
+                        user.FullName
                     }
                 });
             }
@@ -68,25 +68,15 @@ namespace TournamentManager.Api.Controllers
                 if (await _context.Users.AnyAsync(u => u.Login == request.Login))
                     return BadRequest(new { message = "Пользователь с таким именем уже существует" });
 
-                var participantRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Участник");
-                if (participantRole is null)
-                    return BadRequest(new { message = "Роль Participant не найдена в системе" });
-
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
                 var user = new User
                 {
                     Login = request.Login,
                     PasswordHash = passwordHash,
-                    RoleId = participantRole.Id,
-                    LastName = request.LastName,
-                    FirstName = request.FirstName,
-                    Patronymic = request.Patronymic,
-                    Email = request.Email,
-                    Settlement = request.Settlement,
-                    Birthday = request.Birthday,
-                    BeltLevel = request.BeltLevel,
-                    CreatedDate = DateTime.UtcNow
+                    Name = request.Name,
+                    Surname = request.Surname,
+                    Patronymic = request.Patronymic
                 };
 
                 _context.Users.Add(user);
@@ -100,16 +90,16 @@ namespace TournamentManager.Api.Controllers
             }
         }
 
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(User user, string role)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Login),
-                new Claim(ClaimTypes.Role, user.Role.Name),
+                new Claim(ClaimTypes.Role, role),
                 new Claim("FullName", user.FullName)
             };
 
@@ -121,6 +111,23 @@ namespace TournamentManager.Api.Controllers
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<string> DetermineUserRoleAsync(int userId)
+        {
+            bool isOrganizer = await _context.Tournaments
+                .AnyAsync(t => t.OrganizerId == userId);
+
+            if (isOrganizer)
+                return "Организатор";
+
+            bool isJudge = await _context.TournamentCategories
+                .AnyAsync(tc => tc.JudgeId == userId);
+
+            if (isJudge)
+                return "Судья";
+
+            return "Гость";
         }
     }
 }

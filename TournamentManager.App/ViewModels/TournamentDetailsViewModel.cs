@@ -1,10 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Office.Interop.Excel;
+using Microsoft.Win32;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows;
 using TournamentManager.Core.DTOs.Participants;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Services;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace TournamentManager.Client.ViewModels
 {
@@ -145,10 +149,190 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
-        private void ImportParticipants()
+        private async Task ImportParticipants()
         {
-            // TODO: Реализация импорта участников
-            MessageBox.Show("Функция импорта участников будет реализована позже", "Импорт");
+            try
+            {
+                var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "Excel files (*.xlsx;*.xls)|*.xlsx;*.xls|All files (*.*)|*.*",
+                    Title = "Выберите файл для импорта участников"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    IsLoading = true;
+
+                    var importedParticipants = await ParseExcelFile(openFileDialog.FileName);
+                    
+                    if (importedParticipants.Any())
+                    {
+                        foreach (var participant in importedParticipants)
+                            Participants.Add(participant);
+
+                        HasUnsavedChanges = true;
+                        MessageBox.Show($"Успешно импортировано {importedParticipants.Count} участников", "Импорт завершен");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Не удалось импортировать участников из файла", "Ошибка импорта");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при импорте участников: {ex.Message}", "Ошибка импорта");
+            }
+            finally 
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task<List<ParticipantDto>> ParseExcelFile(string filePath)
+        {
+            var participants = new List<ParticipantDto>();
+
+            try
+            {
+                var excelApp = new Excel.Application();
+                Excel.Workbook workbook = null;
+                Excel.Worksheet worksheet = null;
+
+                try
+                {
+                    workbook = excelApp.Workbooks.Open(filePath);
+                    worksheet = workbook.Sheets[1];
+
+                    var usedRange = worksheet.UsedRange;
+                    var rowCount = usedRange.Rows.Count;
+                    var colCount = usedRange.Columns.Count;
+
+                    if (rowCount < 2) return participants;
+
+                    var headers = new Dictionary<string, int>();
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        var headerValue = worksheet.Cells[1, col].Value?.ToString()?.ToLower().Trim();
+
+                        if (!string.IsNullOrEmpty(headerValue))
+                            headers[headerValue] = col;
+                    }
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        try
+                        {
+                            var participant = ParseParticipantFromRow(worksheet, row, headers);
+
+                            if (participant != null && !string.IsNullOrWhiteSpace(participant.Name) && !string.IsNullOrWhiteSpace(participant.Surname))
+                                participants.Add(participant);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Ошибка парсинга строки {row}: {ex.Message}");
+                        }
+                    }
+                }
+                finally
+                {
+                    if (workbook != null)
+                    {
+                        workbook.Close(false);
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
+                    }
+                    if (worksheet != null)
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(worksheet);
+                    if (excelApp != null)
+                    {
+                        excelApp.Quit();
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при работе с Excel: {ex.Message}\n\nУбедитесь, что Excel установлен на компьютере.", "Ошибка Excel");
+            }
+
+            return participants;
+        }
+
+        private ParticipantDto ParseParticipantFromRow(Worksheet worksheet, int row, Dictionary<string, int> headers)
+        {
+            var participant = new ParticipantDto();
+
+            if (headers.ContainsKey("имя"))
+                participant.Name = GetCellValue(worksheet, row, headers["имя"])?.Trim() ?? "";
+
+            if (headers.ContainsKey("фамилия"))
+                participant.Surname = GetCellValue(worksheet, row, headers["фамилия"])?.Trim() ?? "";
+
+            if (headers.ContainsKey("отчество"))
+                participant.Patronymic = GetCellValue(worksheet, row, headers["отчество"]).Trim();
+
+            if (headers.ContainsKey("телефон"))
+            {
+                var phone = GetCellValue(worksheet, row, headers["телефон"])?.Trim();
+                if (!string.IsNullOrEmpty(phone))
+                    participant.Phone = new string(phone.Where(char.IsDigit).ToArray());
+            }    
+
+            if (headers.ContainsKey("пол"))
+            {
+                var genderValue = GetCellValue(worksheet, row, headers["пол"])?.Trim();
+
+                if (!string.IsNullOrEmpty(genderValue))
+                {
+                    if (genderValue == "1" || genderValue.ToLower() == "мужской" || genderValue.ToLower() == "м")
+                        participant.Gender = 1;
+                    else if (genderValue == "0" || genderValue.ToLower() == "женский" || genderValue.ToLower() == "ж")
+                        participant.Gender = 2;
+                }
+            }
+
+            if (headers.ContainsKey("вес"))
+            {
+                var weightValue = GetCellValue(worksheet, row, headers["вес"])?.Trim();
+                if (!string.IsNullOrEmpty(weightValue) && decimal.TryParse(weightValue.Replace(',', '.'),
+                    NumberStyles.Any, CultureInfo.InvariantCulture, out decimal weight))
+                    participant.Weight = weight;
+            }
+
+            if (headers.ContainsKey("дата рождения"))
+            {
+                var birthdayValue = worksheet.Cells[row, headers["дата рождения"]].Value;
+                DateTime birthday = DateTime.MinValue;
+
+                if (birthdayValue is DateTime dateTimeValue)
+                    birthday = dateTimeValue;
+                else
+                {
+                    var stringValue = birthdayValue?.ToString()?.Trim();
+                    if (!string.IsNullOrEmpty(stringValue))
+                    {
+                        if (DateTime.TryParseExact(stringValue, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out birthday) ||
+                            DateTime.TryParseExact(stringValue, "dd.MM.yyyy",
+                            CultureInfo.InvariantCulture, DateTimeStyles.None, out birthday) ||
+                            DateTime.TryParse(stringValue, out birthday))
+                        {
+
+                        }
+                    }
+                }
+
+                if (birthday != DateTime.MinValue && birthday.Year > 1900)
+                {
+                    participant.Birthday = birthday;
+                }
+            }
+
+            return participant;
+        }
+
+        private string GetCellValue(Worksheet worksheet, int row, int col)
+        {
+            return worksheet.Cells[row, col].Value?.ToString();
         }
 
         [RelayCommand]

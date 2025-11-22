@@ -95,17 +95,12 @@ namespace TournamentManager.Client.ViewModels
                 IsLoading = true;
 
                 // TODO: Реализовать сохранение участников в БД
-                // foreach (var participant in Participants)
-                // {
-                //     if (participant.Id == 0) // Новый участник
-                //     {
-                //         await _participantService.CreateAsync(participant);
-                //     }
-                //     else // Существующий участник
-                //     {
-                //         await _participantService.UpdateAsync(participant);
-                //     }
-                // }
+                var validationErrors = ValidateParticipants();
+                if (validationErrors.Any())
+                {
+                    MessageBox.Show($"Ошибки валидации:\n{string.Join("\n", validationErrors)}", "Ошибка");
+                    return;
+                }
 
                 await Task.Delay(1000); // Имитация сохранения
 
@@ -123,6 +118,30 @@ namespace TournamentManager.Client.ViewModels
             {
                 IsLoading = false; 
             }
+        }
+
+        private List<string> ValidateParticipants()
+        {
+            var errors = new List<string>();
+
+            for (int i = 0; i < Participants.Count; i++)
+            {
+                var participant = Participants[i];
+
+                if (string.IsNullOrWhiteSpace(participant.Name))
+                    errors.Add($"Строка {i + 1}: Имя обязательно для заполнения");
+
+                if (string.IsNullOrWhiteSpace(participant.Surname))
+                    errors.Add($"Строка {i + 1}: Фамилия обязательна для заполнения");
+
+                if (participant.Weight <= 0 || participant.Weight > 300)
+                    errors.Add($"Строка {i + 1}: Вес должен быть от 0.1 до 300 кг");
+
+                if (participant.Birthday > DateTime.Now || participant.Birthday < DateTime.Now.AddYears(-100))
+                    errors.Add($"Строка {i + 1}: Некорректная дата рождения");
+            }
+
+            return errors;
         }
 
         [RelayCommand]
@@ -180,7 +199,7 @@ namespace TournamentManager.Client.ViewModels
         {
             Participants.Add(new ParticipantDto
             {
-                Id = 0, // 0 означает нового участника
+                Id = 0,
                 Name = "Новый",
                 Surname = "Участник",
                 Gender = 1,

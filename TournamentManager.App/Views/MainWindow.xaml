@@ -37,11 +37,6 @@
                     <TextBlock Text="{Binding CurrentUser.FullName}"
                                Foreground="{StaticResource WhiteBrush}"
                                FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <TextBlock Text=" | " Foreground="{StaticResource WhiteBrush}"
-                               FontSize="18" Margin="8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding CurrentUser.Role}"
-                               Foreground="{StaticResource WhiteBrush}"
-                               FontSize="18" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <TextBlock Grid.Column="1"

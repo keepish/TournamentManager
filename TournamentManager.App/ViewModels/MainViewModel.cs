@@ -56,11 +56,6 @@ namespace TournamentManager.Client.ViewModels
                     MenuItems.Add(new MenuItem("Мои площадки", new RelayCommand(() => Navigate("MyMatches")), "Stadium"));
                     MenuItems.Add(new MenuItem("Судьи", new RelayCommand(() => Navigate("Judges")), "Gavel"));
                     break;
-
-                case "Участник":
-                    MenuItems.Add(new MenuItem("Мои заявки", new RelayCommand(() => Navigate("MyApplications")), "Application"));
-                    MenuItems.Add(new MenuItem("Мои результаты", new RelayCommand(() => Navigate("MyResults")), "Trophy"));
-                    break;
             }
         }
 
@@ -129,6 +124,17 @@ namespace TournamentManager.Client.ViewModels
             CurrentView = new TournamentEditionView
             {
                 DataContext = new TournamentEditionViewModel(tournament, _tournamentService, this)
+            };
+        }
+
+        public void NavigateToTournamentDetails(TournamentDto tournament)
+        {
+            if (tournament == null)
+                return;
+
+            CurrentView = new TournamentDetailsView
+            {
+                DataContext = new TournamentDetailsViewModel(tournament, _apiService, this)
             };
         }
     }

@@ -149,11 +149,10 @@ namespace TournamentManager.Client.ViewModels
             if (tournament is null)
             {
                 MessageBox.Show("Выберите турнир для просмотра", "Внимание");
-
                 return;
             }
 
-            MessageBox.Show($"Детали турнира: {tournament.Name}", "Просмотр");
+            _mainViewModel.NavigateToTournamentDetails(tournament);
         }
 
         partial void OnSearchTextChanged(string value)

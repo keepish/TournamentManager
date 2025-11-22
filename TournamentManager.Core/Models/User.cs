@@ -21,5 +21,5 @@ public partial class User
 
     public virtual ICollection<Tournament> Tournaments { get; set; } = new List<Tournament>();
 
-    public string FullName => Patronymic != null ? $"{Name} {Surname} {Patronymic}" : $"{Surname} {Name}";
+    public string FullName => Patronymic != null ? $"{Surname} {Name} {Patronymic}" : $"{Surname} {Name}";
 }

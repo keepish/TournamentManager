@@ -14,8 +14,6 @@ namespace TournamentManager.Api.Controllers
         public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments()
         {
             var tournaments = await context.Tournaments.ToListAsync();
-            if (!tournaments.Any())
-                return NotFound();
             var tournamentsDto = tournaments.Select(t => t.ToDto()).ToList(); 
             return Ok(tournamentsDto);
         }

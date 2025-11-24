@@ -4,6 +4,8 @@ using Microsoft.Office.Interop.Excel;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using TournamentManager.Core.DTOs.Participants;
 using TournamentManager.Core.DTOs.Tournaments;
@@ -336,10 +338,130 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
-        private void ExportParticipants()
+        private async Task ExportParticipants()
         {
-            // TODO: Реализация экспорта участников
-            MessageBox.Show("Функция экспорта участников будет реализована позже", "Экспорт");
+            try
+            {
+                if (!Participants.Any())
+                {
+                    MessageBox.Show("Нет участников для экспорта", "Экспорт");
+                    return;
+                }
+
+                var saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+                    Title = "Сохранить файл с участниками",
+                    FileName = $"Участники_турнира_{DateTime.Now:yyyy-MM-dd}.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    IsLoading = true;
+
+                    await Task.Run(() => ExportToExcel(saveFileDialog.FileName));
+
+                    MessageBox.Show($"Участники успешно экспортированы в файл: {saveFileDialog.FileName}", "Экспорт завершен");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при экспорте участников: {ex.Message}", "Ошибка экспорта");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private void ExportToExcel(string filePath)
+        {
+            Excel.Application excelApp = null;
+            Workbook workbook = null;
+            Worksheet worksheet = null;
+
+            try
+            {
+                excelApp = new Excel.Application();
+                excelApp.Visible = false;
+                workbook = excelApp.Workbooks.Add();
+                worksheet = (Worksheet)workbook.Sheets[1];
+                worksheet.Name = "Участники турнира";
+
+                string[] headers = { "Имя", "Фамилия", "Отчество", "Телефон", "Пол", "Вес (кг)", "Дата рождения"};
+
+                for (int col = 0; col < headers.Length; col++)
+                    worksheet.Cells[1, col + 1] = headers[col];
+
+                Excel.Range headerRange = worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, headers.Length]];
+                headerRange.Font.Bold = true;
+                headerRange.Font.Size = 12;
+                headerRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                headerRange.HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                headerRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+                headerRange.Borders.Weight = XlBorderWeight.xlThin;
+
+                for (int i = 0; i < Participants.Count; i++)
+                {
+                    var participant = Participants[i];
+                    int row = i + 2;
+
+                    worksheet.Cells[row, 1] = participant.Name;
+                    worksheet.Cells[row, 2] = participant.Surname;
+                    worksheet.Cells[row, 3] = participant.Patronymic ?? "-";
+                    worksheet.Cells[row, 4] = participant.Phone ?? "-";
+                    worksheet.Cells[row, 5] = participant.GenderDisplay;
+
+                    Excel.Range weightCell = (Excel.Range)worksheet.Cells[row, 6];
+                    weightCell.Value = (double)participant.Weight;
+
+                    Excel.Range dateCell = (Excel.Range)worksheet.Cells[row, 7];
+                    dateCell.Value = participant.Birthday;
+
+                    dateCell.NumberFormat = "dd.mm.yyyy";
+
+                    weightCell.NumberFormat = "0.0";
+                }
+
+                if (Participants.Count > 0)
+                {
+                    Excel.Range dataRange = worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[Participants.Count + 1, headers.Length]];
+                    dataRange.Borders.LineStyle = XlLineStyle.xlContinuous;
+                    dataRange.Borders.Weight = XlBorderWeight.xlThin;
+
+                    Excel.Range weightRange = worksheet.Range[worksheet.Cells[2, 6], worksheet.Cells[Participants.Count + 1, 6]];
+                    weightRange.HorizontalAlignment = XlHAlign.xlHAlignRight;
+                }
+
+                worksheet.Columns.AutoFit();
+
+                worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, headers.Length]].AutoFilter();
+
+                workbook.SaveAs(filePath);
+
+                MessageBox.Show($"Файл успешно сохранен: {System.IO.Path.GetFileName(filePath)}\n\nЭкспортировано участников: {Participants.Count}", "Экспорт завершен");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка при создании Excel файла: {ex.Message}", ex);
+            }
+            finally
+            {
+                if (workbook != null)
+                {
+                    workbook.Close(false);
+                    Marshal.ReleaseComObject(workbook);
+                }
+                if (excelApp != null)
+                {
+                    excelApp.Quit();
+                    Marshal.ReleaseComObject(excelApp);
+                }
+                if (worksheet != null)
+                {
+                    Marshal.ReleaseComObject(worksheet);
+                }
+            }
         }
 
         [RelayCommand]

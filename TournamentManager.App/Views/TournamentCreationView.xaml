@@ -56,17 +56,6 @@
                                 <DatePicker SelectedDate="{Binding Tournament.StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             Style="{StaticResource DatePickerStyle}"/>
                             </StackPanel>
-
-                            <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Статус *"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           Margin="0,0,0,8"/>
-                                <ComboBox ItemsSource="{Binding StatusOptions}"
-                                          SelectedItem="{Binding Tournament.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          Style="{StaticResource ComboBoxStyle}"/>
-                            </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">

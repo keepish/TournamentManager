@@ -7,9 +7,11 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/TournamentManager.Client;component/Resources/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
-        <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter"/>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+            <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter"/>
+            <converters:TournamentStatusToStringConverter x:Key="TournamentStatusToStringConverter"/>
+            <converters:TournamentStatusToColorConverter x:Key="TournamentStatusToColorConverter"/>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

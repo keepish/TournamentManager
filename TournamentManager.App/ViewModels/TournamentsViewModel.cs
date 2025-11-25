@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Windows;
 using TournamentManager.Core.DTOs.Tournaments;
+using TournamentManager.Core.Enums;
 using TournamentManager.Core.Services;
 
 namespace TournamentManager.Client.ViewModels
@@ -165,21 +166,54 @@ namespace TournamentManager.Client.ViewModels
             ApplyFilters();
         }
 
+        private TournamentStatus GetTournamentStatus(TournamentDto tournament)
+        {
+            var now = DateTime.Now;
+
+            if (now < tournament.StartDate)
+                return TournamentStatus.Upcoming;
+            else if (now >= tournament.StartDate && now <= tournament.EndDate)
+                return TournamentStatus.Active;
+            else
+                return TournamentStatus.Completed;
+        }
+
+        private string GetTournamentStatusString(TournamentDto tournament)
+        {
+            return GetTournamentStatus(tournament) switch
+            {
+                TournamentStatus.Upcoming => "Предстоящий",
+                TournamentStatus.Active => "Активный",
+                TournamentStatus.Completed => "Завершенный",
+                _ => "Неизвестно"
+            };
+        }
+
         private void ApplyFilters()
         {
             var filtred = _allTournaments.Where(t =>
-                SelectedStatusFilter == "Все" &&
-                (string.IsNullOrEmpty(SearchText) ||
-                 t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
-                 (t.Description?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true) ||
-                 (t.Address?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true))
-            ).ToList();
+            {
+                var textMatch = string.IsNullOrEmpty(SearchText) ||
+                                t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                (t.Description?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true) ||
+                                (t.Address?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true);
+
+                var statusMatch = SelectedStatusFilter == "Все" || 
+                                GetTournamentStatusString(t) == SelectedStatusFilter;
+
+                return textMatch && statusMatch;
+            }).ToList();
 
             Tournaments.Clear();
             foreach (var tournament in filtred)
             {
                 Tournaments.Add(tournament);
             }
+        }
+
+        public string GetStatusForTournament(TournamentDto tournament)
+        {
+            return GetTournamentStatusString(tournament);
         }
     }
 }

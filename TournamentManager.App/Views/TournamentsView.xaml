@@ -34,12 +34,8 @@
                     <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Width="200"
                              Margin="0,0,4,0"
-                             Style="{StaticResource TextBoxStyle}"/>
-                    <Button Content="Найти" 
-                            Command="{Binding LoadTournamentsCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            ToolTip="Обновить список турниров"
-                            Padding="12,4"/>
+                             Tag="Найти"
+                             Style="{StaticResource WatermarkTextBoxStyle}"/>
                 </StackPanel>
 
                 <Button Content="Сбросить все фильтры"
@@ -68,12 +64,12 @@
                                                    Foreground="{StaticResource TextPrimaryBrush}"
                                                    VerticalAlignment="Center"/>
 
-                                        <Border Background="{Binding Status, Converter={converters:StatusToColorConverter}}"
+                                        <Border Background="{Binding ., Converter={converters:TournamentStatusToColorConverter}}"
                                                 CornerRadius="4"
                                                 Padding="8,4"
                                                 Margin="12,0,0,0"
                                                 VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Status}"
+                                            <TextBlock Text="{Binding ., Converter={converters:TournamentStatusToStringConverter}}"
                                                        Foreground="White"
                                                        FontSize="11"
                                                        FontWeight="Medium"

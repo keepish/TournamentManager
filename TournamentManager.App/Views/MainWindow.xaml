@@ -8,6 +8,8 @@
         xmlns:converters="clr-namespace:TournamentManager.Client.Converters"
         mc:Ignorable="d"
         WindowState="Maximized"
+        MinHeight="500"
+        MinWidth="1000"
         WindowStyle="None"
         WindowStartupLocation="CenterScreen">
 
@@ -38,13 +40,6 @@
                                Foreground="{StaticResource WhiteBrush}"
                                FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
-
-                <TextBlock Grid.Column="1"
-                           Text="Федерация Тхэквондо - Система управления соревнованиями" 
-                           Foreground="{StaticResource WhiteBrush}"
-                           FontSize="28" FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <local:WindowControls HorizontalAlignment="Right" VerticalAlignment="Center"/>

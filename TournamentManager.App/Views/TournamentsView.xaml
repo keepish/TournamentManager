@@ -62,12 +62,13 @@
                                                    FontSize="16"
                                                    FontWeight="SemiBold"
                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                   VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,5,0,20"/>
 
                                         <Border Background="{Binding ., Converter={converters:TournamentStatusToColorConverter}}"
                                                 CornerRadius="4"
                                                 Padding="8,4"
-                                                Margin="12,0,0,0"
+                                                Margin="12,5,0,20"
                                                 VerticalAlignment="Center">
                                             <TextBlock Text="{Binding ., Converter={converters:TournamentStatusToStringConverter}}"
                                                        Foreground="White"

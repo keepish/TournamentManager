@@ -51,7 +51,7 @@ namespace TournamentManager.Client.ViewModels
         private async Task LoadTournaments()
         {
             IsLoading = true;
-
+        
             try
             {
                 var tournaments = await _tournamentService.GetAllAsync();

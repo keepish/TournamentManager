@@ -25,6 +25,11 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private string searchText = string.Empty;
 
+        [ObservableProperty]
+        private string _selectedStatusFilter = "Все";
+
+        public bool IsOrganizer => _mainViewModel.CurrentUser.IsOrganizer;
+
         public ObservableCollection<string> StatusFilters { get; } = new()
         {
             "Все",
@@ -33,8 +38,6 @@ namespace TournamentManager.Client.ViewModels
             "Завершенный"
         };
 
-        [ObservableProperty]
-        private string _selectedStatusFilter = "Все";
 
         public TournamentsViewModel(ApiService apiService,
             IService<TournamentDto> tournamentService,
@@ -90,6 +93,12 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void CreateTournament()
         {
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут создавать турниры.", "Ошибка доступа");
+                return;
+            }
+
             _mainViewModel.NavigateCommand.Execute("CreateTournament");
         }
 
@@ -99,6 +108,12 @@ namespace TournamentManager.Client.ViewModels
             if (tournament is null)
             {
                 MessageBox.Show("Выберите турнир для редактирования", "Внимание");
+                return;
+            }
+
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут редактировать турниры.", "Ошибка доступа");
                 return;
             }
 
@@ -112,6 +127,12 @@ namespace TournamentManager.Client.ViewModels
             {
                 MessageBox.Show("Выберите турнир для удаления", "Внимание");
 
+                return;
+            }
+
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут удалять турниры.", "Ошибка доступа");
                 return;
             }
 

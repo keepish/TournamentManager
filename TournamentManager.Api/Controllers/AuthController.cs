@@ -36,7 +36,7 @@ namespace TournamentManager.Api.Controllers
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                     return Unauthorized(new { message = "Неверный пароль" });
 
-                var role = await DetermineUserRoleAsync(user.Id);
+                var (role, isOrganizer) = await DetermineUserRoleAsync(user.Id);
                 var token = GenerateJwtToken(user, role);
 
                 return Ok(new
@@ -47,6 +47,7 @@ namespace TournamentManager.Api.Controllers
                         user.Id,
                         user.Login,
                         Role = role,
+                        IsOrganizer = isOrganizer,
                         user.Name,
                         user.Surname,
                         user.Patronymic,
@@ -113,21 +114,21 @@ namespace TournamentManager.Api.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private async Task<string> DetermineUserRoleAsync(int userId)
+        private async Task<(string Role, bool IsOrganizer)> DetermineUserRoleAsync(int userId)
         {
             bool isOrganizer = await _context.Tournaments
                 .AnyAsync(t => t.OrganizerId == userId);
 
             if (isOrganizer)
-                return "Организатор";
+                return ("Организатор", true);
 
             bool isJudge = await _context.TournamentCategories
                 .AnyAsync(tc => tc.JudgeId == userId);
 
             if (isJudge)
-                return "Судья";
+                return ("Судья", false);
 
-            return "Гость";
+            return ("Гость", false);
         }
     }
 }

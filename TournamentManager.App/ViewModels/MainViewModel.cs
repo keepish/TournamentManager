@@ -44,24 +44,28 @@ namespace TournamentManager.Client.ViewModels
         {
             MenuItems = new ObservableCollection<MenuItem>();
 
-            switch (CurrentUser.Role)
+            if (CurrentUser.IsOrganizer)
             {
-                case "Организатор":
-                    MenuItems.Add(new MenuItem("Заявки", new RelayCommand(() => Navigate("Applications")), "ClipboardList"));
-                    MenuItems.Add(new MenuItem("Пользователи", new RelayCommand(() => Navigate("Users")), "AccountGroup"));
-                    MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports")), "ChartBar"));
-                    break;
-
-                case "Судья":
-                    MenuItems.Add(new MenuItem("Мои площадки", new RelayCommand(() => Navigate("MyMatches")), "Stadium"));
-                    MenuItems.Add(new MenuItem("Судьи", new RelayCommand(() => Navigate("Judges")), "Gavel"));
-                    break;
+                MenuItems.Add(new MenuItem("Заявки", new RelayCommand(() => Navigate("Applications")), "ClipboardList"));
+                MenuItems.Add(new MenuItem("Пользователи", new RelayCommand(() => Navigate("Users")), "AccountGroup"));
+                MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports")), "ChartBar"));
+            }
+            else
+            {
+                MenuItems.Add(new MenuItem("Мои площадки", new RelayCommand(() => Navigate("MyMatches")), "Stadium"));
+                MenuItems.Add(new MenuItem("Судьи", new RelayCommand(() => Navigate("Judges")), "Gavel"));
             }
         }
 
         [RelayCommand]
         private void Navigate(string viewName)
         {
+            if (viewName == "CreateTournament" && !CurrentUser.IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут управлять турнирами.", "Ошибка доступа");
+                return;
+            }
+
             CurrentView = viewName switch
             {
                 "Dashboard" => new DashboardView(),
@@ -120,6 +124,12 @@ namespace TournamentManager.Client.ViewModels
         {
             if (tournament == null)
                 return;
+
+            if (!CurrentUser.IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут редактировать турниры.", "Ошибка доступа");
+                return;
+            }
 
             CurrentView = new TournamentEditionView
             {

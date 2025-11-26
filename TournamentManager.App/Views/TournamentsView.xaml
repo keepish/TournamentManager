@@ -16,7 +16,8 @@
                 <Button Content="Создать турнир"
                         Command="{Binding CreateTournamentCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
-                        Margin="0,0,12,0"/>
+                        Margin="0,0,12,0"
+                        Visibility="{Binding IsOrganizer, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                 <ComboBox ItemsSource="{Binding StatusFilters}"
                           SelectedItem="{Binding SelectedStatusFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -49,7 +50,7 @@
             <ItemsControl ItemsSource="{Binding Tournaments}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource CardStyle}" Margin="15,5,15,5">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -133,13 +134,15 @@
                                     </Button>
                                     <Button Command="{Binding DataContext.EditTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource IconButtonStyle}">
+                                            Style="{StaticResource IconButtonStyle}"
+                                            Visibility="{Binding DataContext.IsOrganizer, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <materialDesign:PackIcon Kind="Pencil"/>
                                     </Button>
                                     <Button Command="{Binding DataContext.DeleteTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
                                             Style="{StaticResource IconButtonStyle}"
-                                            Foreground="{StaticResource ErrorBrush}">
+                                            Foreground="{StaticResource ErrorBrush}"
+                                            Visibility="{Binding DataContext.IsOrganizer, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <materialDesign:PackIcon Kind="Delete"/>
                                     </Button>
                                 </StackPanel>

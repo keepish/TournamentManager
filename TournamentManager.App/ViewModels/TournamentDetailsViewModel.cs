@@ -29,6 +29,8 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private bool hasUnsavedChanges;
 
+        public bool IsOrganizer => _mainViewModel.CurrentUser.IsOrganizer;
+
         public string TournamentName => _tournament?.Name ?? "Детали турнира";
         public string TournamentDates => $"{_tournament?.StartDate:dd.MM.yyyy} - {_tournament?.EndDate:dd.MM.yyyy}";
         public string TournamentAddress => _tournament?.Address ?? "";
@@ -54,29 +56,32 @@ namespace TournamentManager.Client.ViewModels
 
                 Participants.Clear();
 
-                Participants.Add(new ParticipantDto
+                if (IsOrganizer)
                 {
-                    Id = 1,
-                    Name = "Иван",
-                    Surname = "Петров",
-                    Patronymic = "Сергеевич",
-                    Phone = "+7 (999) 123-45-67",
-                    Gender = 1,
-                    Birthday = new DateTime(1995, 5, 15),
-                    Weight = 70.5m
-                });
+                    Participants.Add(new ParticipantDto
+                    {
+                        Id = 1,
+                        Name = "Иван",
+                        Surname = "Петров",
+                        Patronymic = "Сергеевич",
+                        Phone = "+7 (999) 123-45-67",
+                        Gender = 1,
+                        Birthday = new DateTime(1995, 5, 15),
+                        Weight = 70.5m
+                    });
 
-                Participants.Add(new ParticipantDto
-                {
-                    Id = 2,
-                    Name = "Мария",
-                    Surname = "Сидорова",
-                    Patronymic = "Александровна",
-                    Phone = "+7 (999) 765-43-21",
-                    Gender = 2,
-                    Birthday = new DateTime(1998, 8, 22),
-                    Weight = 58.2m
-                });
+                    Participants.Add(new ParticipantDto
+                    {
+                        Id = 2,
+                        Name = "Мария",
+                        Surname = "Сидорова",
+                        Patronymic = "Александровна",
+                        Phone = "+7 (999) 765-43-21",
+                        Gender = 2,
+                        Birthday = new DateTime(1998, 8, 22),
+                        Weight = 58.2m
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -91,6 +96,12 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task RegisterParticipants()
         {
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут регистрировать участников.", "Ошибка доступа");
+                return;
+            }
+
             if (!HasUnsavedChanges)
             {
                 MessageBox.Show("Нет изменений для сохранения", "Информация");
@@ -153,6 +164,12 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task ImportParticipants()
         {
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут импортировать участников.", "Ошибка доступа");
+                return;
+            }
+
             try
             {
                 var openFileDialog = new OpenFileDialog
@@ -340,6 +357,12 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task ExportParticipants()
         {
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут экспортировать участников.", "Ошибка доступа");
+                return;
+            }
+
             try
             {
                 if (!Participants.Any())
@@ -467,6 +490,12 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void ManageCategories()
         {
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут управлять категориями.", "Ошибка доступа");
+                return;
+            }
+
             // TODO: Реализация управления категориями
             MessageBox.Show("Функция управления категориями будет реализована позже", "Категории");
         }
@@ -474,6 +503,12 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void AddParticipant()
         {
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут добавлять участников.", "Ошибка доступа");
+                return;
+            }
+
             // TODO: Реализация добавления участника
             MessageBox.Show("Функция добавления участника будет реализована позже", "Добавление участника");
         }

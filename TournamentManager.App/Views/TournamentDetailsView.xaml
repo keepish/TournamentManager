@@ -24,49 +24,36 @@
                 <StackPanel>
                     <TextBlock Text="{Binding TournamentName}"
                                Style="{StaticResource HeaderTextStyle}"
-                               Margin="0,0,0,8"/>
+                               Margin="0,0,0,8"
+                               HorizontalAlignment="Left"/>
 
                     <TextBlock Text="{Binding TournamentDescription}"
                                Style="{StaticResource BodyTextStyle}"
-                               TextWrapping="Wrap"
+                               TextAlignment="Left"
+                               HorizontalAlignment="Left"
                                Margin="0,0,0,12"
                                MaxWidth="600"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                         <materialDesign:PackIcon Kind="Calendar" 
-                                               Width="16" 
-                                               Height="16" 
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               Margin="0,0,4,0"/>
+                                                 Width="16" 
+                                                 Height="16" 
+                                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                                 Margin="0,0,4,0"/>
 
                         <TextBlock Text="{Binding TournamentDates}"
                                    Style="{StaticResource BodyTextStyle}"
                                    Margin="0,0,16,0"/>
 
                         <materialDesign:PackIcon Kind="MapMarker" 
-                                               Width="16" 
-                                               Height="16" 
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               Margin="16,0,4,0"/>
+                                                 Width="16" 
+                                                 Height="16" 
+                                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                                 Margin="16,0,4,0"/>
 
                         <TextBlock Text="{Binding TournamentAddress}" 
                                    Style="{StaticResource BodyTextStyle}"/>
                     </StackPanel>
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button Content="Назад"
-                            Height="40"
-                            Command="{Binding CancelCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Margin="0,0,12,0"
-                            VerticalAlignment="Top"/>
-
-                    <Button Content="Управление категориями"
-                            Height="40"
-                            Command="{Binding ManageCategoriesCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            VerticalAlignment="Top"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -86,6 +73,13 @@
                         </DataTemplate>
                     </Button.ContentTemplate>
                 </Button>
+
+                <Button Content="Управление категориями"
+                        Height="40"
+                        Command="{Binding ManageCategoriesCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        VerticalAlignment="Top"
+                        Margin="0,0,12,0"/>
 
                 <Button Content="Импорт участников"
                         Command="{Binding ImportParticipantsCommand}"
@@ -264,14 +258,10 @@
                     </DataGrid.CellStyle>
                 </DataGrid>
 
-                <Border Background="Transparent"
+                <Border Background="Transparent" 
+                        Margin="0,40,0,8"
                         Visibility="{Binding Participants.Count, Converter={converters:EmptyToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="👥"
-                                   Foreground="{StaticResource TextHintBrush}"
-                                   FontSize="48"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,16"/>
                         <TextBlock Text="Участники не найдены"
                                    Style="{StaticResource SubHeaderTextStyle}"
                                    HorizontalAlignment="Center"
@@ -283,35 +273,47 @@
                     </StackPanel>
                 </Border>
 
-                <Border Background="{StaticResource ProgressBarBrush}"
+                <Border Background="{StaticResource ProgressBarBrush}" Margin="0,40,0,8"
                         Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <ProgressBar Style="{StaticResource ProgressBarStyle}"
-                                     Width="200"
-                                     Height="8"
-                                     Margin="0,0,0,16"/>
                         <TextBlock Text="Загрузка участников..."
                                    Style="{StaticResource BodyTextStyle}"
-                                   HorizontalAlignment="Center"/>
+                                   HorizontalAlignment="Center"
+                                     Margin="0,0,0,16"/>
+                        <ProgressBar Style="{StaticResource ProgressBarStyle}"
+                                     Width="200"
+                                     Height="8"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
-        <Button Grid.Row="3" 
-                Content="Зарегистрировать участников"
-                Command="{Binding RegisterParticipantsCommand}"
-                Style="{StaticResource PrimaryButtonStyle}"
-                Height="40"
-                Margin="5"
-                HorizontalAlignment="Center">
-            <Button.ContentTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Зарегистрировать участников" Foreground="{StaticResource WhiteBrush}" FontWeight="SemiBold"/>
-                    </StackPanel>
-                </DataTemplate>
-            </Button.ContentTemplate>
-        </Button>
+
+        <StackPanel Grid.Row="3"  Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0,20,0,0">
+            <Button Content="Назад"
+                    Height="40"
+                    Command="{Binding CancelCommand}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    VerticalAlignment="Top"
+                    Margin="0,0,12,0"/>
+            
+            <Button Content="Зарегистрировать участников"
+                    Command="{Binding RegisterParticipantsCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Height="40"
+                    HorizontalAlignment="Center">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Зарегистрировать участников" Foreground="{StaticResource WhiteBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+        </StackPanel>
     </Grid>
 </UserControl>

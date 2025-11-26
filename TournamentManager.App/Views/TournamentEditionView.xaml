@@ -43,7 +43,7 @@
                                            Margin="0,0,0,8"/>
                                 <TextBox Text="{Binding Tournament.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource TextBoxStyle}"
-                                         MaxLength="100"
+                                         MaxLength="150"
                                          materialDesign:HintAssist.Hint="Введите название турнира"/>
                             </StackPanel>
 
@@ -67,7 +67,7 @@
                                            Margin="0,0,0,8"/>
                                 <TextBox Text="{Binding Tournament.Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource TextBoxStyle}"
-                                         MaxLength="200"
+                                         MaxLength="150"
                                          materialDesign:HintAssist.Hint="Введите адрес проведения"/>
                             </StackPanel>
 
@@ -95,12 +95,13 @@
                                  TextWrapping="Wrap"
                                  AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Auto"
-                                 MaxLength="500"
+                                 MaxLength="300"
                                  materialDesign:HintAssist.Hint="Опишите турнир (необязательно)"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
                                 Margin="0,20,0,0">
                         <Button Content="Отмена"
                                 Command="{Binding CancelCommand}"

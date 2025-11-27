@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using TournamentManager.Client.Views;
+using TournamentManager.Core.DTOs.Categories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
@@ -13,6 +15,7 @@ namespace TournamentManager.Client.ViewModels
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
         private readonly SecureStorage _secureStorage;
+        private readonly IService<CategoryDto> _categoryService;
 
         [ObservableProperty]
         private string login;
@@ -25,11 +28,13 @@ namespace TournamentManager.Client.ViewModels
 
         public LoginViewModel(ApiService apiService,
             IService<TournamentDto> tournamentService,
-            SecureStorage secureStorage)
+            SecureStorage secureStorage,
+            IService<CategoryDto> categoryService)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
             _secureStorage = secureStorage;
+            _categoryService = categoryService;
         }
 
         [RelayCommand]
@@ -61,8 +66,8 @@ namespace TournamentManager.Client.ViewModels
                 var userJson = System.Text.Json.JsonSerializer.Serialize(result.User);
                 _secureStorage.Save("UserData", userJson);
 
-                var mainWindow = new MainWindow();
-                var mainViewModel = new MainViewModel(_apiService, _tournamentService, result.User, _secureStorage);
+                var mainWindow = App.ServiceProvider.GetService<MainWindow>();
+                var mainViewModel = new MainViewModel(_apiService, _tournamentService, _categoryService, result.User, _secureStorage);
 
                 mainWindow.DataContext = mainViewModel;
                 mainWindow.Show();

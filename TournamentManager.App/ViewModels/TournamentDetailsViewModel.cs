@@ -7,6 +7,8 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using TournamentManager.Client.Views;
+using TournamentManager.Core.DTOs.Categories;
 using TournamentManager.Core.DTOs.Participants;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Services;
@@ -19,6 +21,7 @@ namespace TournamentManager.Client.ViewModels
         private readonly TournamentDto _tournament;
         private readonly ApiService _apiService;
         private readonly MainViewModel _mainViewModel;
+        private readonly IService<CategoryDto> _categoryService;
 
         [ObservableProperty]
         private ObservableCollection<ParticipantDto> participants = new();
@@ -36,11 +39,13 @@ namespace TournamentManager.Client.ViewModels
         public string TournamentAddress => _tournament?.Address ?? "";
         public string TournamentDescription => _tournament?.Description ?? "";
 
-        public TournamentDetailsViewModel(TournamentDto tournament, ApiService apiService, MainViewModel mainViewModel) 
+        public TournamentDetailsViewModel(TournamentDto tournament, ApiService apiService,
+            MainViewModel mainViewModel, IService<CategoryDto> categoryService) 
         {
             _tournament = tournament;
             _apiService = apiService;
             _mainViewModel = mainViewModel;
+            _categoryService = categoryService;
 
             LoadParticipants();
         }
@@ -496,8 +501,13 @@ namespace TournamentManager.Client.ViewModels
                 return;
             }
 
-            // TODO: Реализация управления категориями
-            MessageBox.Show("Функция управления категориями будет реализована позже", "Категории");
+            var categoriesWindow = new CategoriesManagementWindow
+            {
+                Owner = System.Windows.Application.Current.MainWindow,
+                DataContext = new CategoriesManagementViewModel(_tournament, _categoryService)
+            };
+
+            categoriesWindow.ShowDialog();
         }
 
         [RelayCommand]

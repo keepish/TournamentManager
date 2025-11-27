@@ -8,13 +8,13 @@
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
         Height="600"
-        Width="800"
+        Width="650"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         ResizeMode="NoResize"
-        Background="{StaticResource SecondaryBrush}">
-   
-    <Border Style="{StaticResource ModalCardStyle}" Margin="20">
+        AllowsTransparency="True">
+
+    <Border BorderBrush="{StaticResource TextSecondaryBrush}" BorderThickness="1" CornerRadius="8">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -31,21 +31,21 @@
 
                     <StackPanel>
                         <TextBlock Text="{Binding WindowTitle}"
-                                   Foreground="{StaticResource WhiteBrush}"
-                                   FontSize="18"
-                                   FontWeight="Bold"/>
+                               Foreground="{StaticResource WhiteBrush}"
+                               FontSize="18"
+                               FontWeight="Bold"/>
                         <TextBlock Text="Управление весовыми и возрастными категориями"
-                                   Foreground="{StaticResource WhiteBrush}"
-                                   Opacity="0.9"
-                                   FontSize="12"
-                                   Margin="0,4,0,0"/>
+                               Foreground="{StaticResource WhiteBrush}"
+                               Opacity="0.9"
+                               FontSize="12"
+                               Margin="0,4,0,0"/>
                     </StackPanel>
 
                     <Button Grid.Column="1"
-                            Command="{Binding CloseCommand}"
-                            Style="{StaticResource IconButtonStyle}"
-                            Foreground="{StaticResource WhiteBrush}"
-                            ToolTip="Закрыть">
+                        Command="{Binding CloseCommand}"
+                        Style="{StaticResource IconButtonStyle}"
+                        Foreground="{StaticResource WhiteBrush}"
+                        ToolTip="Закрыть">
                         <materialDesign:PackIcon Kind="Close" Width="20" Height="20"/>
                     </Button>
                 </Grid>
@@ -63,6 +63,7 @@
                         <TextBlock Text="Список категорий"
                                    FontSize="16"
                                    FontWeight="SemiBold"
+                                   Margin="0,4,0,0"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
 
                         <Button Command="{Binding AddCategoryCommand}"
@@ -70,8 +71,7 @@
                                 Margin="12,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" 
-                                                       Foreground="{StaticResource WhiteBrush}" Margin="0,0,4,0"/>
-
+                                                         Foreground="{StaticResource WhiteBrush}" Margin="0,2,4,0"/>
                                 <TextBlock Text="Добавить" Foreground="{StaticResource WhiteBrush}"/>
                             </StackPanel>
                         </Button>
@@ -84,7 +84,7 @@
                         <ListView ItemsSource="{Binding Categories}"
                                   SelectedItem="{Binding SelectedCategory}"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  Height="300">
+                                  Height="363">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <Border Padding="12,8" BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderBrush}">
@@ -94,29 +94,22 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding DisplayName}"
-                                                           FontSize="14"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextPrimaryBrush}"/>
-                                                <TextBlock Text="{Binding WeightRange}"
-                                                           FontSize="12"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                                                <TextBlock Text="{Binding AgeRange}"
-                                                           FontSize="12"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                                            </StackPanel>
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       VerticalAlignment="Center"/>
 
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <StackPanel Grid.Column="1" 
+                                                        Orientation="Horizontal" 
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Right">
                                                 <Button Command="{Binding DataContext.EditCategoryCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                                        Style="{StaticResource IconButtonStyle}"
-                                                        Margin="2,0">
+                                                        Style="{StaticResource IconButtonStyle}" Margin="4,0,2,0">
                                                     <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
                                                 </Button>
                                                 <Button Command="{Binding DataContext.DeleteCategoryCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                                        Style="{StaticResource IconButtonStyle}"
-                                                        Foreground="{StaticResource ErrorBrush}"
-                                                        Margin="2,0">
+                                                        Style="{StaticResource IconButtonStyle}" Foreground="{StaticResource ErrorBrush}" Margin="2,0,4,0">
                                                     <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
                                                 </Button>
                                             </StackPanel>
@@ -129,8 +122,11 @@
                 </StackPanel>
 
                 <Border Grid.Column="2"
+                        Background="{StaticResource WhiteBrush}"
                         Padding="16"
                         CornerRadius="4"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
                         Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
@@ -153,18 +149,15 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBox Text="{Binding SelectedCategory.MinWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource TextBoxStyle}"
-                                                 materialDesign:HintAssist.Hint="Мин. вес"/>
+                                             Style="{StaticResource TextBoxStyle}" materialDesign:HintAssist.Hint="Мин. вес"/>
 
                                     <TextBlock Grid.Column="1" Text="-"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   FontWeight="Bold"/>
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontWeight="Bold"/>
 
-                                    <TextBox Grid.Column="2" 
-                                                 Text="{Binding SelectedCategory.MaxWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource TextBoxStyle}"
-                                                 materialDesign:HintAssist.Hint="Макс. вес"/>
+                                    <TextBox Grid.Column="2" Text="{Binding SelectedCategory.MaxWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource TextBoxStyle}" materialDesign:HintAssist.Hint="Макс. вес"/>
                                 </Grid>
                             </StackPanel>
 
@@ -186,44 +179,28 @@
                                              Style="{StaticResource TextBoxStyle}"
                                              materialDesign:HintAssist.Hint="Мин. возраст"/>
 
-                                    <TextBlock Grid.Column="1" Text="-"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"/>
+                                    <TextBlock Grid.Column="1" Text="-" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" FontWeight="Bold"/>
 
-                                    <TextBox Grid.Column="2" 
-                                             Text="{Binding SelectedCategory.MaxAge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource TextBoxStyle}"
-                                             materialDesign:HintAssist.Hint="Макс. возраст"/>
+                                    <TextBox Grid.Column="2" Text="{Binding SelectedCategory.MaxAge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource TextBoxStyle}" materialDesign:HintAssist.Hint="Макс. возраст"/>
                                 </Grid>
                             </StackPanel>
 
-                            <Border Background="{StaticResource WhiteBrush}"
-                                    Padding="12"
-                                    CornerRadius="4"
-                                    BorderBrush="{StaticResource BorderBrush}"
-                                    BorderThickness="1"
-                                    Margin="0,0,0,16">
+                            <Border Padding="12" CornerRadius="4" BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1" Margin="0,0,0,16">
                                 <StackPanel>
-                                    <TextBlock Text="Предпросмотр категории:"
-                                               FontSize="12"
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock Text="{Binding SelectedCategory.DisplayName}"
-                                               FontSize="14"
-                                               FontWeight="Bold"
-                                               Foreground="{StaticResource PrimaryBrush}"/>
+                                    <TextBlock Text="Предпросмотр категории:" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding SelectedCategory.DisplayName}" FontSize="14"
+                                               FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
                                 </StackPanel>
                             </Border>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Content="Отмена"
-                                        Command="{Binding CancelEditCommand}"
-                                        Style="{StaticResource SecondaryButtonStyle}"
-                                        Margin="0,0,8,0"/>
-                                <Button Content="Сохранить"
-                                        Command="{Binding SaveCategoryCommand}"
+                                <Button Content="Отмена" Command="{Binding CancelEditCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0"/>
+                                <Button Content="Сохранить" Command="{Binding SaveCategoryCommand}"
                                         Style="{StaticResource PrimaryButtonStyle}"/>
                             </StackPanel>
                         </StackPanel>
@@ -231,27 +208,22 @@
                 </Border>
             </Grid>
 
-            <Border Grid.Row="2" 
-                    Padding="16"
-                    CornerRadius="0,0,8,8">
+            <Border Grid.Row="2" Background="{StaticResource WhiteBrush}"
+                    Padding="16" CornerRadius="0,0,8,8">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Закрыть"
-                            Command="{Binding CloseCommand}"
+                    <Button Content="Закрыть" Command="{Binding CloseCommand}"
                             Style="{StaticResource SecondaryButtonStyle}"/>
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="0" Grid.RowSpan="3"
-                    Background="#CCFFFFFF"
-                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Grid.Row="0" Grid.RowSpan="3" Background="#CC000000"
+                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    CornerRadius="8">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <ProgressBar IsIndeterminate="True" 
-                                 Width="100" 
-                                 Height="4"
-                                 Margin="0,0,0,12"/>
-                    <TextBlock Text="Загрузка..."
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               FontSize="12"/>
+                    <ProgressBar IsIndeterminate="True"  Width="100" Height="4" Margin="0,0,0,12"
+                                 Style="{StaticResource ProgressBarStyle}"/>
+                    <TextBlock Text="Загрузка..." Foreground="{StaticResource WhiteBrush}" 
+                               HorizontalAlignment="Center" FontSize="12"/>
                 </StackPanel>
             </Border>
         </Grid>

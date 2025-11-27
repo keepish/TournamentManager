@@ -9,22 +9,14 @@
 
     <Grid Background="{StaticResource SecondaryBrush}">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <Border Background="{StaticResource WhiteBrush}"
-                    Margin="32"
-                    Padding="32"
-                    CornerRadius="0"
-                    BorderThickness="1"
-                    BorderBrush="{StaticResource BorderBrush}">
+            <Border Background="{StaticResource WhiteBrush}" Margin="32" Padding="32"
+                    CornerRadius="0" BorderThickness="1" BorderBrush="{StaticResource BorderBrush}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,30">
-                        <materialDesign:PackIcon Kind="Pencil"
-                                                 Foreground="{StaticResource PrimaryBrush}"
-                                                 Width="32" Height="32"
-                                                 Margin="0,0,12,0"/>
-                        <TextBlock Text="Редактирование турнира"
-                                   FontSize="24"
-                                   FontWeight="Bold"
-                                   Foreground="{StaticResource PrimaryBrush}"/>
+                        <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource PrimaryBrush}"
+                                                 Width="32" Height="32" Margin="0,0,12,0"/>
+                        <TextBlock Text="Редактирование турнира" FontSize="24"
+                                   FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
                     </StackPanel>
 
                     <Grid>
@@ -36,95 +28,57 @@
 
                         <StackPanel>
                             <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Название турнира *"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           Margin="0,0,0,8"/>
-                                <TextBox Text="{Binding Tournament.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource TextBoxStyle}"
-                                         MaxLength="150"
-                                         materialDesign:HintAssist.Hint="Введите название турнира"/>
+                                <TextBlock Text="Название турнира *" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding Tournament.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Style="{StaticResource TextBoxStyle}"
+                                         MaxLength="150" materialDesign:HintAssist.Hint="Введите название турнира"/>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Дата начала *"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           Margin="0,0,0,8"/>
-                                <DatePicker SelectedDate="{Binding Tournament.StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            Style="{StaticResource DatePickerStyle}"/>
+                                <TextBlock Text="Дата начала *" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                                <DatePicker SelectedDate="{Binding Tournament.StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Style="{StaticResource DatePickerStyle}"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
                             <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Адрес проведения *"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           Margin="0,0,0,8"/>
-                                <TextBox Text="{Binding Tournament.Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource TextBoxStyle}"
-                                         MaxLength="150"
-                                         materialDesign:HintAssist.Hint="Введите адрес проведения"/>
+                                <TextBlock Text="Адрес проведения *" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"  Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding Tournament.Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBoxStyle}"
+                                         MaxLength="150" materialDesign:HintAssist.Hint="Введите адрес проведения"/>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Дата окончания *"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           Margin="0,0,0,8"/>
-                                <DatePicker SelectedDate="{Binding Tournament.EndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            Style="{StaticResource DatePickerStyle}"/>
+                                <TextBlock Text="Дата окончания *" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                                <DatePicker SelectedDate="{Binding Tournament.EndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource DatePickerStyle}"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
 
                     <StackPanel Margin="0,0,0,20">
-                        <TextBlock Text="Описание турнира"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="Описание турнира" FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
                         <TextBox Text="{Binding Tournament.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource TextBoxStyle}"
-                                 Height="100"
-                                 TextWrapping="Wrap"
-                                 AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto"
-                                 MaxLength="300"
-                                 materialDesign:HintAssist.Hint="Опишите турнир (необязательно)"/>
+                                 Style="{StaticResource TextBoxStyle}" Height="100" TextWrapping="Wrap"
+                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 MaxLength="300" materialDesign:HintAssist.Hint="Опишите турнир (необязательно)"/>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Bottom"
-                                Margin="0,20,0,0">
-                        <Button Content="Отмена"
-                                Command="{Binding CancelCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Margin="0,0,12,0"/>
-                        <Button Content="Сохранить изменения"
-                                Command="{Binding SaveTournamentCommand}"
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom" Margin="0,20,0,0">
+                        <Button Content="Отмена" Command="{Binding CancelCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,12,0"/>
+                        <Button Content="Сохранить изменения" Command="{Binding SaveTournamentCommand}"
                                 Style="{StaticResource PrimaryButtonStyle}"/>
                     </StackPanel>
 
-                    <Border Background="{StaticResource ProgressBarBrush}"
-                            Padding="16"
-                            CornerRadius="4"
-                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            Margin="0,20,0,0">
+                    <Border Background="{StaticResource ProgressBarBrush}" Padding="16" CornerRadius="4"
+                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,20,0,0">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <ProgressBar IsIndeterminate="True"
-                                         Width="60"
-                                         Height="6"
-                                         Margin="0,0,12,0"/>
-                            <TextBlock Text="Сохранение измений..."
-                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                       VerticalAlignment="Center"/>
+                            <ProgressBar IsIndeterminate="True" Width="60" Height="6" Margin="0,0,12,0"/>
+                            <TextBlock Text="Сохранение измений..." Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

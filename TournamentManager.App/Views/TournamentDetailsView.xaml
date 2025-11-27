@@ -22,37 +22,24 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="{Binding TournamentName}"
-                               Style="{StaticResource HeaderTextStyle}"
-                               Margin="0,0,0,8"
-                               HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding TournamentName}" Style="{StaticResource HeaderTextStyle}"
+                               Margin="0,0,0,8" HorizontalAlignment="Left"/>
 
-                    <TextBlock Text="{Binding TournamentDescription}"
-                               Style="{StaticResource BodyTextStyle}"
-                               TextAlignment="Left"
-                               HorizontalAlignment="Left"
-                               Margin="0,0,0,12"
-                               MaxWidth="600"/>
+                    <TextBlock Text="{Binding TournamentDescription}" Style="{StaticResource BodyTextStyle}"
+                               TextAlignment="Left" HorizontalAlignment="Left"
+                               Margin="0,0,0,12"  MaxWidth="600"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <materialDesign:PackIcon Kind="Calendar" 
-                                                 Width="16" 
-                                                 Height="16" 
-                                                 Foreground="{StaticResource TextSecondaryBrush}"
-                                                 Margin="0,0,4,0"/>
+                        <materialDesign:PackIcon Kind="Calendar" Width="16" Height="16" Margin="0,0,4,0"
+                                                 Foreground="{StaticResource TextSecondaryBrush}"/>
 
-                        <TextBlock Text="{Binding TournamentDates}"
-                                   Style="{StaticResource BodyTextStyle}"
+                        <TextBlock Text="{Binding TournamentDates}" Style="{StaticResource BodyTextStyle}"
                                    Margin="0,0,16,0"/>
 
-                        <materialDesign:PackIcon Kind="MapMarker" 
-                                                 Width="16" 
-                                                 Height="16" 
-                                                 Foreground="{StaticResource TextSecondaryBrush}"
-                                                 Margin="16,0,4,0"/>
+                        <materialDesign:PackIcon Kind="MapMarker" Width="16" Height="16" Margin="16,0,4,0"
+                                                 Foreground="{StaticResource TextSecondaryBrush}"/>
 
-                        <TextBlock Text="{Binding TournamentAddress}" 
-                                   Style="{StaticResource BodyTextStyle}"/>
+                        <TextBlock Text="{Binding TournamentAddress}" Style="{StaticResource BodyTextStyle}"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
@@ -60,10 +47,8 @@
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
             <StackPanel Orientation="Horizontal">
-                <Button Content="Добавить участника"
-                        Command="{Binding AddParticipantCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Margin="0,0,12,0">
+                <Button Content="Добавить участника" Command="{Binding AddParticipantCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,12,0">
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -74,17 +59,11 @@
                     </Button.ContentTemplate>
                 </Button>
 
-                <Button Content="Управление категориями"
-                        Height="40"
-                        Command="{Binding ManageCategoriesCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        VerticalAlignment="Top"
-                        Margin="0,0,12,0"/>
+                <Button Content="Управление категориями" Height="40" Command="{Binding ManageCategoriesCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" VerticalAlignment="Top" Margin="0,0,12,0"/>
 
-                <Button Content="Импорт участников"
-                        Command="{Binding ImportParticipantsCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Margin="0,0,12,0">
+                <Button Content="Импорт участников" Command="{Binding ImportParticipantsCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,12,0">
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -95,10 +74,8 @@
                     </Button.ContentTemplate>
                 </Button>
 
-                <Button Content="Экспорт участников" 
-                        Command="{Binding ExportParticipantsCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Margin="0,0,12,0">
+                <Button Content="Экспорт участников" Command="{Binding ExportParticipantsCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,12,0">
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -126,21 +103,11 @@
 
         <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="0">
             <Grid>
-                <DataGrid ItemsSource="{Binding Participants}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="False"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="True"
-                          CanUserSortColumns="True"
-                          SelectionMode="Single"
-                          HeadersVisibility="Column"
-                          BorderThickness="0"
-                          Background="Transparent"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto"
-                          CellEditEnding="DataGrid_CellEditEnding"
-                          AddingNewItem="DataGrid_AddingNewItem"
-                          RowEditEnding="DataGrid_RowEditEnding">
+                <DataGrid ItemsSource="{Binding Participants}" AutoGenerateColumns="False" IsReadOnly="False" CanUserAddRows="False"
+                          CanUserDeleteRows="True" CanUserSortColumns="True" SelectionMode="Single" HeadersVisibility="Column"
+                          BorderThickness="0" Background="Transparent" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto" CellEditEnding="DataGrid_CellEditEnding"
+                          AddingNewItem="DataGrid_AddingNewItem" RowEditEnding="DataGrid_RowEditEnding">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="0.5*" Visibility="Collapsed" IsReadOnly="True"/>
                         
@@ -169,11 +136,9 @@
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
                                     <ComboBox SelectedValue="{Binding Gender, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              SelectedValuePath="Value"
-                                              DisplayMemberPath="Display"
+                                              SelectedValuePath="Value" DisplayMemberPath="Display"
                                               ItemsSource="{Binding Source={x:Static classes:GenderOptions.Values}}"
-                                              Style="{StaticResource ComboBoxStyle}"
-                                              BorderThickness="0"
+                                              Style="{StaticResource ComboBoxStyle}" BorderThickness="0"
                                               Background="Transparent"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
@@ -187,11 +152,8 @@
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <TextBox Text="{Binding Weight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                             Style="{StaticResource TextBoxStyle}"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             PreviewTextInput="TextBox_PreviewTextInput"
+                                    <TextBox Text="{Binding Weight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Style="{StaticResource TextBoxStyle}"
+                                             BorderThickness="0" Background="Transparent" PreviewTextInput="TextBox_PreviewTextInput"
                                              DataObject.Pasting="TextBox_Pasting"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
@@ -205,10 +167,8 @@
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <DatePicker SelectedDate="{Binding Birthday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource DatePickerStyle}"
-                                                BorderThickness="0"
-                                                Background="Transparent"/>
+                                    <DatePicker SelectedDate="{Binding Birthday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource DatePickerStyle}"
+                                                BorderThickness="0" Background="Transparent"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
@@ -262,49 +222,31 @@
                         Margin="0,40,0,8"
                         Visibility="{Binding Participants.Count, Converter={converters:EmptyToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="Участники не найдены"
-                                   Style="{StaticResource SubHeaderTextStyle}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="Добавьте участников или импортируйте их из файла"
-                                   Style="{StaticResource HintTextStyle}"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"/>
+                        <TextBlock Text="Участники не найдены" Style="{StaticResource SubHeaderTextStyle}"
+                                   HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="Добавьте участников или импортируйте их из файла" Style="{StaticResource HintTextStyle}"
+                                   HorizontalAlignment="Center" TextAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
                 <Border Background="{StaticResource ProgressBarBrush}" Margin="0,40,0,8"
                         Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="Загрузка участников..."
-                                   Style="{StaticResource BodyTextStyle}"
-                                   HorizontalAlignment="Center"
-                                     Margin="0,0,0,16"/>
-                        <ProgressBar Style="{StaticResource ProgressBarStyle}"
-                                     Width="200"
-                                     Height="8"/>
+                        <TextBlock Text="Загрузка участников..." Style="{StaticResource BodyTextStyle}"
+                                   HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <ProgressBar Style="{StaticResource ProgressBarStyle}" Width="200" Height="8"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
 
-        <StackPanel Grid.Row="3"  Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Margin="0,20,0,0">
-            <Button Content="Назад"
-                    Height="40"
-                    Command="{Binding CancelCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    VerticalAlignment="Top"
-                    Margin="0,0,12,0"/>
+        <StackPanel Grid.Row="3"  Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,20,0,0">
+            <Button Content="Назад" Height="40" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButtonStyle}"
+                    VerticalAlignment="Top" Margin="0,0,12,0"/>
             
-            <Button Content="Зарегистрировать участников"
-                    Command="{Binding RegisterParticipantsCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    Height="40"
-                    HorizontalAlignment="Center">
+            <Button Content="Зарегистрировать участников" Command="{Binding RegisterParticipantsCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}" Height="40"  HorizontalAlignment="Center">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">

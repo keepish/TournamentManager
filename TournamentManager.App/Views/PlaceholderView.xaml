@@ -5,18 +5,11 @@
 
     <Grid Background="{StaticResource SecondaryBrush}">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <materialDesign:PackIcon Kind="Tools" 
-                                   Width="64" 
-                                   Height="64" 
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,20"/>
+            <materialDesign:PackIcon Kind="Tools" Width="64" Height="64" 
+                                     HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-            <TextBlock Text="{Binding Message}" 
-                       Style="{StaticResource SubHeaderTextStyle}"
-                       FontSize="18" 
-                       HorizontalAlignment="Center"
-                       TextWrapping="Wrap"
-                       TextAlignment="Center"/>
+            <TextBlock Text="{Binding Message}" Style="{StaticResource SubHeaderTextStyle}" FontSize="18" 
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
         </StackPanel>
     </Grid>
 </UserControl>

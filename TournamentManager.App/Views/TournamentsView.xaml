@@ -13,17 +13,11 @@
 
         <Border Background="{StaticResource WhiteBrush}" Padding="16" Margin="0,0,0,16" BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderBrush}">
             <StackPanel Orientation="Horizontal">
-                <Button Content="Создать турнир"
-                        Command="{Binding CreateTournamentCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Margin="0,0,12,0"
-                        Visibility="{Binding IsOrganizer, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Создать турнир" Command="{Binding CreateTournamentCommand}" Style="{StaticResource PrimaryButtonStyle}"
+                        Margin="0,0,12,0" Visibility="{Binding IsOrganizer, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                <ComboBox ItemsSource="{Binding StatusFilters}"
-                          SelectedItem="{Binding SelectedStatusFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          Width="160"
-                          Margin="0,0,12,0"
-                          Style="{StaticResource ComboBoxStyle}">
+                <ComboBox ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Width="160" Margin="0,0,12,0" Style="{StaticResource ComboBoxStyle}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding}" Style="{StaticResource BodyTextStyle}" Padding="4"/>
@@ -32,17 +26,12 @@
                 </ComboBox>
                 
                 <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
-                    <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Width="200"
-                             Margin="0,0,4,0"
-                             Tag="Найти"
-                             Style="{StaticResource WatermarkTextBoxStyle}"/>
+                    <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"
+                             Margin="0,0,4,0" Tag="Найти" Style="{StaticResource WatermarkTextBoxStyle}"/>
                 </StackPanel>
 
-                <Button Content="Сбросить все фильтры"
-                        Command="{Binding ResetFiltersCommand}"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        ToolTip="Сбросить фильтры и обновить список"/>
+                <Button Content="Сбросить все фильтры" Command="{Binding ResetFiltersCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" ToolTip="Сбросить фильтры и обновить список"/>
             </StackPanel>
         </Border>
 
@@ -59,23 +48,14 @@
 
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <TextBlock Text="{Binding Name}"
-                                                   FontSize="16"
-                                                   FontWeight="SemiBold"
+                                        <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold"
                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                   VerticalAlignment="Center"
-                                                   Margin="0,5,0,20"/>
+                                                   VerticalAlignment="Center" Margin="0,5,0,20"/>
 
                                         <Border Background="{Binding ., Converter={converters:TournamentStatusToColorConverter}}"
-                                                CornerRadius="4"
-                                                Padding="8,4"
-                                                Margin="12,5,0,20"
-                                                VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding ., Converter={converters:TournamentStatusToStringConverter}}"
-                                                       Foreground="White"
-                                                       FontSize="11"
-                                                       FontWeight="Medium"
-                                                       HorizontalAlignment="Center"/>
+                                                CornerRadius="4" Padding="8,4" Margin="12,5,0,20" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ., Converter={converters:TournamentStatusToStringConverter}}" Foreground="White"
+                                                       FontSize="11" FontWeight="Medium" HorizontalAlignment="Center"/>
                                         </Border>
                                     </StackPanel>
 
@@ -88,60 +68,41 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Margin="0,0,24,0">
-                                            <TextBlock Text="Даты проведения"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                            <TextBlock Text="Даты проведения" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"
                                                        Margin="0,0,0,2"/>
-                                            <TextBlock Text="{Binding StartDate, StringFormat='Начало: {0:dd.MM.yyyy}'}"
-                                                       FontSize="12"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                       FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding StartDate, StringFormat='Начало: {0:dd.MM.yyyy}'}" FontSize="12"
+                                                       Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Medium"/>
                                             <TextBlock Text="{Binding EndDate, StringFormat='Конец:   {0:dd.MM.yyyy}'}"
-                                                       FontSize="12"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                       FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="1" Margin="0,0,24,0">
-                                            <TextBlock Text="Место проведения"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                                       Margin="0,0,0,2"/>
-                                            <TextBlock Text="{Binding Address}"
-                                                       FontSize="12"
-                                                       FontWeight="Medium"
-                                                       TextWrapping="Wrap"/>
+                                            <TextBlock Text="Место проведения" FontSize="10" Margin="0,0,0,2"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Text="{Binding Address}" FontSize="12"
+                                                       FontWeight="Medium" TextWrapping="Wrap"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="2" Margin="0,0,24,0">
-                                            <TextBlock Text="Организатор"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                            <TextBlock Text="Организатор" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"
                                                        Margin="0,0,0,2"/>
-                                            <TextBlock Text="Федерация Тхэквондо"
-                                                       FontSize="12"
-                                                       FontWeight="Medium"/>
+                                            <TextBlock Text="Федерация Тхэквондо" FontSize="12" FontWeight="Medium"/>
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>
 
-                                <StackPanel Grid.Column="1"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Top">
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top">
                                     <Button Command="{Binding DataContext.ViewTournamentDetailsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource IconButtonStyle}">
+                                            CommandParameter="{Binding}" Style="{StaticResource IconButtonStyle}">
                                         <materialDesign:PackIcon Kind="Eye"/>
                                     </Button>
                                     <Button Command="{Binding DataContext.EditTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource IconButtonStyle}"
+                                            CommandParameter="{Binding}" Style="{StaticResource IconButtonStyle}"
                                             Visibility="{Binding DataContext.IsOrganizer, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <materialDesign:PackIcon Kind="Pencil"/>
                                     </Button>
                                     <Button Command="{Binding DataContext.DeleteTournamentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource IconButtonStyle}"
-                                            Foreground="{StaticResource ErrorBrush}"
+                                            CommandParameter="{Binding}" Style="{StaticResource IconButtonStyle}" Foreground="{StaticResource ErrorBrush}"
                                             Visibility="{Binding DataContext.IsOrganizer, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <materialDesign:PackIcon Kind="Delete"/>
                                     </Button>
@@ -153,40 +114,26 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <Border Grid.Row="1"
-                Background="Transparent"
+        <Border Grid.Row="1" Background="Transparent"
                 Visibility="{Binding Tournaments.Count, Converter={converters:EmptyToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="🏆"
-                           Foreground="{StaticResource GoldenBrush}"
-                           FontSize="120"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,16"/>
-                <TextBlock Text="Турниры не найдены"
-                           FontSize="18"
-                           Foreground="{StaticResource TextSecondaryBrush}"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,8"/>
-                <TextBlock Text="Создайте первый турнир или измените параметры фильтрации"
-                           FontSize="13"
-                           Foreground="{StaticResource TextHintBrush}"
-                           HorizontalAlignment="Center"
+                <TextBlock Text="🏆" Foreground="{StaticResource GoldenBrush}"
+                           FontSize="120" HorizontalAlignment="Center"  Margin="0,0,0,16"/>
+                <TextBlock Text="Турниры не найдены" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <TextBlock Text="Создайте первый турнир или измените параметры фильтрации" FontSize="13"
+                           Foreground="{StaticResource TextHintBrush}" HorizontalAlignment="Center"
                            TextAlignment="Center"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="1"
-                Background="{StaticResource ProgressBarBrush}"
+        <Border Grid.Row="1" Background="{StaticResource ProgressBarBrush}"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <ProgressBar IsIndeterminate="True"
-                             Width="200"
-                             Height="8"
-                             Margin="0,0,0,16"/>
-                <TextBlock Text="Загрузка турниров..."
-                           Foreground="{StaticResource TextPrimaryBrush}"
-                           FontSize="14"
-                           HorizontalAlignment="Center"/>
+                <ProgressBar IsIndeterminate="True" Width="200"
+                             Height="8" Margin="0,0,0,16"/>
+                <TextBlock Text="Загрузка турниров..." Foreground="{StaticResource TextPrimaryBrush}"
+                           FontSize="14" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>

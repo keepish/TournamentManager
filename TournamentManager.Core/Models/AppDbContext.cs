@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
-using TournamentManager.Core.Models;
 
-namespace TournamentManager.Core;
+namespace TournamentManager.Core.Models;
 
 public partial class AppDbContext : DbContext
 {
@@ -32,7 +31,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql("server=localhost;database=sport_tournaments;user=root;password=120421", ServerVersion.Parse("9.4.0-mysql"));
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseMySql("server=localhost;database=sport_tournaments;user=root;password=120421", Microsoft.EntityFrameworkCore.ServerVersion.Parse("9.4.0-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -121,20 +121,20 @@ public partial class AppDbContext : DbContext
 
             entity.ToTable("participant_tournament_category");
 
-            entity.HasIndex(e => e.IdParticipant, "participantId_idx");
+            entity.HasIndex(e => e.ParticipantId, "participantId_idx");
 
-            entity.HasIndex(e => e.IdTournamentCategory, "tournamentCategoryId_idx");
+            entity.HasIndex(e => e.TournamentCategoryId, "tournamentCategoryId_idx");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.IdParticipant).HasColumnName("idParticipant");
-            entity.Property(e => e.IdTournamentCategory).HasColumnName("idTournamentCategory");
+            entity.Property(e => e.ParticipantId).HasColumnName("participantId");
+            entity.Property(e => e.TournamentCategoryId).HasColumnName("tournamentCategoryId");
 
-            entity.HasOne(d => d.IdParticipantNavigation).WithMany(p => p.ParticipantTournamentCategories)
-                .HasForeignKey(d => d.IdParticipant)
+            entity.HasOne(d => d.Participant).WithMany(p => p.ParticipantTournamentCategories)
+                .HasForeignKey(d => d.ParticipantId)
                 .HasConstraintName("participantId");
 
-            entity.HasOne(d => d.IdTournamentCategoryNavigation).WithMany(p => p.ParticipantTournamentCategories)
-                .HasForeignKey(d => d.IdTournamentCategory)
+            entity.HasOne(d => d.TournamentCategory).WithMany(p => p.ParticipantTournamentCategories)
+                .HasForeignKey(d => d.TournamentCategoryId)
                 .HasConstraintName("tournamentCategoryId");
         });
 
@@ -147,6 +147,9 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.OrganizerId, "id_idx");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Address)
+                .HasMaxLength(150)
+                .HasColumnName("address");
             entity.Property(e => e.Description)
                 .HasMaxLength(300)
                 .HasColumnName("description");

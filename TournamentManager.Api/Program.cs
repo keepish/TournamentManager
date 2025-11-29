@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TournamentManager.Core;
+using TournamentManager.Core.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

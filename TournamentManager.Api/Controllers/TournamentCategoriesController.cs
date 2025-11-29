@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TournamentManager.Core;
 using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.Models;
 

@@ -13,7 +13,7 @@ public partial class Match
 
     public int FirstParticipantScore { get; set; }
 
-    public string SecondParticipantScore { get; set; } = null!;
+    public int SecondParticipantScore { get; set; }
 
     public virtual ParticipantTournamentCategory FirstParticipant { get; set; } = null!;
 

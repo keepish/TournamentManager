@@ -71,9 +71,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.FirstParticipantId).HasColumnName("firstParticipantId");
             entity.Property(e => e.FirstParticipantScore).HasColumnName("firstParticipantScore");
             entity.Property(e => e.SecondParticipantId).HasColumnName("secondParticipantId");
-            entity.Property(e => e.SecondParticipantScore)
-                .HasMaxLength(45)
-                .HasColumnName("secondParticipantScore");
+            entity.Property(e => e.SecondParticipantScore).HasColumnName("secondParticipantScore");
 
             entity.HasOne(d => d.FirstParticipant).WithMany(p => p.MatchFirstParticipants)
                 .HasForeignKey(d => d.FirstParticipantId)

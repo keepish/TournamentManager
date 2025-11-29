@@ -1,4 +1,7 @@
-﻿namespace TournamentManager.Core.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace TournamentManager.Core.Models;
 
 public partial class Participant
 {

@@ -10,6 +10,6 @@
 
         public int FirstParticipantScore { get; set; }
 
-        public string SecondParticipantScore { get; set; } = null!;
+        public int SecondParticipantScore { get; set; }
     }
 }

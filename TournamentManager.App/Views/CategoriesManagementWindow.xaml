@@ -83,7 +83,8 @@
                             CornerRadius="4">
                         <ListView ItemsSource="{Binding Categories}"
                                   SelectedItem="{Binding SelectedCategory}"
-                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                                   Height="363">
                             <ListView.ItemTemplate>
                                 <DataTemplate>

@@ -13,7 +13,6 @@ namespace TournamentManager.Core.DTOs.Participants
         private DateTime _birthday;
         private decimal _weight;
 
-
         public int Id { get; set; }
         public string Name 
         { 

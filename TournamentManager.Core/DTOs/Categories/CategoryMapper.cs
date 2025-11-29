@@ -1,5 +1,4 @@
-﻿using TournamentManager.Core.DTOs.Participants;
-using TournamentManager.Core.Models;
+﻿using TournamentManager.Core.Models;
 
 namespace TournamentManager.Core.DTOs.Categories
 {

@@ -5,6 +5,8 @@ using TournamentManager.Client;
 using TournamentManager.Client.ViewModels;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Categories;
+using TournamentManager.Core.DTOs.Participants;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Services;
 
@@ -33,12 +35,12 @@ namespace TournamentManager.Client
                 var user = apiService.GetStoredUser();
                 if (user is not null)
                 {
-                    // Получаем сервисы через DI
                     var tournamentService = ServiceProvider.GetService<IService<TournamentDto>>();
                     var categoryService = ServiceProvider.GetService<IService<CategoryDto>>();
+                    var tournamentCategoryService = ServiceProvider.GetService<IService<TournamentCategoryDto>>();
 
                     var mainWindow = ServiceProvider.GetService<MainWindow>();
-                    var mainViewModel = new MainViewModel(apiService, tournamentService, categoryService, user, secureStorage);
+                    var mainViewModel = new MainViewModel(apiService, tournamentService, categoryService, user, secureStorage, tournamentCategoryService);
                     mainWindow.DataContext = mainViewModel;
                     mainWindow.Show();
                     return;
@@ -49,8 +51,9 @@ namespace TournamentManager.Client
             var loginWindow = ServiceProvider.GetService<LoginWindow>();
             var tournamentServiceForLogin = ServiceProvider.GetService<IService<TournamentDto>>();
             var categoryServiceForLogin = ServiceProvider.GetService<IService<CategoryDto>>();
+            var tournamentCategoryServiceForLogin = ServiceProvider.GetService<IService<TournamentCategoryDto>>();
 
-            loginWindow.DataContext = new LoginViewModel(apiService, tournamentServiceForLogin, secureStorage, categoryServiceForLogin);
+            loginWindow.DataContext = new LoginViewModel(apiService, tournamentServiceForLogin, secureStorage, categoryServiceForLogin, tournamentCategoryServiceForLogin);
             loginWindow.Show();
         }
 
@@ -63,19 +66,32 @@ namespace TournamentManager.Client
                 return new ApiService(secureStorage);
             });
 
-            // Регистрация TournamentService
             services.AddHttpClient<IService<TournamentDto>, TournamentService>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
             });
 
-            // Регистрация CategoryService
             services.AddHttpClient<IService<CategoryDto>, CategoryService>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/Categories/");
             });
 
-            // Регистрация ViewModels
+            services.AddHttpClient<TournamentCategoryService, TournamentCategoryService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7074/api/TournamentCategory/");
+            });
+
+            // Регистрация UserService через UsersController
+            //services.AddHttpClient<UserService, UserService>(client =>
+            //{
+            //    client.BaseAddress = new Uri("https://localhost:7074/api/Users/");
+            //});
+
+            services.AddHttpClient<IService<ParticipantDto>, ParticipantService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7074/api/Participants/");
+            });
+
             services.AddTransient<LoginViewModel>();
             services.AddTransient<MainViewModel>();
             services.AddTransient<TournamentsViewModel>();
@@ -85,7 +101,6 @@ namespace TournamentManager.Client
             services.AddTransient<CategoriesManagementViewModel>();
             services.AddTransient<DashboardViewModel>();
 
-            // Регистрация Views
             services.AddTransient<LoginWindow>();
             services.AddTransient<MainWindow>();
             services.AddTransient<TournamentsView>();

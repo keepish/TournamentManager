@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using TournamentManager.Core.DTOs.Users;
 using TournamentManager.Core.Models;
 
 namespace TournamentManager.Api.Controllers
@@ -61,19 +62,20 @@ namespace TournamentManager.Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] Core.Models.Requests.RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] UserDto request)
         {
             try
             {
                 if (await _context.Users.AnyAsync(u => u.Login == request.Login))
                     return BadRequest(new { message = "Пользователь с таким именем уже существует" });
 
-                var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                if (string.IsNullOrEmpty(request.Password))
+                    return BadRequest(new { message = "Пароль обязателен" });
 
                 var user = new User
                 {
                     Login = request.Login,
-                    PasswordHash = passwordHash,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                     Name = request.Name,
                     Surname = request.Surname,
                     Patronymic = request.Patronymic
@@ -82,11 +84,11 @@ namespace TournamentManager.Api.Controllers
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Пользователь успешно зарегистрирован" });
+                return Ok("Пользователь успешно зарегистрирован");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = $"Ошибка регистрации: {ex.Message}" });
+                return StatusCode(500, "Ошибка регистрации");
             }
         }
 

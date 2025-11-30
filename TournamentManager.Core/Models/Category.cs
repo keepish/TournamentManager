@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TournamentManager.Core.Models;
+﻿namespace TournamentManager.Core.Models;
 
 public partial class Category
 {

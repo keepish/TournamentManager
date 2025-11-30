@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Windows;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Categories;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
@@ -18,6 +19,7 @@ namespace TournamentManager.Client.ViewModels
         private readonly IService<TournamentDto> _tournamentService;
         private readonly SecureStorage _secureStorage;
         private readonly IService<CategoryDto> _categoryService;
+        private readonly IService<TournamentCategoryDto> _tournamentCategoryService;
 
         [ObservableProperty]
         private UserInfo currentUser;
@@ -32,12 +34,14 @@ namespace TournamentManager.Client.ViewModels
         private bool isMenuCollapsed = false;
 
         public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService,
-            IService<CategoryDto> categoryService, UserInfo user, SecureStorage secureStorage)
+            IService<CategoryDto> categoryService, UserInfo user, SecureStorage secureStorage, 
+            IService<TournamentCategoryDto> tournamentCategoryService)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
             _secureStorage = secureStorage;
             _categoryService = categoryService;
+            _tournamentCategoryService = tournamentCategoryService;
 
             CurrentUser = _apiService.GetStoredUser();
             CurrentView = new DashboardView { DataContext = new DashboardViewModel(_apiService, CurrentUser) };
@@ -103,8 +107,9 @@ namespace TournamentManager.Client.ViewModels
             var categoryService = App.ServiceProvider.GetService<IService<CategoryDto>>();
             var secureStorage = App.ServiceProvider.GetService<SecureStorage>();
             var apiService = App.ServiceProvider.GetService<ApiService>();
+            var tournamentCategoryService = App.ServiceProvider.GetService<IService<TournamentCategoryDto>>();
 
-            loginWindow.DataContext = new LoginViewModel(apiService, tournamentService, secureStorage, categoryService);
+            loginWindow.DataContext = new LoginViewModel(apiService, tournamentService, secureStorage, categoryService, tournamentCategoryService);
 
             loginWindow.Show();
 
@@ -147,7 +152,7 @@ namespace TournamentManager.Client.ViewModels
 
             CurrentView = new TournamentDetailsView
             {
-                DataContext = new TournamentDetailsViewModel(tournament, _apiService, this, _categoryService)
+                DataContext = new TournamentDetailsViewModel(tournament, _apiService, this, _categoryService, _tournamentCategoryService)
             };
         }
     }

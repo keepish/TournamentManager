@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Categories;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
@@ -16,6 +17,7 @@ namespace TournamentManager.Client.ViewModels
         private readonly IService<TournamentDto> _tournamentService;
         private readonly SecureStorage _secureStorage;
         private readonly IService<CategoryDto> _categoryService;
+        private readonly IService<TournamentCategoryDto> _tournamentCategoryService;
 
         [ObservableProperty]
         private string login;
@@ -29,12 +31,14 @@ namespace TournamentManager.Client.ViewModels
         public LoginViewModel(ApiService apiService,
             IService<TournamentDto> tournamentService,
             SecureStorage secureStorage,
-            IService<CategoryDto> categoryService)
+            IService<CategoryDto> categoryService,
+            IService<TournamentCategoryDto> tournamentCategoryService)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
             _secureStorage = secureStorage;
             _categoryService = categoryService;
+            _tournamentCategoryService = tournamentCategoryService;
         }
 
         [RelayCommand]
@@ -67,7 +71,7 @@ namespace TournamentManager.Client.ViewModels
                 _secureStorage.Save("UserData", userJson);
 
                 var mainWindow = App.ServiceProvider.GetService<MainWindow>();
-                var mainViewModel = new MainViewModel(_apiService, _tournamentService, _categoryService, result.User, _secureStorage);
+                var mainViewModel = new MainViewModel(_apiService, _tournamentService, _categoryService, result.User, _secureStorage, _tournamentCategoryService);
 
                 mainWindow.DataContext = mainViewModel;
                 mainWindow.Show();

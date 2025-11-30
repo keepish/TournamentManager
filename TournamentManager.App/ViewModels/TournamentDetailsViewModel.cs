@@ -7,9 +7,11 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using TournamentManager.Client.Classes;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Categories;
 using TournamentManager.Core.DTOs.Participants;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Services;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -22,6 +24,7 @@ namespace TournamentManager.Client.ViewModels
         private readonly ApiService _apiService;
         private readonly MainViewModel _mainViewModel;
         private readonly IService<CategoryDto> _categoryService;
+        private readonly IService<TournamentCategoryDto> _tournamentCategoryService;
 
         [ObservableProperty]
         private ObservableCollection<ParticipantDto> participants = new();
@@ -40,13 +43,16 @@ namespace TournamentManager.Client.ViewModels
         public string TournamentDescription => _tournament?.Description ?? "";
 
         public TournamentDetailsViewModel(TournamentDto tournament, ApiService apiService,
-            MainViewModel mainViewModel, IService<CategoryDto> categoryService) 
+            MainViewModel mainViewModel, IService<CategoryDto> categoryService,
+            IService<TournamentCategoryDto> tournamentCategoryService) 
         {
             _tournament = tournament;
             _apiService = apiService;
             _mainViewModel = mainViewModel;
             _categoryService = categoryService;
+            _tournamentCategoryService = tournamentCategoryService;
 
+            Participants = ParticipantState.GetParticipants(_tournament.Id);
             LoadParticipants();
         }
 
@@ -57,10 +63,6 @@ namespace TournamentManager.Client.ViewModels
 
             try
             {
-                await Task.Delay(1000);
-
-                Participants.Clear();
-
                 if (IsOrganizer)
                 {
                     Participants.Add(new ParticipantDto

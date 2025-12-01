@@ -11,6 +11,9 @@ namespace TournamentManager.Core.DTOs.Tournaments
         public int SecondParticipantScore { get; set; }
         public bool IsStarted { get; set; }
         public bool IsFinished { get; set; }
+        // New: round and ordering inside round
+        public int Round { get; set; } // 1-based round number; 0 if unknown
+        public int Order { get; set; } // position within round for layout (0 if unknown)
     }
 
     public class CategoryBracketDto

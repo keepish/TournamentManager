@@ -96,29 +96,19 @@ namespace TournamentManager.Client.ViewModels
                 return;
             }
 
-            if (!HasUnsavedChanges)
-            {
-                MessageBox.Show("Нет изменений для сохранения", "Информация");
-                return;
-            }
             try
             {
                 IsLoading = true;
 
-                // TODO: Реализовать сохранение участников в БД
-                var validationErrors = ValidateAllParticipants();
-                if (validationErrors.Any())
-                {
-                    MessageBox.Show($"Ошибки валидации:\n{string.Join("\n", validationErrors)}", "Ошибка");
-                    return;
-                }
+                // Call backend registration endpoint
+                var endpoint = $"api/Tournaments/{_tournament.Id}/register-participants";
+                var registrationResult = await _apiService.PostAsync<TournamentRegistrationResultDto>(endpoint, new { });
 
-                await Task.Delay(1000); // Имитация сохранения
+                var total = registrationResult.TotalParticipantsRegistered;
+                var matches = registrationResult.TotalMatchesCreated;
+                MessageBox.Show($"Регистрация завершена. Участников добавлено: {total}. Создано пар: {matches}.", "Успех");
 
-                HasUnsavedChanges = false;
-                MessageBox.Show("Участники успешно зарегистрированы!", "Успех");
-
-                // Обновляем список чтобы получить актуальные ID из БД
+                // Refresh participants list to reflect any new registrations
                 await LoadParticipants();
             }
             catch (Exception ex)
@@ -672,6 +662,12 @@ namespace TournamentManager.Client.ViewModels
                 Weight = 70.0m
             });
             HasUnsavedChanges = true;
+        }
+
+        [RelayCommand]
+        private void GoToBrackets()
+        {
+            _mainViewModel.NavigateToBrackets(_tournament);
         }
     }
 }

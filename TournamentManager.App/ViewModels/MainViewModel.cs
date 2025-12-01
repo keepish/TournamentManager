@@ -164,6 +164,14 @@ namespace TournamentManager.Client.ViewModels
                     _tournamentCategoryService, _userService, _participantService)
             };
         }
+
+        public void NavigateToBrackets(TournamentDto tournament)
+        {
+            CurrentView = new BracketsView
+            {
+                DataContext = new BracketsViewModel(_apiService, tournament)
+            };
+        }
     }
 
     public class MenuItem

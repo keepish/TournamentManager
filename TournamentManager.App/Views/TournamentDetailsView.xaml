@@ -42,6 +42,10 @@
                         <TextBlock Text="{Binding TournamentAddress}" Style="{StaticResource BodyTextStyle}"/>
                     </StackPanel>
                 </StackPanel>
+
+                <Button Grid.Column="1" Content="Перейти к турнирной сетке"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding GoToBracketsCommand}"/>
             </Grid>
         </Border>
 

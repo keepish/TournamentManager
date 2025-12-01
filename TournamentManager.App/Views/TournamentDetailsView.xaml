@@ -47,13 +47,13 @@
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
             <StackPanel Orientation="Horizontal">
-                <Button Content="Добавить участника" Command="{Binding AddParticipantCommand}"
+                <Button Content="Добавить участников в систему" Command="{Binding AddParticipantCommand}"
                         Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,12,0">
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="AccountPlus" Width="16" Height="16" Margin="0,2,8,0" Cursor="Hand"/>
-                                <TextBlock Text="Добавить участника" Foreground="{StaticResource WhiteBrush}" FontWeight="SemiBold"/>
+                                <TextBlock Text="Добавить участников в систему" Foreground="{StaticResource WhiteBrush}" FontWeight="SemiBold"/>
                             </StackPanel>
                         </DataTemplate>
                     </Button.ContentTemplate>
@@ -115,7 +115,7 @@
 
         <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="0">
             <Grid>
-                <DataGrid ItemsSource="{Binding Participants}" AutoGenerateColumns="False" IsReadOnly="False" CanUserAddRows="False"
+                <DataGrid ItemsSource="{Binding Participants}" AutoGenerateColumns="False" IsReadOnly="False" CanUserAddRows="True"
                           CanUserDeleteRows="True" CanUserSortColumns="True" SelectionMode="Single" HeadersVisibility="Column"
                           BorderThickness="0" Background="Transparent" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto" CellEditEnding="DataGrid_CellEditEnding"

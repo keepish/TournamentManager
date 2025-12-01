@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using TournamentManager.Client.Classes;
 using TournamentManager.Client.Views;
@@ -25,6 +26,7 @@ namespace TournamentManager.Client.ViewModels
         private readonly IService<CategoryDto> _categoryService;
         private readonly ITournamentCategoryService _tournamentCategoryService;
         private readonly IUserService _userService;
+        private readonly IParticipantService _participantService;
 
         [ObservableProperty]
         private ObservableCollection<ParticipantDto> participants = new();
@@ -44,7 +46,8 @@ namespace TournamentManager.Client.ViewModels
 
         public TournamentDetailsViewModel(TournamentDto tournament, ApiService apiService,
             MainViewModel mainViewModel, IService<CategoryDto> categoryService,
-            ITournamentCategoryService tournamentCategoryService, IUserService userService)
+            ITournamentCategoryService tournamentCategoryService, IUserService userService,
+            IParticipantService participantService)
         {
             _tournament = tournament;
             _apiService = apiService;
@@ -52,6 +55,7 @@ namespace TournamentManager.Client.ViewModels
             _categoryService = categoryService;
             _tournamentCategoryService = tournamentCategoryService;
             _userService = userService;
+            _participantService = participantService;
 
             Participants = ParticipantState.GetParticipants(_tournament.Id);
             LoadParticipants();
@@ -64,32 +68,14 @@ namespace TournamentManager.Client.ViewModels
 
             try
             {
-                if (IsOrganizer)
-                {
-                    Participants.Add(new ParticipantDto
-                    {
-                        Id = 1,
-                        Name = "Иван",
-                        Surname = "Петров",
-                        Patronymic = "Сергеевич",
-                        Phone = "+7 (999) 123-45-67",
-                        Gender = 1,
-                        Birthday = new DateTime(1995, 5, 15),
-                        Weight = 70.5m
-                    });
+                var participantsFromDb = await _participantService.GetAllAsync();
 
-                    Participants.Add(new ParticipantDto
-                    {
-                        Id = 2,
-                        Name = "Мария",
-                        Surname = "Сидорова",
-                        Patronymic = "Александровна",
-                        Phone = "+7 (999) 765-43-21",
-                        Gender = 2,
-                        Birthday = new DateTime(1998, 8, 22),
-                        Weight = 58.2m
-                    });
-                }
+                Participants.Clear();
+
+                if (participantsFromDb != null)
+                    foreach (var participant in participantsFromDb)
+                        if (participant != null)
+                            Participants.Add(participant);
             }
             catch (Exception ex)
             {
@@ -120,7 +106,7 @@ namespace TournamentManager.Client.ViewModels
                 IsLoading = true;
 
                 // TODO: Реализовать сохранение участников в БД
-                var validationErrors = ValidateParticipants();
+                var validationErrors = ValidateAllParticipants();
                 if (validationErrors.Any())
                 {
                     MessageBox.Show($"Ошибки валидации:\n{string.Join("\n", validationErrors)}", "Ошибка");
@@ -143,30 +129,6 @@ namespace TournamentManager.Client.ViewModels
             {
                 IsLoading = false;
             }
-        }
-
-        private List<string> ValidateParticipants()
-        {
-            var errors = new List<string>();
-
-            for (int i = 0; i < Participants.Count; i++)
-            {
-                var participant = Participants[i];
-
-                if (string.IsNullOrWhiteSpace(participant.Name))
-                    errors.Add($"Строка {i + 1}: Имя обязательно для заполнения");
-
-                if (string.IsNullOrWhiteSpace(participant.Surname))
-                    errors.Add($"Строка {i + 1}: Фамилия обязательна для заполнения");
-
-                if (participant.Weight <= 0 || participant.Weight > 300)
-                    errors.Add($"Строка {i + 1}: Вес должен быть от 0.1 до 300 кг");
-
-                if (participant.Birthday > DateTime.Now || participant.Birthday < DateTime.Now.AddYears(-100))
-                    errors.Add($"Строка {i + 1}: Некорректная дата рождения");
-            }
-
-            return errors;
         }
 
         [RelayCommand]
@@ -553,7 +515,7 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
-        private void AddParticipant()
+        private async Task AddParticipant()
         {
             if (!IsOrganizer)
             {
@@ -561,8 +523,118 @@ namespace TournamentManager.Client.ViewModels
                 return;
             }
 
-            // TODO: Реализация добавления участника
-            MessageBox.Show("Функция добавления участника будет реализована позже", "Добавление участника");
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Нет участников для добавления", "Внимание");
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+
+                var validationErrors = ValidateAllParticipants();
+                if (validationErrors.Any())
+                {
+                    MessageBox.Show($"Обнаружены ошибки валидации:\n{string.Join("\n", validationErrors)}",
+                        "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                RemoveDuplicates();
+
+                var existingParticipants = await _participantService.GetAllAsync() ?? new List<ParticipantDto?>();
+                var participantsToAdd = new List<ParticipantDto>();
+                var existingCount = 0;
+                var addedCount = 0;
+                var errorCount = 0;
+
+                foreach (var participant in Participants)
+                {
+                    if (participant.Id > 0)
+                    {
+                        existingCount++;
+                        continue;
+                    }
+
+                    var existsInDb = existingParticipants.Any(ep =>
+                        ep != null &&
+                        string.Equals(ep.Surname?.Trim(), participant.Surname?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(ep.Name?.Trim(), participant.Name?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(ep.Patronymic?.Trim(), participant.Patronymic?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                        ep.Birthday.Date == participant.Birthday.Date);
+
+                    if (existsInDb)
+                    {
+                        existingCount++;
+                        continue;
+                    }
+
+                    try
+                    {
+                        await _participantService.AddAsync(participant);
+                        addedCount++;
+                        participantsToAdd.Add(participant);
+                    }
+                    catch
+                    {
+                        errorCount++;
+                        Console.WriteLine($"Ошибка добавления участника {participant.Surname} {participant.Name}");
+                    }
+                }
+
+                await LoadParticipants();
+
+                var message = $"Обработка завершена:\n" +
+                    $"* Успешно добавлено: {addedCount}\n" +
+                    $"* Уже есть в системе: {existingCount}\n" +
+                    $"* Успешно добавлено: {errorCount}";
+
+                if (addedCount > 0)
+                    MessageBox.Show(message, "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                else if (existingCount > 0)
+                    MessageBox.Show("Все участники уже существуют в системе", "Информация",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                else
+                    MessageBox.Show("Не удалось добавить участников", "Внимание",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch
+            {
+                MessageBox.Show($"Ошибка при добавлении участников");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private List<string> ValidateAllParticipants()
+        {
+            var errors = new List<string>();
+
+            for (int i = 0; i < Participants.Count; i++)
+            {
+                var participant = Participants[i];
+                var rowNumber = i + 1;
+
+                if (string.IsNullOrWhiteSpace(participant.Surname))
+                    errors.Add($"Строка {rowNumber}: Фамилия обязательна");
+
+                if (string.IsNullOrWhiteSpace(participant.Name))
+                    errors.Add($"Строка {rowNumber}: Имя обязательно");
+
+                if (participant.Gender > 1)
+                    errors.Add($"Строка {rowNumber}: Укажите пол (0 - мужской, 1 - женский)");
+
+                if (participant.Weight <= 0 || participant.Weight > 300)
+                    errors.Add($"Строка {rowNumber}: Вес должен быть от 0.1 до 300 кг");
+
+                if (participant.Birthday == DateTime.MinValue || participant.Birthday > DateTime.Now || participant.Birthday < DateTime.Now.AddYears(-100))
+                    errors.Add($"Строка {rowNumber}: Некорректная дата рождения");
+            }
+
+            return errors;
         }
 
         [RelayCommand]

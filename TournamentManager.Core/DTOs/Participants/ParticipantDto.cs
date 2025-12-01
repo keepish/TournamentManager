@@ -83,7 +83,12 @@ namespace TournamentManager.Core.DTOs.Participants
         }
 
         public string FullName => $"{Surname} {Name} {Patronymic}".Trim();
-        public string GenderDisplay => Gender == 1 ? "Мужской" : "Женский";
+        public string GenderDisplay => Gender switch
+        {
+            1 => "Мужской",
+            0 => "Женский",
+            _ => "Неизвестно"
+        };
         public int Age => DateTime.Now.Year - Birthday.Year;
 
         public event PropertyChangedEventHandler? PropertyChanged;

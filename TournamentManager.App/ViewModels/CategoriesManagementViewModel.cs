@@ -23,6 +23,9 @@ namespace TournamentManager.Client.ViewModels
         private ObservableCollection<CategoryDto> attachedCategories = new();
 
         [ObservableProperty]
+        private CategoryDto selectedAttachedCategory;
+
+        [ObservableProperty]
         private ObservableCollection<UserDto> judges = new();
 
         [ObservableProperty]
@@ -51,12 +54,6 @@ namespace TournamentManager.Client.ViewModels
             _tournamentCategoryService = tournamentCategoryService;
             _userService = userService;
 
-            if (_userService == null)
-            {
-                MessageBox.Show("UserService is null!", "Error");
-                return;
-            }
-
             InitializeCategory();
             LoadCategories();
             LoadJudges();
@@ -68,12 +65,6 @@ namespace TournamentManager.Client.ViewModels
         {
             try
             {
-                if (_userService == null)
-                {
-                    MessageBox.Show("UserService is not initialized", "Error");
-                    return;
-                }
-
                 var judgesList = await _userService.GetJudgesAsync();
                 Judges.Clear();
                 if (judgesList != null)
@@ -104,7 +95,7 @@ namespace TournamentManager.Client.ViewModels
                 Categories.Clear();
                 if (categoriesList != null)
                 {
-                    foreach (var category in categoriesList) 
+                    foreach (var category in categoriesList)
                         if (category != null)
                             Categories.Add(category);
                 }
@@ -171,6 +162,8 @@ namespace TournamentManager.Client.ViewModels
                     SitesNumber = 1;
                     if (Judges.Any())
                         SelectedJudge = Judges.First();
+
+                    SelectedAttachedCategory = null;
                 }
                 else
                 {
@@ -186,14 +179,14 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task DetachCategory()
         {
-            if (SelectedCategory?.Id == 0)
+            if (SelectedAttachedCategory?.Id == 0 || SelectedAttachedCategory == null)
             {
                 MessageBox.Show("Выберите категорию для открепления", "Внимание");
                 return;
             }
 
             var result = MessageBox.Show(
-                $"Вы уверены, что хотите открепить категорию \"{SelectedCategory.DisplayName}\" от турнира?",
+                $"Вы уверены, что хотите открепить категорию \"{SelectedAttachedCategory.DisplayName}\" от турнира?",
                 "Подтверждение открепления",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -202,11 +195,12 @@ namespace TournamentManager.Client.ViewModels
             {
                 try
                 {
-                    var succes = await _tournamentCategoryService.DetachCategoryFromTournamentAsync(_tournament.Id, SelectedCategory.Id);
+                    var succes = await _tournamentCategoryService.DetachCategoryFromTournamentAsync(_tournament.Id, SelectedAttachedCategory.Id);
 
                     if (succes)
                     {
                         await LoadAttachedCategories();
+                        SelectedAttachedCategory = null;
                         MessageBox.Show("Категория успешно откреплена от турнира", "Успех");
                     }
                     else
@@ -231,7 +225,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void EditCategory()
         {
-            if (SelectedCategory?.Id == 0)
+            if (SelectedCategory?.Id == 0 || SelectedCategory == null)
             {
                 MessageBox.Show("Выберите категорию для редактирования", "Внимание");
                 return;
@@ -267,7 +261,7 @@ namespace TournamentManager.Client.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка сохранения категории: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка сохранения категории", "Ошибка");
             }
             finally
             {
@@ -285,7 +279,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task DeleteCategory()
         {
-            if (SelectedCategory?.Id == 0)
+            if (SelectedCategory?.Id == 0 || SelectedCategory == null)
             {
                 MessageBox.Show("Выберите категорию для удаления", "Внимание");
                 return;
@@ -308,7 +302,7 @@ namespace TournamentManager.Client.ViewModels
                 }
                 catch (Exception ex)
                 {
-                         MessageBox.Show($"Ошибка удаления категории: {ex.Message}", "Ошибка");
+                        MessageBox.Show($"Ошибка удаления категории", "Ошибка");
                 }
             }
         }
@@ -327,6 +321,7 @@ namespace TournamentManager.Client.ViewModels
                 MinAge = 18,
                 MaxAge = 35
             };
+            SelectedAttachedCategory = null;
         }
 
         private bool ValidateCategory()

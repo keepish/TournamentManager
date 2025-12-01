@@ -4,7 +4,7 @@ using TournamentManager.Core.DTOs.Participants;
 
 namespace TournamentManager.Core.Services
 {
-    public class ParticipantService : IService<ParticipantDto>
+    public class ParticipantService : IParticipantService
     {
         private readonly HttpClient _client;
 
@@ -26,11 +26,14 @@ namespace TournamentManager.Core.Services
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task AddAsync(ParticipantDto participantDto)
+        public async Task<ParticipantDto> AddAsync(ParticipantDto participantDto)
         {
             HttpResponseMessage response =
                 await _client.PostAsJsonAsync("", participantDto);
             response.EnsureSuccessStatusCode();
+
+            var createdParticipant = await response.Content.ReadFromJsonAsync<ParticipantDto>();
+            return createdParticipant ?? participantDto;
         }
 
         public async Task DeleteAsync(int id)

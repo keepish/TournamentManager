@@ -39,10 +39,11 @@ namespace TournamentManager.Client
                     var categoryService = ServiceProvider.GetService<IService<CategoryDto>>();
                     var tournamentCategoryService = ServiceProvider.GetService<ITournamentCategoryService>();
                     var userService = ServiceProvider.GetService<IUserService>();
+                    var participantService = ServiceProvider.GetService<IParticipantService>();
 
                     var mainWindow = ServiceProvider.GetService<MainWindow>();
                     var mainViewModel = new MainViewModel(apiService, tournamentService, categoryService, 
-                        user, secureStorage, tournamentCategoryService, userService);
+                        user, secureStorage, tournamentCategoryService, userService, participantService);
                     mainWindow.DataContext = mainViewModel;
                     mainWindow.Show();
                     return;
@@ -54,9 +55,10 @@ namespace TournamentManager.Client
             var categoryServiceForLogin = ServiceProvider.GetService<IService<CategoryDto>>();
             var tournamentCategoryServiceForLogin = ServiceProvider.GetService<ITournamentCategoryService>();
             var userServiceForLogin = ServiceProvider.GetService<IUserService>();
+            var participantServiceForLogin = ServiceProvider.GetService<IParticipantService>();
 
             loginWindow.DataContext = new LoginViewModel(apiService, tournamentServiceForLogin, secureStorage, categoryServiceForLogin, 
-                tournamentCategoryServiceForLogin, userServiceForLogin);
+                tournamentCategoryServiceForLogin, userServiceForLogin, participantServiceForLogin);
             loginWindow.Show();
         }
 
@@ -89,7 +91,7 @@ namespace TournamentManager.Client
                 client.BaseAddress = new Uri("https://localhost:7074/api/Users/");
             });
 
-            services.AddHttpClient<IService<ParticipantDto>, ParticipantService>(client =>
+            services.AddHttpClient<IParticipantService, ParticipantService>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/Participants/");
             });

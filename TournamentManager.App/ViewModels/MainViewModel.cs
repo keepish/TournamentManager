@@ -21,6 +21,7 @@ namespace TournamentManager.Client.ViewModels
         private readonly IService<CategoryDto> _categoryService;
         private readonly ITournamentCategoryService _tournamentCategoryService;
         private readonly IUserService _userService;
+        private readonly IParticipantService _participantService;
 
         [ObservableProperty]
         private UserInfo currentUser;
@@ -36,7 +37,8 @@ namespace TournamentManager.Client.ViewModels
 
         public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService,
             IService<CategoryDto> categoryService, UserInfo user, SecureStorage secureStorage, 
-            ITournamentCategoryService tournamentCategoryService, IUserService userService)
+            ITournamentCategoryService tournamentCategoryService, IUserService userService,
+            IParticipantService participantService)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
@@ -44,6 +46,7 @@ namespace TournamentManager.Client.ViewModels
             _categoryService = categoryService;
             _tournamentCategoryService = tournamentCategoryService;
             _userService = userService;
+            _participantService = participantService;
 
             CurrentUser = _apiService.GetStoredUser();
             CurrentView = new DashboardView { DataContext = new DashboardViewModel(_apiService, CurrentUser) };
@@ -111,9 +114,10 @@ namespace TournamentManager.Client.ViewModels
             var apiService = App.ServiceProvider.GetService<ApiService>();
             var tournamentCategoryService = App.ServiceProvider.GetService<ITournamentCategoryService>();
             var userService = App.ServiceProvider.GetService<IUserService>();
+            var participantService = App.ServiceProvider.GetService<IParticipantService>();
 
             loginWindow.DataContext = new LoginViewModel(apiService, tournamentService, secureStorage, 
-                categoryService, tournamentCategoryService, userService);
+                categoryService, tournamentCategoryService, userService, participantService);
 
             loginWindow.Show();
 
@@ -157,7 +161,7 @@ namespace TournamentManager.Client.ViewModels
             CurrentView = new TournamentDetailsView
             {
                 DataContext = new TournamentDetailsViewModel(tournament, _apiService, this, _categoryService,
-                    _tournamentCategoryService, _userService)
+                    _tournamentCategoryService, _userService, _participantService)
             };
         }
     }

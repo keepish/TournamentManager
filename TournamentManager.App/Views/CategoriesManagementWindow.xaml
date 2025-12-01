@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
         Height="700"
-        Width="900"
+        Width="765"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         ResizeMode="NoResize"
@@ -53,7 +53,7 @@
 
             <Grid Grid.Row="1" Margin="20">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="350"/>
                     <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="350"/>
                 </Grid.ColumnDefinitions>
@@ -63,7 +63,7 @@
                         <TextBlock Text="Доступные категории"
                                    FontSize="16"
                                    FontWeight="SemiBold"
-                                   Margin="0,4,0,0"
+                                   Margin="0,6,0,0"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
 
                         <Button Command="{Binding AddCategoryCommand}"
@@ -74,6 +74,15 @@
                                                          Foreground="{StaticResource WhiteBrush}" Margin="0,2,4,0"/>
                                 <TextBlock Text="Создать" Foreground="{StaticResource WhiteBrush}"/>
                             </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding EditCategoryCommand}" Style="{StaticResource IconButtonStyle}" Margin="4,0,2,0"
+                                ToolTip="Редактировать выбранную категорию">
+                            <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
+                        </Button>
+                        <Button Command="{Binding DeleteCategoryCommand}" Style="{StaticResource IconButtonStyle}" 
+                                Foreground="{StaticResource ErrorBrush}" Margin="2,0,4,0">
+                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" ToolTip="Удалить выбранную категорию"/>
                         </Button>
                     </StackPanel>
 
@@ -99,20 +108,6 @@
                                                        FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
-
-                                            <StackPanel Grid.Column="1" 
-                                                        Orientation="Horizontal" 
-                                                        VerticalAlignment="Center"
-                                                        HorizontalAlignment="Right">
-                                                <Button Command="{Binding DataContext.EditCategoryCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                                        Style="{StaticResource IconButtonStyle}" Margin="4,0,2,0">
-                                                    <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
-                                                </Button>
-                                                <Button Command="{Binding DataContext.DeleteCategoryCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                                        Style="{StaticResource IconButtonStyle}" Foreground="{StaticResource ErrorBrush}" Margin="2,0,4,0">
-                                                    <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
-                                                </Button>
-                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -126,13 +121,22 @@
                                    FontWeight="SemiBold"
                                    Margin="0,4,0,0"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
+
+                        <Button Grid.Column="1"
+                                Command="{Binding DetachCategoryCommand}"
+                                Style="{StaticResource IconButtonStyle}"
+                                Foreground="{StaticResource ErrorBrush}"
+                                Margin="0,-1,0,0"
+                                ToolTip="Открепить категорию">
+                            <materialDesign:PackIcon Kind="LinkOff" Width="16" Height="16"/>
+                        </Button>
                     </StackPanel>
 
                     <Border BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             Background="{StaticResource WhiteBrush}"
                             CornerRadius="4"
-                            Height="200">
+                            Height="190">
                         <ListView ItemsSource="{Binding AttachedCategories}"
                                   SelectedItem="{Binding SelectedAttachedCategory}"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -150,16 +154,6 @@
                                                        FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
-
-                                            <Button Grid.Column="1"
-                                                    Command="{Binding DataContext.DetachCategoryCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource IconButtonStyle}"
-                                                    Foreground="{StaticResource ErrorBrush}"
-                                                    Margin="2,0,4,0"
-                                                    ToolTip="Открепить категорию">
-                                                <materialDesign:PackIcon Kind="LinkOff" Width="16" Height="16"/>
-                                            </Button>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -262,7 +256,7 @@
                                 <StackPanel Margin="0,0,0,16">
                                     <TextBlock Text="Прикрепить судью к выбранной категории" FontSize="14" FontWeight="SemiBold"
                                                Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
-                                    <ComboBox ItemsSource="{Binding Judges}" SelectedItem="{Binding SelectedJudges}" DisplayMemberPath="FullName"
+                                    <ComboBox ItemsSource="{Binding Judges}" SelectedItem="{Binding SelectedJudge}" DisplayMemberPath="FullName"
                                               Style="{StaticResource ComboBoxStyle}" Height="40"/>
                                 </StackPanel>
 

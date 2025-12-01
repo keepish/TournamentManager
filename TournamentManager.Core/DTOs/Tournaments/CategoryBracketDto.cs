@@ -9,6 +9,8 @@ namespace TournamentManager.Core.DTOs.Tournaments
         public string? SecondParticipantName { get; set; }
         public int FirstParticipantScore { get; set; }
         public int SecondParticipantScore { get; set; }
+        public bool IsStarted { get; set; }
+        public bool IsFinished { get; set; }
     }
 
     public class CategoryBracketDto

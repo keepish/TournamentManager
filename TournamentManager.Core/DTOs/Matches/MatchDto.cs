@@ -11,5 +11,9 @@
         public int FirstParticipantScore { get; set; }
 
         public int SecondParticipantScore { get; set; }
+        
+        public bool IsStarted { get; set; }
+
+        public bool IsFinished { get; set; }
     }
 }

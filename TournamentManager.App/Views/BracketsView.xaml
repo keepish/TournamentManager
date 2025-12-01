@@ -23,35 +23,100 @@
         <TabControl.ContentTemplate>
           <DataTemplate>
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel Margin="16">
-                <ItemsControl ItemsSource="{Binding Matches}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <Border Margin="0,0,0,8" Padding="8" Background="{StaticResource WhiteBrush}" CornerRadius="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-                        <Grid>
-                          <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                          </Grid.ColumnDefinitions>
+              <Grid Margin="16">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Первый столбец: стартовые пары (у обеих участников есть имена) -->
+                <StackPanel Grid.Column="0">
+                  <TextBlock Text="Раунд 1" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,8"/>
+                  <ItemsControl ItemsSource="{Binding Matches}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8" Padding="8" Background="{StaticResource WhiteBrush}" CornerRadius="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*"/>
+                              <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                              <TextBlock Text="{Binding FirstParticipantName}" Style="{StaticResource BodyTextStyle}"/>
+                              <TextBlock Text="{Binding SecondParticipantName}" Style="{StaticResource BodyTextStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding SecondParticipantName, Converter={StaticResource NullToCollapsedConverter}}">
+                              <TextBox Width="100" Margin="0,0,8,0" Text="{Binding FirstParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBoxStyle}" IsEnabled="{Binding CanEdit}"/>
+                              <TextBlock Text=":" Margin="0,0,8,0"/>
+                              <TextBox Width="100" Margin="0,0,8,0" Text="{Binding SecondParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBoxStyle}" IsEnabled="{Binding CanEdit}"/>
+                              <Button Content="Начать" Style="{StaticResource SecondaryButtonStyle}"
+                                      Command="{Binding DataContext.StartMatchCommand, ElementName=Root}"
+                                      CommandParameter="{Binding}"/>
+                              <Button Content="Завершить" Margin="8,0,0,0" Style="{StaticResource PrimaryButtonStyle}"
+                                      Command="{Binding DataContext.FinishMatchCommand, ElementName=Root}"
+                                      CommandParameter="{Binding}"/>
+                              <Button Content="Редактировать" Margin="8,0,0,0" Style="{StaticResource SecondaryButtonStyle}"
+                                      Visibility="{Binding DataContext.IsOrganizer, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                      Command="{Binding DataContext.EditMatchCommand, ElementName=Root}"
+                                      CommandParameter="{Binding}"/>
+                            </StackPanel>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel/>
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                  </ItemsControl>
+                </StackPanel>
+
+                <!-- Второй столбец: сформированные пары следующего раунда (возможно один участник ожидает соперника) -->
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="Раунд 2" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,8"/>
+                  <ItemsControl ItemsSource="{Binding Matches}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8" Padding="8" Background="{StaticResource WhiteBrush}" CornerRadius="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                Visibility="{Binding SecondParticipantName, Converter={StaticResource NullToVisibleConverter}}">
+                          <StackPanel>
+                            <TextBlock Text="{Binding FirstParticipantName}" Style="{StaticResource BodyTextStyle}"/>
+                            <TextBlock Text="{Binding SecondParticipantName, TargetNullValue=Ожидает соперника}" Style="{StaticResource HintTextStyle}"/>
+                          </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+
+                <!-- Третий столбец: финал + блок для 3-го места -->
+                <StackPanel Grid.Column="2">
+                  <TextBlock Text="Финал" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,8"/>
+                  <!-- Простейшее отображение: последний матч списка как финал -->
+                  <ContentPresenter Content="{Binding Matches[0]}" Visibility="Collapsed"/>
+                  <ItemsControl ItemsSource="{Binding Matches}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8" Padding="8" Background="{StaticResource WhiteBrush}" CornerRadius="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
                           <StackPanel>
                             <TextBlock Text="{Binding FirstParticipantName}" Style="{StaticResource BodyTextStyle}"/>
                             <TextBlock Text="{Binding SecondParticipantName}" Style="{StaticResource BodyTextStyle}"/>
                           </StackPanel>
-                          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBox Width="40" Margin="0,0,8,0" Text="{Binding FirstParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBoxStyle}"/>
-                            <TextBlock Text=":" Margin="0,0,8,0"/>
-                            <TextBox Width="40" Margin="0,0,8,0" Text="{Binding SecondParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource TextBoxStyle}"/>
-                            <Button Content="Сохранить"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    Command="{Binding DataContext.SaveMatchScoreCommand, ElementName=Root}"
-                                    CommandParameter="{Binding}"/>
-                          </StackPanel>
-                        </Grid>
-                      </Border>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <TextBlock Text="Схватка за 3-е место" Style="{StaticResource SubHeaderTextStyle}" Margin="16,16,0,8"/>
+                  <Border Padding="8" Background="{StaticResource WhiteBrush}" CornerRadius="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                    <TextBlock Text="Будет сформирована после полуфиналов" Style="{StaticResource HintTextStyle}"/>
+                  </Border>
+                </StackPanel>
+
+              </Grid>
             </ScrollViewer>
           </DataTemplate>
         </TabControl.ContentTemplate>

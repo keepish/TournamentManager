@@ -81,6 +81,68 @@ namespace TournamentManager.Api.Controllers
             return CreatedAtAction("GetMatch", new { id = matchDto.Id }, matchDto);
         }
 
+        [HttpPost("{id}/advance")]
+        public async Task<ActionResult<MatchDto>> AdvanceWinner(int id)
+        {
+            var match = await context.Matches.FindAsync(id);
+            if (match is null)
+                return NotFound();
+
+            // Determine winner by score
+            int winnerPtcId;
+            if (match.SecondParticipantId is null)
+            {
+                winnerPtcId = match.FirstParticipantId;
+            }
+            else
+            {
+                winnerPtcId = match.FirstParticipantScore >= match.SecondParticipantScore
+                    ? match.FirstParticipantId
+                    : match.SecondParticipantId.Value;
+            }
+
+            // Find tournament category via ParticipantTournamentCategory
+            var winnerPtc = await context.ParticipantTournamentCategories
+                .Include(ptc => ptc.TournamentCategory)
+                .FirstOrDefaultAsync(ptc => ptc.Id == winnerPtcId);
+            if (winnerPtc is null)
+                return BadRequest("Winner participant not found");
+
+            var tcId = winnerPtc.TournamentCategoryId;
+
+            // Try to find an existing next-round placeholder with only one participant
+            var placeholder = await context.Matches
+                .Where(m => m.SecondParticipantId == null)
+                .Where(m => m.FirstParticipantId != winnerPtcId)
+                .Join(context.ParticipantTournamentCategories,
+                      m => m.FirstParticipantId,
+                      ptc => ptc.Id,
+                      (m, ptc) => new { m, ptc })
+                .Where(x => x.ptc.TournamentCategoryId == tcId)
+                .Select(x => x.m)
+                .FirstOrDefaultAsync();
+
+            if (placeholder != null)
+            {
+                placeholder.SecondParticipantId = winnerPtcId;
+                context.Entry(placeholder).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+                return Ok(placeholder.ToDto());
+            }
+
+            // Otherwise create a new match with winner waiting for opponent
+            var next = new Match
+            {
+                FirstParticipantId = winnerPtcId,
+                SecondParticipantId = null,
+                FirstParticipantScore = 0,
+                SecondParticipantScore = 0
+            };
+            context.Matches.Add(next);
+            await context.SaveChangesAsync();
+            return Ok(next.ToDto());
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMatch(int id)
         {

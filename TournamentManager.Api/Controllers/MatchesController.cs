@@ -88,11 +88,11 @@ namespace TournamentManager.Api.Controllers
             if (match is null)
                 return NotFound();
 
-            // Determine winner by score
+            // Determine winner by score/byes
             int winnerPtcId;
             if (match.SecondParticipantId is null)
             {
-                winnerPtcId = match.FirstParticipantId;
+                winnerPtcId = match.FirstParticipantId; // bye or placeholder progressed
             }
             else
             {
@@ -101,7 +101,7 @@ namespace TournamentManager.Api.Controllers
                     : match.SecondParticipantId.Value;
             }
 
-            // Find tournament category via ParticipantTournamentCategory
+            // Determine tournament category by ParticipantTournamentCategory
             var winnerPtc = await context.ParticipantTournamentCategories
                 .Include(ptc => ptc.TournamentCategory)
                 .FirstOrDefaultAsync(ptc => ptc.Id == winnerPtcId);
@@ -110,27 +110,78 @@ namespace TournamentManager.Api.Controllers
 
             var tcId = winnerPtc.TournamentCategoryId;
 
-            // Try to find an existing next-round placeholder with only one participant
-            var placeholder = await context.Matches
+            // Build seeding for this category (stable order by PTC Id)
+            var seedPtcs = await context.ParticipantTournamentCategories
+                .Where(ptc => ptc.TournamentCategoryId == tcId)
+                .OrderBy(ptc => ptc.Id)
+                .Select(ptc => ptc.Id)
+                .ToListAsync();
+
+            if (seedPtcs.Count == 0)
+                return Ok(match.ToDto());
+
+            int IndexOf(int ptcId) => seedPtcs.FindIndex(x => x == ptcId);
+
+            int iA = IndexOf(match.FirstParticipantId);
+            int iB = match.SecondParticipantId.HasValue ? IndexOf(match.SecondParticipantId.Value) : iA; // if bye, use same index
+
+            // Compute current round r from indices (minimal block containing both)
+            int diff = Math.Abs(iA - iB);
+            int r = 1;
+            int block = 1;
+            while (block <= diff)
+            {
+                block <<= 1;
+                r++;
+            }
+            // r is 1 for adjacent pair, 2 for block size 4, etc.
+
+            // Compute parent group range for next round
+            int childBlock = 1 << (r - 1); // size for this match
+            int parentBlock = childBlock << 1;
+            int minIndex = Math.Min(iA, iB);
+            int parentStart = (minIndex / parentBlock) * parentBlock;
+            bool isLeftChild = (minIndex - parentStart) < childBlock;
+
+            // Try to find existing placeholder parent match in this group (with one participant)
+            var candidates = await context.Matches
                 .Where(m => m.SecondParticipantId == null)
-                .Where(m => m.FirstParticipantId != winnerPtcId)
                 .Join(context.ParticipantTournamentCategories,
                       m => m.FirstParticipantId,
                       ptc => ptc.Id,
                       (m, ptc) => new { m, ptc })
                 .Where(x => x.ptc.TournamentCategoryId == tcId)
                 .Select(x => x.m)
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
-            if (placeholder != null)
+            Match? parent = null;
+            foreach (var cand in candidates)
             {
-                placeholder.SecondParticipantId = winnerPtcId;
-                context.Entry(placeholder).State = EntityState.Modified;
-                await context.SaveChangesAsync();
-                return Ok(placeholder.ToDto());
+                var idx = IndexOf(cand.FirstParticipantId);
+                if (idx >= parentStart && idx < parentStart + parentBlock)
+                {
+                    parent = cand;
+                    break;
+                }
             }
 
-            // Otherwise create a new match with winner waiting for opponent
+            if (parent != null)
+            {
+                if (parent.SecondParticipantId == null)
+                {
+                    // Fill the other slot
+                    if (parent.FirstParticipantId != winnerPtcId)
+                        parent.SecondParticipantId = winnerPtcId;
+                    else
+                        return Ok(parent.ToDto());
+
+                    context.Entry(parent).State = EntityState.Modified;
+                    await context.SaveChangesAsync();
+                    return Ok(parent.ToDto());
+                }
+            }
+
+            // Otherwise create a new next-round match with winner waiting
             var next = new Match
             {
                 FirstParticipantId = winnerPtcId,

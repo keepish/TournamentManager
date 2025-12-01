@@ -225,55 +225,139 @@ namespace TournamentManager.Api.Controllers
 
             foreach (var tc in tournamentCategories)
             {
-                // get matches for participants in this tournament category
-                var ptcIds = await context.ParticipantTournamentCategories
+                // Load PTCs with participant to access gender
+                var ptcs = await context.ParticipantTournamentCategories
+                    .Include(ptc => ptc.Participant)
                     .Where(ptc => ptc.TournamentCategoryId == tc.Id)
-                    .Select(ptc => ptc.Id)
                     .ToListAsync();
 
-                var matches = await context.Matches
-                    .Where(m => ptcIds.Contains(m.FirstParticipantId) || (m.SecondParticipantId != null && ptcIds.Contains(m.SecondParticipantId.Value)))
-                    .ToListAsync();
+                if (!ptcs.Any())
+                    continue;
 
-                if (!matches.Any()) continue;
+                // Group by gender (1/2 or other) and build separate brackets per gender
+                var byGender = ptcs.GroupBy(p => (int)p.Participant.Gender).ToList();
 
-                var items = new List<BracketMatchItemDto>();
-
-                foreach (var m in matches)
+                foreach (var ggrp in byGender)
                 {
-                    var first = await context.ParticipantTournamentCategories
-                        .Include(x => x.Participant)
-                        .FirstOrDefaultAsync(x => x.Id == m.FirstParticipantId);
-                    ParticipantTournamentCategory? second = null;
-                    if (m.SecondParticipantId.HasValue)
+                    var genderValue = ggrp.Key;
+                    // Requirement: gender 0 = Women
+                    var genderLabel = genderValue == 0 ? "Женщины" : genderValue == 1 ? "Мужчины" : $"Пол {genderValue}";
+
+                    var seedPtcs = ggrp.OrderBy(p => p.Id).Select(p => p.Id).ToList();
+
+                    // Fetch matches for this gender group only
+                    var matches = await context.Matches
+                        .Where(m => seedPtcs.Contains(m.FirstParticipantId) || (m.SecondParticipantId != null && seedPtcs.Contains(m.SecondParticipantId.Value)))
+                        .ToListAsync();
+
+                    if (!matches.Any())
+                        continue;
+
+                    var items = new List<BracketMatchItemDto>();
+                    foreach (var m in matches)
                     {
-                        second = await context.ParticipantTournamentCategories
+                        var first = await context.ParticipantTournamentCategories
                             .Include(x => x.Participant)
-                            .FirstOrDefaultAsync(x => x.Id == m.SecondParticipantId);
+                            .FirstOrDefaultAsync(x => x.Id == m.FirstParticipantId);
+                        ParticipantTournamentCategory? second = null;
+                        if (m.SecondParticipantId.HasValue)
+                        {
+                            second = await context.ParticipantTournamentCategories
+                                .Include(x => x.Participant)
+                                .FirstOrDefaultAsync(x => x.Id == m.SecondParticipantId);
+                        }
+
+                        items.Add(new BracketMatchItemDto
+                        {
+                            MatchId = m.Id,
+                            FirstParticipantTournamentCategoryId = m.FirstParticipantId,
+                            SecondParticipantTournamentCategoryId = m.SecondParticipantId,
+                            FirstParticipantName = first?.Participant != null ? $"{first.Participant.Surname} {first.Participant.Name}" : "",
+                            SecondParticipantName = second?.Participant != null ? $"{second.Participant.Surname} {second.Participant.Name}" : null,
+                            FirstParticipantScore = m.FirstParticipantScore,
+                            SecondParticipantScore = m.SecondParticipantScore,
+                            Round = 1,
+                            Order = 0
+                        });
                     }
 
-                    items.Add(new BracketMatchItemDto
+                    // Deterministic round calculation from seeding
+                    int IndexOf(int ptcId) => seedPtcs.FindIndex(x => x == ptcId);
+                    static int NextPow2(int x){ if (x<=1) return 1; x--; x|=x>>1; x|=x>>2; x|=x>>4; x|=x>>8; x|=x>>16; return x+1; }
+                    static int Log2(int x){ int r=0; while((x>>=1)>0) r++; return r; }
+                    int expectedRounds = Log2(NextPow2(seedPtcs.Count)); if (expectedRounds < 1) expectedRounds = 1;
+
+                    foreach (var it in items)
                     {
-                        MatchId = m.Id,
-                        FirstParticipantTournamentCategoryId = m.FirstParticipantId,
-                        SecondParticipantTournamentCategoryId = m.SecondParticipantId,
-                        FirstParticipantName = first?.Participant != null ? $"{first.Participant.Surname} {first.Participant.Name}" : "",
-                        SecondParticipantName = second?.Participant != null ? $"{second.Participant.Surname} {second.Participant.Name}" : null,
-                        FirstParticipantScore = m.FirstParticipantScore,
-                        SecondParticipantScore = m.SecondParticipantScore
+                        if (it.SecondParticipantTournamentCategoryId.HasValue)
+                        {
+                            int i1 = IndexOf(it.FirstParticipantTournamentCategoryId);
+                            int i2 = IndexOf(it.SecondParticipantTournamentCategoryId.Value);
+                            if (i1 >= 0 && i2 >= 0)
+                            {
+                                int span = Math.Abs(i1 - i2) + 1;
+                                int block = NextPow2(span);
+                                int round = Log2(block);
+                                it.Round = Math.Clamp(round, 1, expectedRounds);
+                            }
+                        }
+                    }
+
+                    bool IsDecided(BracketMatchItemDto it)
+                        => (it.SecondParticipantTournamentCategoryId == null) ||
+                           ((it.FirstParticipantScore + it.SecondParticipantScore) > 0 && it.FirstParticipantScore != it.SecondParticipantScore);
+
+                    bool changed; int guard = 0;
+                    do
+                    {
+                        changed = false; guard++; if (guard > 16) break;
+                        foreach (var it in items)
+                        {
+                            if (it.SecondParticipantTournamentCategoryId == null)
+                            {
+                                int pid = it.FirstParticipantTournamentCategoryId;
+                                var prev = items
+                                    .Where(p => p.MatchId != it.MatchId && IsDecided(p) &&
+                                        (p.FirstParticipantTournamentCategoryId == pid || (p.SecondParticipantTournamentCategoryId.HasValue && p.SecondParticipantTournamentCategoryId.Value == pid)))
+                                    .OrderByDescending(p => p.Round)
+                                    .FirstOrDefault();
+                                int proposed = (prev != null ? prev.Round + 1 : 1);
+                                proposed = Math.Clamp(proposed, 1, expectedRounds);
+                                if (proposed > it.Round)
+                                {
+                                    it.Round = proposed;
+                                    changed = true;
+                                }
+                            }
+                        }
+                    } while (changed);
+
+                    foreach (var grp in items.GroupBy(i => i.Round))
+                    {
+                        int ord = 1;
+                        foreach (var it in grp.OrderBy(x => x.MatchId))
+                        {
+                            it.Order = ord++;
+                        }
+                    }
+
+                    result.Add(new CategoryBracketDto
+                    {
+                        TournamentCategoryId = tc.Id,
+                        CategoryId = tc.CategoryId,
+                        CategoryDisplay = $"{tc.Category.MinWeight}-{tc.Category.MaxWeight} кг, {tc.Category.MinAge}-{tc.Category.MaxAge} лет — {genderLabel}",
+                        Matches = items
                     });
                 }
-
-                result.Add(new CategoryBracketDto
-                {
-                    TournamentCategoryId = tc.Id,
-                    CategoryId = tc.CategoryId,
-                    CategoryDisplay = $"{tc.Category.MinWeight}-{tc.Category.MaxWeight} кг, {tc.Category.MinAge}-{tc.Category.MaxAge} лет",
-                    Matches = items
-                });
             }
 
             return Ok(result);
+        }
+
+        private static int GetAge(DateTime birthday)
+        {
+            var now = DateTime.UtcNow;
+            return GetAge(birthday, now);
         }
     }
 }

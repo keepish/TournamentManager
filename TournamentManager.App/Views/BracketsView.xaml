@@ -14,7 +14,8 @@
     </Border>
 
     <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="0">
-      <TabControl ItemsSource="{Binding Brackets}">
+      <TabControl ItemsSource="{Binding Brackets}"
+                  SelectedIndex="{Binding SelectedBracketIndex, Mode=TwoWay}">
         <TabControl.ItemContainerStyle>
           <Style TargetType="TabItem">
             <Setter Property="Header" Value="{Binding CategoryDisplay}"/>

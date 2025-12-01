@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TournamentManager.Core.DTOs.Categories;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models;
 

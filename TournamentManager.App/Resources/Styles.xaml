@@ -590,7 +590,6 @@
                                 </Border>
                             </Popup>
 
-                            <!-- Визуал для отключенного состояния -->
                             <Grid x:Name="PART_DisabledVisual"
                                   Grid.ColumnSpan="2"
                                   Background="{StaticResource SecondaryBrush}"

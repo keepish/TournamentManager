@@ -5,7 +5,6 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows;
 using TournamentManager.Client.Classes;
 using TournamentManager.Client.Views;
@@ -24,7 +23,8 @@ namespace TournamentManager.Client.ViewModels
         private readonly ApiService _apiService;
         private readonly MainViewModel _mainViewModel;
         private readonly IService<CategoryDto> _categoryService;
-        private readonly IService<TournamentCategoryDto> _tournamentCategoryService;
+        private readonly ITournamentCategoryService _tournamentCategoryService;
+        private readonly IUserService _userService;
 
         [ObservableProperty]
         private ObservableCollection<ParticipantDto> participants = new();
@@ -44,13 +44,14 @@ namespace TournamentManager.Client.ViewModels
 
         public TournamentDetailsViewModel(TournamentDto tournament, ApiService apiService,
             MainViewModel mainViewModel, IService<CategoryDto> categoryService,
-            IService<TournamentCategoryDto> tournamentCategoryService) 
+            ITournamentCategoryService tournamentCategoryService, IUserService userService)
         {
             _tournament = tournament;
             _apiService = apiService;
             _mainViewModel = mainViewModel;
             _categoryService = categoryService;
             _tournamentCategoryService = tournamentCategoryService;
+            _userService = userService;
 
             Participants = ParticipantState.GetParticipants(_tournament.Id);
             LoadParticipants();
@@ -140,7 +141,7 @@ namespace TournamentManager.Client.ViewModels
             }
             finally
             {
-                IsLoading = false; 
+                IsLoading = false;
             }
         }
 
@@ -190,7 +191,7 @@ namespace TournamentManager.Client.ViewModels
                     IsLoading = true;
 
                     var importedParticipants = await ParseExcelFile(openFileDialog.FileName);
-                    
+
                     if (importedParticipants.Any())
                     {
                         foreach (var participant in importedParticipants)
@@ -209,9 +210,48 @@ namespace TournamentManager.Client.ViewModels
             {
                 MessageBox.Show($"Ошибка при импорте участников: {ex.Message}", "Ошибка импорта");
             }
-            finally 
+            finally
             {
                 IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveDuplicates()
+        {
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут управлять участниками.", "Ошибка доступа");
+                return;
+            }
+
+            var uniqueParticipants = Participants
+                .GroupBy(p => new {
+                    Surname = p.Surname?.Trim().ToLower(),
+                    Name = p.Name?.Trim().ToLower(),
+                    Patronymic = p.Patronymic?.Trim().ToLower(),
+                    Phone = p.Phone?.Trim(),
+                    p.Gender,
+                    Birthday = p.Birthday.ToString("yyyy-MM-dd"),
+                    p.Weight
+                })
+                .Select(g => g.First())
+                .ToList();
+
+            var removedCount = Participants.Count - uniqueParticipants.Count;
+
+            if (removedCount > 0)
+            {
+                Participants.Clear();
+                foreach(var participant in uniqueParticipants)
+                    Participants.Add(participant);
+
+                HasUnsavedChanges = true;
+                MessageBox.Show($"Удалено {removedCount} дубликатов", "Убраны дубликаты");
+            }
+            else
+            {
+                MessageBox.Show("Дубликаты не найдены", "Информация");
             }
         }
 
@@ -265,14 +305,14 @@ namespace TournamentManager.Client.ViewModels
                     if (workbook != null)
                     {
                         workbook.Close(false);
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
+                        Marshal.ReleaseComObject(workbook);
                     }
                     if (worksheet != null)
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(worksheet);
+                        Marshal.ReleaseComObject(worksheet);
                     if (excelApp != null)
                     {
                         excelApp.Quit();
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
+                        Marshal.ReleaseComObject(excelApp);
                     }
                 }
             }
@@ -302,7 +342,7 @@ namespace TournamentManager.Client.ViewModels
                 var phone = GetCellValue(worksheet, row, headers["телефон"])?.Trim();
                 if (!string.IsNullOrEmpty(phone))
                     participant.Phone = new string(phone.Where(char.IsDigit).ToArray());
-            }    
+            }
 
             if (headers.ContainsKey("пол"))
             {
@@ -418,7 +458,7 @@ namespace TournamentManager.Client.ViewModels
                 worksheet = (Worksheet)workbook.Sheets[1];
                 worksheet.Name = "Участники турнира";
 
-                string[] headers = { "Имя", "Фамилия", "Отчество", "Телефон", "Пол", "Вес (кг)", "Дата рождения"};
+                string[] headers = { "Имя", "Фамилия", "Отчество", "Телефон", "Пол", "Вес (кг)", "Дата рождения" };
 
                 for (int col = 0; col < headers.Length; col++)
                     worksheet.Cells[1, col + 1] = headers[col];
@@ -506,7 +546,7 @@ namespace TournamentManager.Client.ViewModels
             var categoriesWindow = new CategoriesManagementWindow
             {
                 Owner = System.Windows.Application.Current.MainWindow,
-                DataContext = new CategoriesManagementViewModel(_tournament, _categoryService)
+                DataContext = new CategoriesManagementViewModel(_tournament, _categoryService, _tournamentCategoryService, _userService)
             };
 
             categoriesWindow.ShowDialog();

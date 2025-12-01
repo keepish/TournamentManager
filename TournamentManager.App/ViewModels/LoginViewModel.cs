@@ -17,7 +17,8 @@ namespace TournamentManager.Client.ViewModels
         private readonly IService<TournamentDto> _tournamentService;
         private readonly SecureStorage _secureStorage;
         private readonly IService<CategoryDto> _categoryService;
-        private readonly IService<TournamentCategoryDto> _tournamentCategoryService;
+        private readonly ITournamentCategoryService _tournamentCategoryService;
+        private readonly IUserService _userService;
 
         [ObservableProperty]
         private string login;
@@ -32,13 +33,15 @@ namespace TournamentManager.Client.ViewModels
             IService<TournamentDto> tournamentService,
             SecureStorage secureStorage,
             IService<CategoryDto> categoryService,
-            IService<TournamentCategoryDto> tournamentCategoryService)
+            ITournamentCategoryService tournamentCategoryService,
+            IUserService userService)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
             _secureStorage = secureStorage;
             _categoryService = categoryService;
             _tournamentCategoryService = tournamentCategoryService;
+            _userService = userService;
         }
 
         [RelayCommand]
@@ -71,7 +74,8 @@ namespace TournamentManager.Client.ViewModels
                 _secureStorage.Save("UserData", userJson);
 
                 var mainWindow = App.ServiceProvider.GetService<MainWindow>();
-                var mainViewModel = new MainViewModel(_apiService, _tournamentService, _categoryService, result.User, _secureStorage, _tournamentCategoryService);
+                var mainViewModel = new MainViewModel(_apiService, _tournamentService, _categoryService, result.User,
+                    _secureStorage, _tournamentCategoryService, _userService);
 
                 mainWindow.DataContext = mainViewModel;
                 mainWindow.Show();

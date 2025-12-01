@@ -27,11 +27,5 @@ namespace TournamentManager.Client.Classes
             if (_tournamentParticipants.ContainsKey(tournamentId))
                 _tournamentParticipants.Remove(tournamentId);
         }
-
-        public static bool HasParticipants(int tournamentId)
-        {
-            return _tournamentParticipants.ContainsKey(tournamentId) &&
-                   _tournamentParticipants[tournamentId].Any();
-        }
     }
 }

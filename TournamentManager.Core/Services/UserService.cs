@@ -14,21 +14,21 @@ namespace TournamentManager.Core.Services
         }
 
         public async Task<List<UserDto?>?> GetAllAsync()
-            => await _client.GetFromJsonAsync<List<UserDto?>?>("api/users");
+            => await _client.GetFromJsonAsync<List<UserDto?>?>("");
 
         public async Task<UserDto?> GetByIdAsync(int id)
-            => await _client.GetFromJsonAsync<UserDto?>($"api/users/{id}");
+            => await _client.GetFromJsonAsync<UserDto?>($"{id}");
 
         public async Task<List<UserDto?>?> GetJudgesAsync()
-            => await _client.GetFromJsonAsync<List<UserDto?>?>("api/users/judges");
+        => await _client.GetFromJsonAsync<List<UserDto?>?>("judges");
 
         public async Task<List<UserDto?>?> GetOrganizersAsync()
-            => await _client.GetFromJsonAsync<List<UserDto?>?>("api/users/organizers");
+            => await _client.GetFromJsonAsync<List<UserDto?>?>("organizers");
 
         public async Task<UserDto?> CreateUserAsync(UserDto userDto)
         {
             var response =
-                await _client.PostAsJsonAsync("api/users", userDto);
+                await _client.PostAsJsonAsync("", userDto);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<UserDto>();
         }
@@ -37,7 +37,7 @@ namespace TournamentManager.Core.Services
             try
             {
                 var response =
-                    await _client.PutAsJsonAsync($"api/users/{id}", userDto);
+                    await _client.PutAsJsonAsync($"{id}", userDto);
                 return true;
             }
             catch
@@ -51,7 +51,7 @@ namespace TournamentManager.Core.Services
             try
             {
                 var response =
-                    await _client.DeleteAsync($"api/users/{id}");
+                    await _client.DeleteAsync($"{id}");
                 return true;
             }
             catch
@@ -59,6 +59,5 @@ namespace TournamentManager.Core.Services
                 return false;
             }
         }
-
     }
 }

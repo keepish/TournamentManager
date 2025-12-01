@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TournamentManager.Core.DTOs.Categories;
 using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.Models;
 
@@ -96,6 +92,73 @@ namespace TournamentManager.Api.Controllers
             await context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet("tournament/{tournamentId}")]
+        public async Task<ActionResult<IEnumerable<TournamentCategoryDto>>> GetByTournamentId(int tournamentId)
+        {
+            var tournamentCategory = await context.TournamentCategories
+                .Where(tc => tc.TournamentId == tournamentId)
+                .ToListAsync();
+
+            var tournamentCategoryDto = tournamentCategory.Select(tc => tc.ToDto()).ToList();
+            return Ok(tournamentCategoryDto);
+        }
+
+        [HttpGet("tournament/{tournamentId}/categories")]
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategoriesByTournamentId(int tournamentId)
+        {
+            var categories = await context.TournamentCategories
+                .Where(tc => tc.TournamentId == tournamentId)
+                .Include(tc => tc.Category)
+                .Select(tc => tc.Category.ToDto())
+                .ToListAsync();
+
+            return Ok(categories);
+        }
+
+        [HttpPost("tournament/{tournamentId}/category/{categoryId}")]
+        public async Task<IActionResult> AddCategoryToTournament(int tournamentId, int categoryId, [FromBody] AttachCategoryRequest request)
+        {
+            var existingCategory = await context.TournamentCategories
+                .FirstOrDefaultAsync(tc => tc.TournamentId == tournamentId && tc.CategoryId == categoryId);
+
+            if (existingCategory != null)
+                return Conflict("Категория уже прикреплена к турниру");
+
+            var tournamentCategory = new TournamentCategory
+            {
+                TournamentId = tournamentId,
+                CategoryId = categoryId,
+                JudgeId = request.JudgeId,
+                SitesNumber = request.SitesNumber
+            };
+
+            context.TournamentCategories.Add(tournamentCategory);
+            await context.SaveChangesAsync();
+
+            return StatusCode(201, tournamentCategory.ToDto());
+        }
+
+        [HttpDelete("tournament/{tournamentId}/category/{categoryId}")]
+        public async Task<IActionResult> DetachCategoryFromTournament(int tournamentId, int categoryId)
+        {
+            var tournamentCategory = await context.TournamentCategories
+                .FirstOrDefaultAsync(tc => tc.TournamentId == tournamentId && tc.CategoryId == categoryId);
+
+            if (tournamentCategory is null)
+                return NotFound();
+
+            context.TournamentCategories.Remove(tournamentCategory);
+            await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        public class AttachCategoryRequest
+        {
+            public int JudgeId { get; set; }
+            public int SitesNumber { get; set; }
         }
 
         private bool TournamentCategoryExists(int id)

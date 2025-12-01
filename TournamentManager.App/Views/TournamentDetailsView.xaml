@@ -30,13 +30,13 @@
                                Margin="0,0,0,12"  MaxWidth="600"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <materialDesign:PackIcon Kind="Calendar" Width="16" Height="16" Margin="0,0,4,0"
+                        <materialDesign:PackIcon Kind="Calendar" Width="16" Height="16" Margin="0,1,4,0"
                                                  Foreground="{StaticResource TextSecondaryBrush}"/>
 
                         <TextBlock Text="{Binding TournamentDates}" Style="{StaticResource BodyTextStyle}"
                                    Margin="0,0,16,0"/>
 
-                        <materialDesign:PackIcon Kind="MapMarker" Width="16" Height="16" Margin="16,0,4,0"
+                        <materialDesign:PackIcon Kind="MapMarker" Width="16" Height="16" Margin="16,1,4,0"
                                                  Foreground="{StaticResource TextSecondaryBrush}"/>
 
                         <TextBlock Text="{Binding TournamentAddress}" Style="{StaticResource BodyTextStyle}"/>
@@ -52,7 +52,7 @@
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="AccountPlus" Width="16" Height="16" Margin="0,0,8,0" Cursor="Hand"/>
+                                <materialDesign:PackIcon Kind="AccountPlus" Width="16" Height="16" Margin="0,2,8,0" Cursor="Hand"/>
                                 <TextBlock Text="Добавить участника" Foreground="{StaticResource WhiteBrush}" FontWeight="SemiBold"/>
                             </StackPanel>
                         </DataTemplate>
@@ -67,7 +67,7 @@
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Import" Width="16" Height="16" Margin="0,0,8,0"/>
+                                <materialDesign:PackIcon Kind="Import" Width="16" Height="16" Margin="0,2,8,0"/>
                                 <TextBlock Text="Импорт" Style="{StaticResource BodyTextStyle}"/>
                             </StackPanel>
                         </DataTemplate>
@@ -79,21 +79,33 @@
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Export" Width="16" Height="16" Margin="0,0,8,0"/>
+                                <materialDesign:PackIcon Kind="Export" Width="16" Height="16" Margin="0,2,8,0"/>
                                 <TextBlock Text="Экспорт" Style="{StaticResource BodyTextStyle}"/>
                             </StackPanel>
                         </DataTemplate>
                     </Button.ContentTemplate>
                 </Button>
 
+                <Button Content="Убрать дубликаты" Command="{Binding RemoveDuplicatesCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,12,0">
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FilterRemove" Width="16" Height="16" Margin="0,2,8,0"/>
+                                <TextBlock Text="Убрать дубликаты" Style="{StaticResource BodyTextStyle}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                
                 <Button Content="Обновить список" 
                         Command="{Binding LoadParticipantsCommand}"
                         Style="{StaticResource SecondaryButtonStyle}">
                     <Button.ContentTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16" Margin="0,0,8,0"/>
-                                <TextBlock Text="Обновить" Style="{StaticResource BodyTextStyle}"/>
+                                <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16" Margin="0,2,8,0"/>
+                                <TextBlock Text="Обновить" Style="{StaticResource BodyTextStyle}" Margin="0,0,0,0"/>
                             </StackPanel>
                         </DataTemplate>
                     </Button.ContentTemplate>

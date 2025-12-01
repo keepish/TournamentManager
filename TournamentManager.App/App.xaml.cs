@@ -37,23 +37,26 @@ namespace TournamentManager.Client
                 {
                     var tournamentService = ServiceProvider.GetService<IService<TournamentDto>>();
                     var categoryService = ServiceProvider.GetService<IService<CategoryDto>>();
-                    var tournamentCategoryService = ServiceProvider.GetService<IService<TournamentCategoryDto>>();
+                    var tournamentCategoryService = ServiceProvider.GetService<ITournamentCategoryService>();
+                    var userService = ServiceProvider.GetService<IUserService>();
 
                     var mainWindow = ServiceProvider.GetService<MainWindow>();
-                    var mainViewModel = new MainViewModel(apiService, tournamentService, categoryService, user, secureStorage, tournamentCategoryService);
+                    var mainViewModel = new MainViewModel(apiService, tournamentService, categoryService, 
+                        user, secureStorage, tournamentCategoryService, userService);
                     mainWindow.DataContext = mainViewModel;
                     mainWindow.Show();
                     return;
                 }
             }
 
-            // Для логина получаем сервисы через DI
             var loginWindow = ServiceProvider.GetService<LoginWindow>();
             var tournamentServiceForLogin = ServiceProvider.GetService<IService<TournamentDto>>();
             var categoryServiceForLogin = ServiceProvider.GetService<IService<CategoryDto>>();
-            var tournamentCategoryServiceForLogin = ServiceProvider.GetService<IService<TournamentCategoryDto>>();
+            var tournamentCategoryServiceForLogin = ServiceProvider.GetService<ITournamentCategoryService>();
+            var userServiceForLogin = ServiceProvider.GetService<IUserService>();
 
-            loginWindow.DataContext = new LoginViewModel(apiService, tournamentServiceForLogin, secureStorage, categoryServiceForLogin, tournamentCategoryServiceForLogin);
+            loginWindow.DataContext = new LoginViewModel(apiService, tournamentServiceForLogin, secureStorage, categoryServiceForLogin, 
+                tournamentCategoryServiceForLogin, userServiceForLogin);
             loginWindow.Show();
         }
 
@@ -76,16 +79,15 @@ namespace TournamentManager.Client
                 client.BaseAddress = new Uri("https://localhost:7074/api/Categories/");
             });
 
-            services.AddHttpClient<TournamentCategoryService, TournamentCategoryService>(client =>
+            services.AddHttpClient<ITournamentCategoryService, TournamentCategoryService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7074/api/TournamentCategory/");
+                client.BaseAddress = new Uri("https://localhost:7074/api/TournamentCategories/");
             });
 
-            // Регистрация UserService через UsersController
-            //services.AddHttpClient<UserService, UserService>(client =>
-            //{
-            //    client.BaseAddress = new Uri("https://localhost:7074/api/Users/");
-            //});
+            services.AddHttpClient<IUserService, UserService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7074/api/Users/");
+            });
 
             services.AddHttpClient<IService<ParticipantDto>, ParticipantService>(client =>
             {

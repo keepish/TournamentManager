@@ -42,6 +42,32 @@
                                ScrollViewer.CanContentScroll="True"
                                VirtualizingPanel.IsVirtualizing="True"
                                VirtualizingPanel.VirtualizationMode="Recycling">
+                        <!-- Override system highlight brushes -->
+                        <ListBox.Resources>
+                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource TextPrimary}"/>
+                        </ListBox.Resources>
+                        <!-- Remove blue hover/selection highlight by overriding template -->
+                        <ListBox.ItemContainerStyle>
+                          <Style TargetType="ListBoxItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="OverridesDefaultStyle" Value="True"/>
+                            <Setter Property="Template">
+                              <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                  <Border Background="Transparent" BorderThickness="0">
+                                    <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                  </Border>
+                                </ControlTemplate>
+                              </Setter.Value>
+                            </Setter>
+                          </Style>
+                        </ListBox.ItemContainerStyle>
                         <ListBox.ItemsPanel>
                           <ItemsPanelTemplate>
                             <VirtualizingStackPanel/>
@@ -49,7 +75,8 @@
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                           <DataTemplate>
-                            <Border Margin="0,0,0,8" Padding="10" Background="{StaticResource WhiteBrush}" CornerRadius="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <Border Margin="0,0,0,8" Padding="10" Background="{StaticResource WhiteBrush}" CornerRadius="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                    MinWidth="320" Height="160">
                               <!-- 2 rows (participants) x 3 columns (name | actions | score) -->
                               <Grid VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
@@ -58,8 +85,8 @@
                                   <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
-                                  <RowDefinition Height="Auto"/>
-                                  <RowDefinition Height="Auto"/>
+                                  <RowDefinition Height="*"/>
+                                  <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
                                 <!-- Names, evenly aligned -->

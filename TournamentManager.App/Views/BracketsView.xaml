@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              x:Name="Root">
-  <!-- Removed local BracketIconButtonStyle to avoid recursive ContentPresenter causing StackOverflow -->
   <Grid Margin="16" Background="{StaticResource SecondaryBrush}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
@@ -91,7 +90,7 @@
                                            TextTrimming="CharacterEllipsis"
                                            ToolTip="{Binding FirstParticipantName}"/>
                                 <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="{Binding SecondParticipantName, TargetNullValue=Ожидает соперника}"
+                                           Text="{Binding SecondParticipantName}"
                                            Style="{StaticResource BodyTextStyle}" FontSize="12"
                                            VerticalAlignment="Center"
                                            TextTrimming="CharacterEllipsis"
@@ -114,7 +113,6 @@
                                       </Style.Triggers>
                                     </Style>
                                   </StackPanel.Style>
-                                  <!-- Start -->
                                   <Button Style="{StaticResource IconButtonStyle}"
                                           ToolTipService.ShowDuration="2000"
                                           ToolTip="Начать"
@@ -124,7 +122,6 @@
                                       <Path Data="M6,4 L20,12 6,20 Z" Fill="{StaticResource TextPrimaryBrush}"/>
                                     </Viewbox>
                                   </Button>
-                                  <!-- Finish -->
                                   <Button Style="{StaticResource IconButtonStyle}"
                                           ToolTipService.ShowDuration="2000"
                                           ToolTip="Завершить"
@@ -132,17 +129,6 @@
                                           CommandParameter="{Binding}">
                                     <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
                                       <Path Data="M18,6 L6,18 M6,6 L18,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/>
-                                    </Viewbox>
-                                  </Button>
-                                  <!-- Edit (visible for organizer) -->
-                                  <Button Style="{StaticResource IconButtonStyle}"
-                                          ToolTipService.ShowDuration="2000"
-                                          ToolTip="Редактировать"
-                                          Visibility="{Binding DataContext.IsOrganizer, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                          Command="{Binding DataContext.EditMatchCommand, ElementName=Root}"
-                                          CommandParameter="{Binding}">
-                                    <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                      <Path Data="M3,17.25V21h3.75L17.81,9.94l-3.75-3.75L3,17.25z M20.71,7.04a1.0,1.0 0 0 0 0-1.41L18.37,3.29a1.0,1.0 0 0 0-1.41,0l-1.83,1.83 3.75,3.75 1.83-1.83z" Fill="{StaticResource TextPrimaryBrush}"/>
                                     </Viewbox>
                                   </Button>
                                 </StackPanel>

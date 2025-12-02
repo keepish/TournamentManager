@@ -177,18 +177,6 @@ namespace TournamentManager.Client.ViewModels
 
         public ObservableCollection<BracketRoundViewModel> Rounds { get; } = new();
 
-        private static int NextPow2(int x)
-        {
-            if (x <= 1) return 1;
-            x--;
-            x |= x >> 1; x |= x >> 2; x |= x >> 4; x |= x >> 8; x |= x >> 16;
-            return x + 1;
-        }
-        private static int Log2(int x)
-        {
-            int r = 0; while ((x >>= 1) > 0) r++; return r;
-        }
-
         public void BuildRoundsStructured()
         {
             Rounds.Clear();
@@ -198,171 +186,160 @@ namespace TournamentManager.Client.ViewModels
                 return;
             }
 
-            // Seed order by participant tournament category id
-            var ptcIds = new HashSet<int>();
+            // Collect participant ids in seed order
+            var participantIds = new HashSet<int>();
             foreach (var m in Matches)
             {
-                ptcIds.Add(m.FirstParticipantTournamentCategoryId);
-                if (m.SecondParticipantTournamentCategoryId.HasValue) ptcIds.Add(m.SecondParticipantTournamentCategoryId.Value);
+                participantIds.Add(m.FirstParticipantTournamentCategoryId);
+                if (m.SecondParticipantTournamentCategoryId.HasValue)
+                    participantIds.Add(m.SecondParticipantTournamentCategoryId.Value);
             }
-            var seed = ptcIds.OrderBy(id => id).ToList();
-            int participants = seed.Count;
+            var seedOrdered = participantIds.OrderBy(id => id).ToList();
+            int participantsCount = seedOrdered.Count;
 
-            // Map ptcId -> display name (from any match)
-            var nameByPtc = new Dictionary<int, string>();
+            // Name map
+            var nameById = new Dictionary<int, string>();
             foreach (var m in Matches)
             {
-                if (!string.IsNullOrWhiteSpace(m.FirstParticipantName)) nameByPtc[m.FirstParticipantTournamentCategoryId] = m.FirstParticipantName;
-                if (m.SecondParticipantTournamentCategoryId.HasValue && !string.IsNullOrWhiteSpace(m.SecondParticipantName)) nameByPtc[m.SecondParticipantTournamentCategoryId.Value] = m.SecondParticipantName!;
+                if (!string.IsNullOrWhiteSpace(m.FirstParticipantName))
+                    nameById[m.FirstParticipantTournamentCategoryId] = m.FirstParticipantName;
+                if (m.SecondParticipantTournamentCategoryId.HasValue && !string.IsNullOrWhiteSpace(m.SecondParticipantName))
+                    nameById[m.SecondParticipantTournamentCategoryId.Value] = m.SecondParticipantName!;
             }
 
-            // Actual matches by (round, order)
-            var actualByKey = Matches
+            // Group actual matches by round
+            var actualByRound = Matches
                 .GroupBy(x => x.Round <= 0 ? 1 : x.Round)
                 .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Order).ToList());
 
-            // Helper to clone a view-model item
-            MatchItemViewModel CloneFrom(MatchItemViewModel src)
+            MatchItemViewModel Clone(MatchItemViewModel src) => new()
             {
-                return new MatchItemViewModel
+                MatchId = src.MatchId,
+                FirstParticipantTournamentCategoryId = src.FirstParticipantTournamentCategoryId,
+                SecondParticipantTournamentCategoryId = src.SecondParticipantTournamentCategoryId,
+                FirstParticipantName = src.FirstParticipantName,
+                SecondParticipantName = src.SecondParticipantName,
+                FirstParticipantScore = src.FirstParticipantScore,
+                SecondParticipantScore = src.SecondParticipantScore,
+                IsStarted = src.IsStarted,
+                IsFinished = src.IsFinished,
+                Round = src.Round <= 0 ? 1 : src.Round,
+                Order = src.Order
+            };
+
+            // ROUND 1
+            var round1Items = new ObservableCollection<MatchItemViewModel>();
+            var usedInRound = new HashSet<int>();
+            var actualR1 = actualByRound.ContainsKey(1) ? actualByRound[1] : new List<MatchItemViewModel>();
+
+            // Add actual matches ensuring uniqueness
+            int orderCounter = 1;
+            foreach (var m in actualR1)
+            {
+                int a = m.FirstParticipantTournamentCategoryId;
+                int b = m.SecondParticipantTournamentCategoryId ?? 0;
+                if (usedInRound.Contains(a) || (b != 0 && usedInRound.Contains(b)))
+                    continue; // skip duplicate participant match
+
+                round1Items.Add(Clone(m));
+                usedInRound.Add(a);
+                if (b != 0) usedInRound.Add(b);
+            }
+
+            // Placeholder matches for remaining participants (pairing sequentially)
+            var remaining = seedOrdered.Where(id => !usedInRound.Contains(id)).ToList();
+            for (int i = 0; i < remaining.Count; i += 2)
+            {
+                int first = remaining[i];
+                int? second = (i + 1 < remaining.Count) ? remaining[i + 1] : null;
+                var item = new MatchItemViewModel
                 {
-                    MatchId = src.MatchId,
-                    FirstParticipantTournamentCategoryId = src.FirstParticipantTournamentCategoryId,
-                    SecondParticipantTournamentCategoryId = src.SecondParticipantTournamentCategoryId,
-                    FirstParticipantName = src.FirstParticipantName,
-                    SecondParticipantName = src.SecondParticipantName,
-                    FirstParticipantScore = src.FirstParticipantScore,
-                    SecondParticipantScore = src.SecondParticipantScore,
-                    IsStarted = src.IsStarted,
-                    IsFinished = src.IsFinished,
-                    Round = src.Round,
-                    Order = src.Order
+                    MatchId = 0,
+                    FirstParticipantTournamentCategoryId = first,
+                    SecondParticipantTournamentCategoryId = second,
+                    FirstParticipantName = nameById.TryGetValue(first, out var fn) ? fn : string.Empty,
+                    SecondParticipantName = second.HasValue && nameById.TryGetValue(second.Value, out var sn) ? sn : null,
+                    Round = 1,
+                    Order = orderCounter++,
+                    IsStarted = false,
+                    IsFinished = false
                 };
+                round1Items.Add(item);
             }
 
-            // Round 1: expected matches = ceil(participants/2) to avoid extra empty pair
-            var round1 = new ObservableCollection<MatchItemViewModel>();
-            int expectedR1 = Math.Max(1, (participants + 1) / 2);
-            var actualR1 = actualByKey.ContainsKey(1) ? actualByKey[1] : new List<MatchItemViewModel>();
-            for (int i = 0; i < expectedR1; i++)
-            {
-                var real = actualR1.FirstOrDefault(x => (x.Order > 0 ? x.Order - 1 : i) == i) ?? actualR1.ElementAtOrDefault(i);
-                if (real != null)
-                {
-                    round1.Add(CloneFrom(real));
-                }
-                else
-                {
-                    int aIndex = 2 * i;
-                    int bIndex = 2 * i + 1;
-                    // Only create placeholder if there is at least one seeded participant
-                    bool hasA = aIndex < seed.Count;
-                    bool hasB = bIndex < seed.Count;
-                    if (!hasA && !hasB) continue;
+            // Normalize order indices
+            int idx = 1; foreach (var r1 in round1Items) r1.Order = idx++;
+            Rounds.Add(new BracketRoundViewModel("Раунд 1", round1Items));
 
-                    var item = new MatchItemViewModel
-                    {
-                        MatchId = 0,
-                        FirstParticipantTournamentCategoryId = hasA ? seed[aIndex] : 0,
-                        SecondParticipantTournamentCategoryId = hasB ? seed[bIndex] : null,
-                        FirstParticipantName = (hasA && nameByPtc.TryGetValue(seed[aIndex], out var aName)) ? aName : string.Empty,
-                        SecondParticipantName = (hasB && nameByPtc.TryGetValue(seed[bIndex], out var bName)) ? bName : null,
-                        IsStarted = false,
-                        IsFinished = false,
-                        Round = 1,
-                        Order = i + 1
-                    };
-                    round1.Add(item);
-                }
-            }
-            Rounds.Add(new BracketRoundViewModel($"Раунд 1", round1));
-
-            // Subsequent rounds: derive from previous round winners; expected = ceil(prevRound.Count/2)
-            var prevRound = round1;
+            // Subsequent rounds - derive from winners of previous round; ensure uniqueness
+            var prevRound = round1Items;
             int roundNumber = 2;
             while (prevRound.Count > 1)
             {
                 var current = new ObservableCollection<MatchItemViewModel>();
-                int expected = Math.Max(1, (prevRound.Count + 1) / 2);
-                var actual = actualByKey.ContainsKey(roundNumber) ? actualByKey[roundNumber] : new List<MatchItemViewModel>();
+                var winnerCandidates = new List<(int id, string name)>();
 
-                for (int i = 0; i < expected; i++)
+                foreach (var match in prevRound)
                 {
-                    var left = prevRound.ElementAtOrDefault(2 * i);
-                    var right = prevRound.ElementAtOrDefault(2 * i + 1);
-
-                    string? leftWinner = null;
-                    int leftPtc = 0;
-                    if (left != null)
+                    // Decide winner if finished and scores differ OR if only one participant present
+                    if (match.SecondParticipantTournamentCategoryId == null)
                     {
-                        bool leftDecided = (left.SecondParticipantName == null) ||
-                                           ((left.FirstParticipantScore + left.SecondParticipantScore) > 0 && left.FirstParticipantScore != left.SecondParticipantScore);
-                        if (leftDecided)
-                        {
-                            if (left.SecondParticipantName == null || left.FirstParticipantScore > left.SecondParticipantScore)
-                            {
-                                leftWinner = string.IsNullOrWhiteSpace(left.FirstParticipantName) ? null : left.FirstParticipantName;
-                                leftPtc = left.FirstParticipantTournamentCategoryId;
-                            }
-                            else
-                            {
-                                leftWinner = string.IsNullOrWhiteSpace(left.SecondParticipantName) ? null : left.SecondParticipantName;
-                                leftPtc = left.SecondParticipantTournamentCategoryId ?? 0;
-                            }
-                        }
+                        winnerCandidates.Add((match.FirstParticipantTournamentCategoryId, match.FirstParticipantName));
+                        continue;
                     }
-
-                    string? rightWinner = null;
-                    int rightPtc = 0;
-                    if (right != null)
+                    if (match.IsFinished && match.FirstParticipantScore != match.SecondParticipantScore)
                     {
-                        bool rightDecided = (right.SecondParticipantName == null) ||
-                                            ((right.FirstParticipantScore + right.SecondParticipantScore) > 0 && right.FirstParticipantScore != right.SecondParticipantScore);
-                        if (rightDecided)
-                        {
-                            if (right.SecondParticipantName == null || right.FirstParticipantScore > right.SecondParticipantScore)
-                            {
-                                rightWinner = string.IsNullOrWhiteSpace(right.FirstParticipantName) ? null : right.FirstParticipantName;
-                                rightPtc = right.FirstParticipantTournamentCategoryId;
-                            }
-                            else
-                            {
-                                rightWinner = string.IsNullOrWhiteSpace(right.SecondParticipantName) ? null : right.SecondParticipantName;
-                                rightPtc = right.SecondParticipantTournamentCategoryId ?? 0;
-                            }
-                        }
+                        if (match.FirstParticipantScore > match.SecondParticipantScore)
+                            winnerCandidates.Add((match.FirstParticipantTournamentCategoryId, match.FirstParticipantName));
+                        else
+                            winnerCandidates.Add((match.SecondParticipantTournamentCategoryId.Value, match.SecondParticipantName ?? string.Empty));
                     }
-
-                    var placeholder = new MatchItemViewModel
+                    else
                     {
-                        MatchId = 0,
-                        FirstParticipantTournamentCategoryId = leftPtc,
-                        SecondParticipantTournamentCategoryId = rightPtc == 0 ? null : rightPtc,
-                        FirstParticipantName = leftWinner ?? string.Empty,
-                        SecondParticipantName = rightWinner,
-                        IsStarted = false,
-                        IsFinished = false,
-                        Round = roundNumber,
-                        Order = i + 1
-                    };
-
-                    var real = actual.FirstOrDefault(x => (x.Order > 0 ? x.Order - 1 : i) == i) ?? actual.ElementAtOrDefault(i);
-                    if (real != null)
-                    {
-                        placeholder.MatchId = real.MatchId;
-                        placeholder.FirstParticipantTournamentCategoryId = real.FirstParticipantTournamentCategoryId;
-                        placeholder.SecondParticipantTournamentCategoryId = real.SecondParticipantTournamentCategoryId;
-                        placeholder.FirstParticipantName = string.IsNullOrWhiteSpace(real.FirstParticipantName) ? placeholder.FirstParticipantName : real.FirstParticipantName;
-                        placeholder.SecondParticipantName = string.IsNullOrWhiteSpace(real.SecondParticipantName) ? placeholder.SecondParticipantName : real.SecondParticipantName;
-                        placeholder.FirstParticipantScore = real.FirstParticipantScore;
-                        placeholder.SecondParticipantScore = real.SecondParticipantScore;
-                        placeholder.IsStarted = real.IsStarted;
-                        placeholder.IsFinished = real.IsFinished;
+                        // Undecided placeholder
+                        winnerCandidates.Add((0, string.Empty));
                     }
-
-                    current.Add(placeholder);
                 }
 
+                // Build actual matches of this round if they exist, enforcing uniqueness
+                var actualCurrent = actualByRound.ContainsKey(roundNumber) ? actualByRound[roundNumber] : new List<MatchItemViewModel>();
+                var used = new HashSet<int>();
+                int order = 1;
+                foreach (var m in actualCurrent)
+                {
+                    int a = m.FirstParticipantTournamentCategoryId;
+                    int b = m.SecondParticipantTournamentCategoryId ?? 0;
+                    if ((a != 0 && used.Contains(a)) || (b != 0 && used.Contains(b)))
+                        continue;
+                    var clone = Clone(m);
+                    clone.Round = roundNumber;
+                    clone.Order = order++;
+                    current.Add(clone);
+                    if (a != 0) used.Add(a);
+                    if (b != 0) used.Add(b);
+                }
+
+                // Add placeholders for winners without a match yet
+                var pending = winnerCandidates.Select(w => w.id).Where(id => id != 0).Where(id => !used.Contains(id)).ToList();
+                for (int i = 0; i < pending.Count; i += 2)
+                {
+                    int first = pending[i];
+                    int? second = (i + 1 < pending.Count) ? pending[i + 1] : null;
+                    current.Add(new MatchItemViewModel
+                    {
+                        MatchId = 0,
+                        FirstParticipantTournamentCategoryId = first,
+                        SecondParticipantTournamentCategoryId = second,
+                        FirstParticipantName = nameById.TryGetValue(first, out var fName) ? fName : string.Empty,
+                        SecondParticipantName = second.HasValue && nameById.TryGetValue(second.Value, out var sName) ? sName : null,
+                        Round = roundNumber,
+                        Order = order++,
+                        IsStarted = false,
+                        IsFinished = false
+                    });
+                }
+
+                if (current.Count == 0) break; // no progression possible
                 Rounds.Add(new BracketRoundViewModel($"Раунд {roundNumber}", current));
                 prevRound = current;
                 roundNumber++;
@@ -398,7 +375,6 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty] private int order;
 
         public bool CanEdit => IsStarted && !IsFinished && MatchId != 0;
-
         partial void OnIsStartedChanged(bool value) => OnPropertyChanged(nameof(CanEdit));
         partial void OnIsFinishedChanged(bool value) => OnPropertyChanged(nameof(CanEdit));
     }

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              x:Name="Root">
+  <!-- Removed local BracketIconButtonStyle to avoid recursive ContentPresenter causing StackOverflow -->
   <Grid Margin="16" Background="{StaticResource SecondaryBrush}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
@@ -23,7 +24,6 @@
         </TabControl.ItemContainerStyle>
         <TabControl.ContentTemplate>
           <DataTemplate>
-            <!-- Horizontal scroll for many rounds -->
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
               <ItemsControl ItemsSource="{Binding Rounds}">
                 <ItemsControl.ItemsPanel>
@@ -33,21 +33,17 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <!-- slightly wider round column -->
                     <StackPanel Width="340" Margin="8,16,8,16">
                       <TextBlock Text="{Binding Title}" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,8"/>
-                      <!-- Use ListBox with virtualization for matches -->
                       <ListBox ItemsSource="{Binding Items}"
                                BorderThickness="0"
                                ScrollViewer.CanContentScroll="True"
                                VirtualizingPanel.IsVirtualizing="True"
                                VirtualizingPanel.VirtualizationMode="Recycling">
-                        <!-- Override system highlight brushes -->
                         <ListBox.Resources>
                           <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
-                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource TextPrimary}"/>
+                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource TextPrimaryBrush}"/>
                         </ListBox.Resources>
-                        <!-- Remove blue hover/selection highlight by overriding template -->
                         <ListBox.ItemContainerStyle>
                           <Style TargetType="ListBoxItem">
                             <Setter Property="Background" Value="Transparent"/>
@@ -77,7 +73,6 @@
                           <DataTemplate>
                             <Border Margin="0,0,0,8" Padding="10" Background="{StaticResource WhiteBrush}" CornerRadius="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                                     MinWidth="320" Height="160">
-                              <!-- 2 rows (participants) x 3 columns (name | actions | score) -->
                               <Grid VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                   <ColumnDefinition Width="*"/>
@@ -89,7 +84,6 @@
                                   <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Names, evenly aligned -->
                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                            Text="{Binding FirstParticipantName}"
                                            Style="{StaticResource BodyTextStyle}" FontSize="12"
@@ -103,7 +97,6 @@
                                            TextTrimming="CharacterEllipsis"
                                            ToolTip="{Binding SecondParticipantName}"/>
 
-                                <!-- Actions centered, spanning both rows -->
                                 <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
                                             VerticalAlignment="Center"
                                             Margin="8,0"
@@ -127,7 +120,9 @@
                                           ToolTip="Начать"
                                           Command="{Binding DataContext.StartMatchCommand, ElementName=Root}"
                                           CommandParameter="{Binding}">
-                                    <Path Data="M6,4 L20,12 6,20 Z" Fill="{StaticResource TextPrimaryBrush}"/>
+                                    <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                      <Path Data="M6,4 L20,12 6,20 Z" Fill="{StaticResource TextPrimaryBrush}"/>
+                                    </Viewbox>
                                   </Button>
                                   <!-- Finish -->
                                   <Button Style="{StaticResource IconButtonStyle}"
@@ -135,7 +130,9 @@
                                           ToolTip="Завершить"
                                           Command="{Binding DataContext.FinishMatchCommand, ElementName=Root}"
                                           CommandParameter="{Binding}">
-                                    <Path Data="M18,6 L6,18 M6,6 L18,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/>
+                                    <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                      <Path Data="M18,6 L6,18 M6,6 L18,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/>
+                                    </Viewbox>
                                   </Button>
                                   <!-- Edit (visible for organizer) -->
                                   <Button Style="{StaticResource IconButtonStyle}"
@@ -144,11 +141,12 @@
                                           Visibility="{Binding DataContext.IsOrganizer, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}"
                                           Command="{Binding DataContext.EditMatchCommand, ElementName=Root}"
                                           CommandParameter="{Binding}">
-                                    <Path Data="M3,17.25V21h3.75L17.81,9.94l-3.75-3.75L3,17.25z M20.71,7.04a1.0,1.0 0 0 0 0-1.41L18.37,3.29a1.0,1.0 0 0 0-1.41,0l-1.83,1.83 3.75,3.75 1.83-1.83z" Fill="{StaticResource TextPrimaryBrush}"/>
+                                    <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                      <Path Data="M3,17.25V21h3.75L17.81,9.94l-3.75-3.75L3,17.25z M20.71,7.04a1.0,1.0 0 0 0 0-1.41L18.37,3.29a1.0,1.0 0 0 0-1.41,0l-1.83,1.83 3.75,3.75 1.83-1.83z" Fill="{StaticResource TextPrimaryBrush}"/>
+                                    </Viewbox>
                                   </Button>
                                 </StackPanel>
 
-                                <!-- Score inputs aligned to each participant on the right -->
                                 <TextBox Grid.Row="0" Grid.Column="2"
                                          Width="90" MinWidth="80"
                                          Margin="8,2,0,2"

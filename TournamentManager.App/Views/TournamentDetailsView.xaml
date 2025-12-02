@@ -43,9 +43,7 @@
                     </StackPanel>
                 </StackPanel>
 
-                <Button Grid.Column="1" Content="Перейти к турнирной сетке"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding GoToBracketsCommand}"/>
+                <!-- Removed button from top panel -->
             </Grid>
         </Border>
 
@@ -58,6 +56,17 @@
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="AccountPlus" Width="16" Height="16" Margin="0,2,8,0" Cursor="Hand"/>
                                 <TextBlock Text="Добавить участников в систему" Foreground="{StaticResource WhiteBrush}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content="Удалить" Click="DeleteButton_Click" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,12,0" Height="40">
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Margin="0,2,8,0"/>
+                                <TextBlock Text="Удалить" Style="{StaticResource BodyTextStyle}"/>
                             </StackPanel>
                         </DataTemplate>
                     </Button.ContentTemplate>
@@ -119,11 +128,11 @@
 
         <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="0">
             <Grid>
-                <DataGrid ItemsSource="{Binding Participants}" AutoGenerateColumns="False" IsReadOnly="False" CanUserAddRows="True"
-                          CanUserDeleteRows="True" CanUserSortColumns="True" SelectionMode="Single" HeadersVisibility="Column"
+                <DataGrid x:Name="ParticipantsGrid" ItemsSource="{Binding Participants}" AutoGenerateColumns="False" IsReadOnly="False" CanUserAddRows="True"
+                          CanUserDeleteRows="True" CanUserSortColumns="True" SelectionMode="Extended" SelectionUnit="FullRow" HeadersVisibility="Column"
                           BorderThickness="0" Background="Transparent" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto" CellEditEnding="DataGrid_CellEditEnding"
-                          AddingNewItem="DataGrid_AddingNewItem" RowEditEnding="DataGrid_RowEditEnding">
+                          AddingNewItem="DataGrid_AddingNewItem" RowEditEnding="DataGrid_RowEditEnding" PreviewKeyDown="ParticipantsGrid_PreviewKeyDown">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="0.5*" Visibility="Collapsed" IsReadOnly="True"/>
                         
@@ -262,7 +271,7 @@
                     VerticalAlignment="Top" Margin="0,0,12,0"/>
             
             <Button Content="Зарегистрировать участников" Command="{Binding RegisterParticipantsCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}" Height="40"  HorizontalAlignment="Center">
+                    Style="{StaticResource PrimaryButtonStyle}" Height="40"  HorizontalAlignment="Center" Margin="0,0,12,0">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -272,6 +281,9 @@
                 </Button.ContentTemplate>
             </Button>
 
+            <Button Content="Перейти к турнирной сетке"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding GoToBracketsCommand}" Height="40"/>
         </StackPanel>
     </Grid>
 </UserControl>

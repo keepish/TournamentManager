@@ -256,12 +256,26 @@
                                 <StackPanel Margin="0,0,0,16">
                                     <TextBlock Text="Прикрепить судью к выбранной категории" FontSize="14" FontWeight="SemiBold"
                                                Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
-                                    <ComboBox ItemsSource="{Binding Judges}" SelectedItem="{Binding SelectedJudge}" DisplayMemberPath="FullName"
-                                              Style="{StaticResource ComboBoxStyle}" Height="40"/>
+                                    <ComboBox ItemsSource="{Binding Judges}" SelectedItem="{Binding SelectedJudge}"
+                                              Style="{StaticResource ComboBoxStyle}" Height="40">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} {1} {2}">
+                                                            <Binding Path="Surname"/>
+                                                            <Binding Path="Name"/>
+                                                            <Binding Path="Patronymic"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
 
                                 <StackPanel Margin="0,0,0,16">
-                                    <TextBlock Text="Количество площадок" FontSize="14" FontWeight="SemiBold"
+                                    <TextBlock Text="Номер площадки" FontSize="14" FontWeight="SemiBold"
                                                Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
                                     <TextBox Text="{Binding SitesNumber}" Style="{StaticResource TextBoxStyle}"
                                              materialDesign:HintAssist.Hint="Введите количество"/>

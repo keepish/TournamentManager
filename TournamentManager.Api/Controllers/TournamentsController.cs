@@ -110,7 +110,7 @@ namespace TournamentManager.Api.Controllers
             {
                 var category = tc.Category;
 
-                // Filter participants by age and weight (gender optional if future property exists)
+                // Filter participants by age and weight
                 var eligible = participants
                     .Where(p =>
                         p.Weight >= category.MinWeight && p.Weight <= category.MaxWeight &&
@@ -138,47 +138,65 @@ namespace TournamentManager.Api.Controllers
                     continue;
                 }
 
-                // Randomize order
-                eligible = eligible.OrderBy(_ => random.Next()).ToList();
+                // Group by gender to avoid mixing men and women in the same bracket/match
+                var genderGroups = eligible.GroupBy(p => (int)p.Gender).ToList();
 
-                // Register participants
-                var participantTournamentCategories = eligible.Select(p => new ParticipantTournamentCategory
+                foreach (var genderGroup in genderGroups)
                 {
-                    TournamentCategoryId = tc.Id,
-                    ParticipantId = p.Id
-                }).ToList();
+                    var groupEligible = genderGroup.OrderBy(_ => random.Next()).ToList();
 
-                context.ParticipantTournamentCategories.AddRange(participantTournamentCategories);
-                await context.SaveChangesAsync();
-
-                // Create matches (pair sequentially)
-                var createdMatches = new List<Match>();
-                for (int i = 0; i < participantTournamentCategories.Count; i += 2)
-                {
-                    var first = participantTournamentCategories[i];
-                    ParticipantTournamentCategory? second = i + 1 < participantTournamentCategories.Count ? participantTournamentCategories[i + 1] : null;
-
-                    var match = new Match
+                    if (!groupEligible.Any())
                     {
-                        FirstParticipantId = first.Id,
-                        SecondParticipantId = second?.Id,
-                        FirstParticipantScore = 0,
-                        SecondParticipantScore = 0
-                    };
-                    createdMatches.Add(match);
+                        result.CategoryResults.Add(new TournamentRegistrationCategoryResultDto
+                        {
+                            TournamentCategoryId = tc.Id,
+                            CategoryId = tc.CategoryId,
+                            Gender = genderGroup.Key,
+                            ParticipantsRegistered = 0,
+                            MatchesCreated = 0
+                        });
+                        continue;
+                    }
+
+                    // Register participants for this gender group
+                    var ptcs = groupEligible.Select(p => new ParticipantTournamentCategory
+                    {
+                        TournamentCategoryId = tc.Id,
+                        ParticipantId = p.Id
+                    }).ToList();
+
+                    context.ParticipantTournamentCategories.AddRange(ptcs);
+                    await context.SaveChangesAsync();
+
+                    // Create matches by pairing sequentially within the gender group
+                    var createdMatches = new List<Match>();
+                    for (int i = 0; i < ptcs.Count; i += 2)
+                    {
+                        var first = ptcs[i];
+                        ParticipantTournamentCategory? second = i + 1 < ptcs.Count ? ptcs[i + 1] : null;
+
+                        var match = new Match
+                        {
+                            FirstParticipantId = first.Id,
+                            SecondParticipantId = second?.Id,
+                            FirstParticipantScore = 0,
+                            SecondParticipantScore = 0
+                        };
+                        createdMatches.Add(match);
+                    }
+
+                    context.Matches.AddRange(createdMatches);
+                    await context.SaveChangesAsync();
+
+                    result.CategoryResults.Add(new TournamentRegistrationCategoryResultDto
+                    {
+                        TournamentCategoryId = tc.Id,
+                        CategoryId = tc.CategoryId,
+                        Gender = genderGroup.Key,
+                        ParticipantsRegistered = ptcs.Count,
+                        MatchesCreated = createdMatches.Count
+                    });
                 }
-
-                context.Matches.AddRange(createdMatches);
-                await context.SaveChangesAsync();
-
-                result.CategoryResults.Add(new TournamentRegistrationCategoryResultDto
-                {
-                    TournamentCategoryId = tc.Id,
-                    CategoryId = tc.CategoryId,
-                    Gender = 0,
-                    ParticipantsRegistered = participantTournamentCategories.Count,
-                    MatchesCreated = createdMatches.Count
-                });
             }
 
             return Ok(result);
@@ -234,13 +252,13 @@ namespace TournamentManager.Api.Controllers
                 if (!ptcs.Any())
                     continue;
 
-                // Group by gender (1/2 or other) and build separate brackets per gender
+                // Group by gender (1/0 or other) and build separate brackets per gender
                 var byGender = ptcs.GroupBy(p => (int)p.Participant.Gender).ToList();
 
                 foreach (var ggrp in byGender)
                 {
                     var genderValue = ggrp.Key;
-                    // Requirement: gender 0 = Women
+                    // Requirement: gender 0 = Women, 1 = Men
                     var genderLabel = genderValue == 0 ? "Женщины" : genderValue == 1 ? "Мужчины" : $"Пол {genderValue}";
 
                     var seedPtcs = ggrp.OrderBy(p => p.Id).Select(p => p.Id).ToList();

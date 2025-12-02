@@ -14,31 +14,30 @@ namespace TournamentManager.Core.Services
         }
 
         public async Task<List<UserDto?>?> GetAllAsync()
-            => await _client.GetFromJsonAsync<List<UserDto?>?>("");
+            => await _client.GetFromJsonAsync<List<UserDto?>?>($"");
 
         public async Task<UserDto?> GetByIdAsync(int id)
             => await _client.GetFromJsonAsync<UserDto?>($"{id}");
 
         public async Task<List<UserDto?>?> GetJudgesAsync()
-        => await _client.GetFromJsonAsync<List<UserDto?>?>("judges");
+            => await _client.GetFromJsonAsync<List<UserDto?>?>($"judges");
 
         public async Task<List<UserDto?>?> GetOrganizersAsync()
-            => await _client.GetFromJsonAsync<List<UserDto?>?>("organizers");
+            => await _client.GetFromJsonAsync<List<UserDto?>?>($"organizers");
 
         public async Task<UserDto?> CreateUserAsync(UserDto userDto)
         {
-            var response =
-                await _client.PostAsJsonAsync("", userDto);
+            var response = await _client.PostAsJsonAsync($"", userDto);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<UserDto>();
         }
+
         public async Task<bool> UpdateUserAsync(int id, UserDto userDto)
         {
             try
             {
-                var response =
-                    await _client.PutAsJsonAsync($"{id}", userDto);
-                return true;
+                var response = await _client.PutAsJsonAsync($"{id}", userDto);
+                return response.IsSuccessStatusCode;
             }
             catch
             {
@@ -50,9 +49,8 @@ namespace TournamentManager.Core.Services
         {
             try
             {
-                var response =
-                    await _client.DeleteAsync($"{id}");
-                return true;
+                var response = await _client.DeleteAsync($"{id}");
+                return response.IsSuccessStatusCode;
             }
             catch
             {

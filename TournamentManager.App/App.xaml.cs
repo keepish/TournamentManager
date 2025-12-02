@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Windows;
-using TournamentManager.Client;
 using TournamentManager.Client.ViewModels;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Categories;
@@ -12,9 +12,6 @@ using TournamentManager.Core.Services;
 
 namespace TournamentManager.Client
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         public static IServiceProvider ServiceProvider { get; private set; }
@@ -42,7 +39,7 @@ namespace TournamentManager.Client
                     var participantService = ServiceProvider.GetService<IParticipantService>();
 
                     var mainWindow = ServiceProvider.GetService<MainWindow>();
-                    var mainViewModel = new MainViewModel(apiService, tournamentService, categoryService, 
+                    var mainViewModel = new MainViewModel(apiService, tournamentService, categoryService,
                         user, secureStorage, tournamentCategoryService, userService, participantService);
                     mainWindow.DataContext = mainViewModel;
                     mainWindow.Show();
@@ -57,7 +54,7 @@ namespace TournamentManager.Client
             var userServiceForLogin = ServiceProvider.GetService<IUserService>();
             var participantServiceForLogin = ServiceProvider.GetService<IParticipantService>();
 
-            loginWindow.DataContext = new LoginViewModel(apiService, tournamentServiceForLogin, secureStorage, categoryServiceForLogin, 
+            loginWindow.DataContext = new LoginViewModel(apiService, tournamentServiceForLogin, secureStorage, categoryServiceForLogin,
                 tournamentCategoryServiceForLogin, userServiceForLogin, participantServiceForLogin);
             loginWindow.Show();
         }
@@ -71,27 +68,27 @@ namespace TournamentManager.Client
                 return new ApiService(secureStorage);
             });
 
-            services.AddHttpClient<IService<TournamentDto>, TournamentService>(client =>
+            services.AddHttpClient<IService<TournamentDto>, TournamentService>((provider, client) =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
             });
 
-            services.AddHttpClient<IService<CategoryDto>, CategoryService>(client =>
+            services.AddHttpClient<IService<CategoryDto>, CategoryService>((provider, client) =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/Categories/");
             });
 
-            services.AddHttpClient<ITournamentCategoryService, TournamentCategoryService>(client =>
+            services.AddHttpClient<ITournamentCategoryService, TournamentCategoryService>((provider, client) =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/TournamentCategories/");
             });
 
-            services.AddHttpClient<IUserService, UserService>(client =>
+            services.AddHttpClient<IUserService, UserService>((provider, client) =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/Users/");
             });
 
-            services.AddHttpClient<IParticipantService, ParticipantService>(client =>
+            services.AddHttpClient<IParticipantService, ParticipantService>((provider, client) =>
             {
                 client.BaseAddress = new Uri("https://localhost:7074/api/Participants/");
             });

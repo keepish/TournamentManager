@@ -61,6 +61,15 @@ namespace TournamentManager.Client.ViewModels
             LoadParticipants();
         }
 
+        // Служебный метод: определяет, что участник не является пустой строкой-плейсхолдером в DataGrid
+        private static bool IsRealParticipant(ParticipantDto p)
+        {
+            if (p == null) return false;
+            bool hasName = !string.IsNullOrWhiteSpace(p.Name) || !string.IsNullOrWhiteSpace(p.Surname);
+            bool hasData = p.Id > 0 || hasName || p.Weight > 0 || (p.Birthday != default);
+            return hasData;
+        }
+
         [RelayCommand]
         private async Task LoadParticipants()
         {
@@ -100,7 +109,7 @@ namespace TournamentManager.Client.ViewModels
             {
                 IsLoading = true;
 
-                // Call backend registration endpoint
+                // Регистрация и формирование пар выполняется на сервере
                 var endpoint = $"api/Tournaments/{_tournament.Id}/register-participants";
                 var registrationResult = await _apiService.PostAsync<TournamentRegistrationResultDto>(endpoint, new { });
 
@@ -108,7 +117,7 @@ namespace TournamentManager.Client.ViewModels
                 var matches = registrationResult.TotalMatchesCreated;
                 MessageBox.Show($"Регистрация завершена. Участников добавлено: {total}. Создано пар: {matches}.", "Успех");
 
-                // Refresh participants list to reflect any new registrations
+                // Обновляем список участников
                 await LoadParticipants();
             }
             catch (Exception ex)
@@ -178,6 +187,7 @@ namespace TournamentManager.Client.ViewModels
             }
 
             var uniqueParticipants = Participants
+                .Where(IsRealParticipant)
                 .GroupBy(p => new {
                     Surname = p.Surname?.Trim().ToLower(),
                     Name = p.Name?.Trim().ToLower(),
@@ -302,10 +312,12 @@ namespace TournamentManager.Client.ViewModels
 
                 if (!string.IsNullOrEmpty(genderValue))
                 {
-                    if (genderValue == "1" || genderValue.ToLower() == "мужской" || genderValue.ToLower() == "м")
-                        participant.Gender = 1;
-                    else if (genderValue == "0" || genderValue.ToLower() == "женский" || genderValue.ToLower() == "ж")
-                        participant.Gender = 2;
+                    // 1 — мужской, 0 — женский
+                    var g = genderValue.ToLower();
+                    if (g == "1" || g == "мужской" || g == "м")
+                        participant.Gender = 1UL;
+                    else if (g == "0" || g == "женский" || g == "ж")
+                        participant.Gender = 0UL;
                 }
             }
 
@@ -334,7 +346,6 @@ namespace TournamentManager.Client.ViewModels
                             CultureInfo.InvariantCulture, DateTimeStyles.None, out birthday) ||
                             DateTime.TryParse(stringValue, out birthday))
                         {
-
                         }
                     }
                 }
@@ -423,9 +434,11 @@ namespace TournamentManager.Client.ViewModels
                 headerRange.Borders.LineStyle = XlLineStyle.xlContinuous;
                 headerRange.Borders.Weight = XlBorderWeight.xlThin;
 
-                for (int i = 0; i < Participants.Count; i++)
+                var exportList = Participants.Where(IsRealParticipant).ToList();
+
+                for (int i = 0; i < exportList.Count; i++)
                 {
-                    var participant = Participants[i];
+                    var participant = exportList[i];
                     int row = i + 2;
 
                     worksheet.Cells[row, 1] = participant.Name;
@@ -445,13 +458,13 @@ namespace TournamentManager.Client.ViewModels
                     weightCell.NumberFormat = "0.0";
                 }
 
-                if (Participants.Count > 0)
+                if (exportList.Count > 0)
                 {
-                    Excel.Range dataRange = worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[Participants.Count + 1, headers.Length]];
+                    Excel.Range dataRange = worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[exportList.Count + 1, headers.Length]];
                     dataRange.Borders.LineStyle = XlLineStyle.xlContinuous;
                     dataRange.Borders.Weight = XlBorderWeight.xlThin;
 
-                    Excel.Range weightRange = worksheet.Range[worksheet.Cells[2, 6], worksheet.Cells[Participants.Count + 1, 6]];
+                    Excel.Range weightRange = worksheet.Range[worksheet.Cells[2, 6], worksheet.Cells[exportList.Count + 1, 6]];
                     weightRange.HorizontalAlignment = XlHAlign.xlHAlignRight;
                 }
 
@@ -461,7 +474,7 @@ namespace TournamentManager.Client.ViewModels
 
                 workbook.SaveAs(filePath);
 
-                MessageBox.Show($"Файл успешно сохранен: {System.IO.Path.GetFileName(filePath)}\n\nЭкспортировано участников: {Participants.Count}", "Экспорт завершен");
+                MessageBox.Show($"Файл успешно сохранен: {System.IO.Path.GetFileName(filePath)}\n\nЭкспортировано участников: {exportList.Count}", "Экспорт завершен");
             }
             catch (Exception ex)
             {
@@ -539,7 +552,7 @@ namespace TournamentManager.Client.ViewModels
                 var addedCount = 0;
                 var errorCount = 0;
 
-                foreach (var participant in Participants)
+                foreach (var participant in Participants.Where(IsRealParticipant))
                 {
                     if (participant.Id > 0)
                     {
@@ -602,10 +615,11 @@ namespace TournamentManager.Client.ViewModels
         private List<string> ValidateAllParticipants()
         {
             var errors = new List<string>();
+            var real = Participants.Where(p => IsRealParticipant(p)).ToList();
 
-            for (int i = 0; i < Participants.Count; i++)
+            for (int i = 0; i < real.Count; i++)
             {
-                var participant = Participants[i];
+                var participant = real[i];
                 var rowNumber = i + 1;
 
                 if (string.IsNullOrWhiteSpace(participant.Surname))
@@ -614,8 +628,9 @@ namespace TournamentManager.Client.ViewModels
                 if (string.IsNullOrWhiteSpace(participant.Name))
                     errors.Add($"Строка {rowNumber}: Имя обязательно");
 
-                if (participant.Gender > 1)
-                    errors.Add($"Строка {rowNumber}: Укажите пол (0 - мужской, 1 - женский)");
+                // Пол: 1 — мужской, 0 — женский
+                if (participant.Gender != 0UL && participant.Gender != 1UL)
+                    errors.Add($"Строка {rowNumber}: Укажите пол (1 - мужской, 0 - женский)");
 
                 if (participant.Weight <= 0 || participant.Weight > 300)
                     errors.Add($"Строка {rowNumber}: Вес должен быть от 0.1 до 300 кг");
@@ -668,6 +683,38 @@ namespace TournamentManager.Client.ViewModels
         private void GoToBrackets()
         {
             _mainViewModel.NavigateToBrackets(_tournament);
+        }
+
+        public async Task DeleteParticipantAsync(ParticipantDto? participant)
+        {
+            if (participant == null)
+                return;
+
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут удалять участников.", "Ошибка доступа");
+                return;
+            }
+
+            try
+            {
+                // Если участник есть в БД, удаляем из сервиса
+                if (participant.Id > 0)
+                {
+                    await _participantService.DeleteAsync(participant.Id);
+                }
+
+                // Удаляем из локальной коллекции, если ещё присутствует
+                if (Participants.Contains(participant))
+                {
+                    Participants.Remove(participant);
+                    HasUnsavedChanges = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка удаления участника: {ex.Message}", "Ошибка");
+            }
         }
     }
 }

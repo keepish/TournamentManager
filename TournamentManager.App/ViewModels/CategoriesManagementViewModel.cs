@@ -63,23 +63,43 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task LoadJudges()
         {
+            IsLoading = true;
             try
             {
-                var judgesList = await _userService.GetJudgesAsync();
+                // Load all users
+                var all = await _userService.GetAllAsync() ?? new List<UserDto?>();
+                var allUsers = all.Where(u => u != null).Select(u => u!).ToList();
+
+                // Load organizers (users present in Tournament table via OrganizerId)
+                var organizers = await _userService.GetOrganizersAsync() ?? new List<UserDto?>();
+                var organizerIds = organizers.Where(o => o != null).Select(o => o!.Id).ToHashSet();
+
+                // Keep only users that are NOT present in Tournament table (i.e., not organizers)
+                var candidates = allUsers
+                    .Where(u => !organizerIds.Contains(u.Id))
+                    .GroupBy(u => u.Id)
+                    .Select(g => g.First())
+                    .OrderBy(u => u.Surname)
+                    .ThenBy(u => u.Name)
+                    .ThenBy(u => u.Patronymic)
+                    .ToList();
+
                 Judges.Clear();
-                if (judgesList != null)
-                    foreach (var judge in judgesList)
-                        if (judge != null)
-                            Judges.Add(judge);
+                foreach (var user in candidates)
+                    Judges.Add(user);
 
                 if (Judges.Any())
                     SelectedJudge = Judges.First();
                 else
-                    MessageBox.Show("Список судей пуст. Убедитесь, что есть пользователи, назначенные судьями в категориях турнира.", "Информация");
+                    MessageBox.Show("Нет доступных пользователей для назначения судьёй (пользователи отсутствуют в таблице Tournament)", "Информация");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки списка судей", "Ошибка");
+                MessageBox.Show($"Ошибка загрузки списка пользователей {ex.Message}", "Ошибка");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 

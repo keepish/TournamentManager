@@ -207,8 +207,6 @@ namespace TournamentManager.Client.ViewModels
             }
             var seed = ptcIds.OrderBy(id => id).ToList();
             int participants = seed.Count;
-            int slots = NextPow2(participants);
-            int roundCount = Math.Max(1, Log2(slots));
 
             // Map ptcId -> display name (from any match)
             var nameByPtc = new Dictionary<int, string>();
@@ -242,9 +240,9 @@ namespace TournamentManager.Client.ViewModels
                 };
             }
 
-            // Round 1: expected matches = slots/2
+            // Round 1: expected matches = ceil(participants/2) to avoid extra empty pair
             var round1 = new ObservableCollection<MatchItemViewModel>();
-            int expectedR1 = Math.Max(1, slots / 2);
+            int expectedR1 = Math.Max(1, (participants + 1) / 2);
             var actualR1 = actualByKey.ContainsKey(1) ? actualByKey[1] : new List<MatchItemViewModel>();
             for (int i = 0; i < expectedR1; i++)
             {
@@ -257,13 +255,18 @@ namespace TournamentManager.Client.ViewModels
                 {
                     int aIndex = 2 * i;
                     int bIndex = 2 * i + 1;
+                    // Only create placeholder if there is at least one seeded participant
+                    bool hasA = aIndex < seed.Count;
+                    bool hasB = bIndex < seed.Count;
+                    if (!hasA && !hasB) continue;
+
                     var item = new MatchItemViewModel
                     {
                         MatchId = 0,
-                        FirstParticipantTournamentCategoryId = aIndex < seed.Count ? seed[aIndex] : 0,
-                        SecondParticipantTournamentCategoryId = bIndex < seed.Count ? seed[bIndex] : null,
-                        FirstParticipantName = (aIndex < seed.Count && nameByPtc.TryGetValue(seed[aIndex], out var aName)) ? aName : string.Empty,
-                        SecondParticipantName = (bIndex < seed.Count && nameByPtc.TryGetValue(seed[bIndex], out var bName)) ? bName : null,
+                        FirstParticipantTournamentCategoryId = hasA ? seed[aIndex] : 0,
+                        SecondParticipantTournamentCategoryId = hasB ? seed[bIndex] : null,
+                        FirstParticipantName = (hasA && nameByPtc.TryGetValue(seed[aIndex], out var aName)) ? aName : string.Empty,
+                        SecondParticipantName = (hasB && nameByPtc.TryGetValue(seed[bIndex], out var bName)) ? bName : null,
                         IsStarted = false,
                         IsFinished = false,
                         Round = 1,
@@ -274,17 +277,17 @@ namespace TournamentManager.Client.ViewModels
             }
             Rounds.Add(new BracketRoundViewModel($"Раунд 1", round1));
 
-            // Subsequent rounds: derive from previous round winners, override with actual matches if present
+            // Subsequent rounds: derive from previous round winners; expected = ceil(prevRound.Count/2)
             var prevRound = round1;
-            for (int r = 2; r <= roundCount; r++)
+            int roundNumber = 2;
+            while (prevRound.Count > 1)
             {
                 var current = new ObservableCollection<MatchItemViewModel>();
-                int expected = Math.Max(1, slots / (1 << r));
-                var actual = actualByKey.ContainsKey(r) ? actualByKey[r] : new List<MatchItemViewModel>();
+                int expected = Math.Max(1, (prevRound.Count + 1) / 2);
+                var actual = actualByKey.ContainsKey(roundNumber) ? actualByKey[roundNumber] : new List<MatchItemViewModel>();
 
                 for (int i = 0; i < expected; i++)
                 {
-                    // Determine children
                     var left = prevRound.ElementAtOrDefault(2 * i);
                     var right = prevRound.ElementAtOrDefault(2 * i + 1);
 
@@ -330,7 +333,6 @@ namespace TournamentManager.Client.ViewModels
                         }
                     }
 
-                    // Base placeholder
                     var placeholder = new MatchItemViewModel
                     {
                         MatchId = 0,
@@ -340,11 +342,10 @@ namespace TournamentManager.Client.ViewModels
                         SecondParticipantName = rightWinner,
                         IsStarted = false,
                         IsFinished = false,
-                        Round = r,
+                        Round = roundNumber,
                         Order = i + 1
                     };
 
-                    // Overlay actual match if exists
                     var real = actual.FirstOrDefault(x => (x.Order > 0 ? x.Order - 1 : i) == i) ?? actual.ElementAtOrDefault(i);
                     if (real != null)
                     {
@@ -362,8 +363,9 @@ namespace TournamentManager.Client.ViewModels
                     current.Add(placeholder);
                 }
 
-                Rounds.Add(new BracketRoundViewModel($"Раунд {r}", current));
+                Rounds.Add(new BracketRoundViewModel($"Раунд {roundNumber}", current));
                 prevRound = current;
+                roundNumber++;
             }
 
             OnPropertyChanged(nameof(Rounds));

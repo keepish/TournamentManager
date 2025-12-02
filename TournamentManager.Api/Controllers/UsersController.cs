@@ -8,7 +8,6 @@ namespace TournamentManager.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Организатор")]
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _context;

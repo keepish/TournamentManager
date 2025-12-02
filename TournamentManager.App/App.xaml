@@ -11,6 +11,8 @@
             <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter"/>
             <converters:TournamentStatusToStringConverter x:Key="TournamentStatusToStringConverter"/>
             <converters:TournamentStatusToColorConverter x:Key="TournamentStatusToColorConverter"/>
+            <converters:CollapsedMenuWidthConverter x:Key="CollapsedMenuWidthConverter"/>
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>

@@ -24,7 +24,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Background="{StaticResource PrimaryBrush}">
+        <Border Background="{StaticResource PrimaryBrush}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
             <Grid Margin="16,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

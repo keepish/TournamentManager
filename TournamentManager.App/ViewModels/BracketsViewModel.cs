@@ -25,11 +25,19 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private int selectedBracketIndex;
 
+        [ObservableProperty]
+        private bool isTournamentEditable;
+
         public BracketsViewModel(ApiService apiService, TournamentDto tournament, bool isOrganizer)
         {
             _apiService = apiService;
             _tournament = tournament;
             IsOrganizer = isOrganizer;
+
+            // Determine editability from current time within tournament dates (Active)
+            var now = DateTime.Now;
+            IsTournamentEditable = now >= _tournament.StartDate && now <= _tournament.EndDate;
+
             SelectedBracketIndex = 0;
             LoadBracketsCommand.Execute(null);
         }
@@ -107,6 +115,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task SaveMatchScore(MatchItemViewModel match)
         {
+            if (!IsTournamentEditable) return;
             if (match == null || match.MatchId == 0)
                 return;
 
@@ -133,6 +142,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void StartMatch(MatchItemViewModel match)
         {
+            if (!IsTournamentEditable) return;
             if (match == null || match.IsFinished || match.MatchId == 0 || SelectedBracketIndex < 0) return;
             var category = Brackets[SelectedBracketIndex];
             if (category.IsCategoryFinished) return;
@@ -142,6 +152,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private async Task FinishMatch(MatchItemViewModel match)
         {
+            if (!IsTournamentEditable) return;
             if (match == null || !match.IsStarted || match.IsFinished || match.MatchId == 0 || SelectedBracketIndex < 0) return;
             var category = Brackets[SelectedBracketIndex];
             if (category.IsCategoryFinished) return;
@@ -164,6 +175,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void EditMatch(MatchItemViewModel match)
         {
+            if (!IsTournamentEditable) return;
             if (!IsOrganizer || match == null || match.MatchId == 0 || SelectedBracketIndex < 0) return;
             var category = Brackets[SelectedBracketIndex];
             if (category.IsCategoryFinished) return;
@@ -176,6 +188,7 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void FinishCategory()
         {
+            if (!IsTournamentEditable) return;
             if (SelectedBracketIndex < 0) return;
             var category = Brackets[SelectedBracketIndex];
             category.ComputePodium();

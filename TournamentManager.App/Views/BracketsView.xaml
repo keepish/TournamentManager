@@ -17,7 +17,7 @@
                   Style="{StaticResource PrimaryButtonStyle}"
                   Margin="8,0,0,0"
                   Command="{Binding DataContext.FinishCategoryCommand, ElementName=Root}"
-                  IsEnabled="{Binding ElementName=Root, Path=DataContext.IsOrganizer}"
+                  IsEnabled="{Binding ElementName=Root, Path=DataContext.IsTournamentEditable}"
                   ToolTip="Фиксировать результаты и показать призовые места"/>
         </StackPanel>
       </DockPanel>
@@ -136,6 +136,10 @@
                                           <DataTrigger Binding="{Binding DataContext.IsCategoryFinished, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                           </DataTrigger>
+                                          <!-- Hide action buttons if tournament not editable -->
+                                          <DataTrigger Binding="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                          </DataTrigger>
                                         </Style.Triggers>
                                       </Style>
                                     </StackPanel.Style>
@@ -166,7 +170,7 @@
                                            TextAlignment="Center"
                                            Text="{Binding FirstParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                            Style="{StaticResource TextBoxStyle}"
-                                           IsEnabled="{Binding DataContext.IsCategoryFinished, ElementName=Root, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                           IsEnabled="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                   <TextBox Grid.Row="1" Grid.Column="2"
                                            Width="90" MinWidth="80"
                                            Margin="8,2,0,2"
@@ -174,7 +178,7 @@
                                            TextAlignment="Center"
                                            Text="{Binding SecondParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                            Style="{StaticResource TextBoxStyle}"
-                                           IsEnabled="{Binding DataContext.IsCategoryFinished, ElementName=Root, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                           IsEnabled="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                 </Grid>
                               </Border>
                             </DataTemplate>

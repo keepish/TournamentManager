@@ -5,10 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:TournamentManager.Client.Views"
+        xmlns:converters="clr-namespace:TournamentManager.Client.Converters"
         mc:Ignorable="d"
         WindowState="Maximized"
+        MinHeight="500"
+        MinWidth="1000"
         WindowStyle="None"
         WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <converters:CollapsedMenuWidthConverter x:Key="CollapsedMenuWidthConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -16,7 +24,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Background="{StaticResource PrimaryBrush}">
+        <Border Background="{StaticResource PrimaryBrush}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
             <Grid Margin="16,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -25,23 +33,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="AccountCircle" Foreground="White" Margin="0,0,8,0"/>
-                    <TextBlock Text="{Binding CurrentUser.FullName}" Foreground="{StaticResource WhiteBrush}" FontWeight="Bold"/>
-                    <TextBlock Text=" | " Foreground="{StaticResource WhiteBrush}" Margin="8,0"/>
-                    <TextBlock Text="{Binding CurrentUser.Role}" Foreground="{StaticResource WhiteBrush}"/>
+                    <materialDesign:PackIcon Kind="AccountCircle" Width="32" Height="32"
+                                             Foreground="White" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding CurrentUser.FullName}" Foreground="{StaticResource WhiteBrush}"
+                               FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <TextBlock Grid.Column="1" Text="Федерация Тхэквондо - Система управления соревнованиями" 
-                           Foreground="{StaticResource WhiteBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button
-                        Foreground="{StaticResource WhiteBrush}"
-                        Content="Выход из аккаунта"
-                        Command="{Binding LogoutCommand}"
-                        Background="{StaticResource ErrorBrush}"
-                        BorderBrush="{StaticResource WhiteBrush}"/>
-
                     <local:WindowControls HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </StackPanel>
             </Grid>
@@ -49,43 +47,105 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="{Binding IsMenuCollapsed, Converter={StaticResource CollapsedMenuWidthConverter}}"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border BorderThickness="0,0,1,0"
-                    Background="{StaticResource WhiteBrush}"
+            <Border BorderThickness="0,0,1,0" Background="{StaticResource WhiteBrush}"
                     BorderBrush="{StaticResource BorderBrush}">
-                <ScrollViewer Style="{StaticResource ScrollViewerStyle}">
-                    <StackPanel Margin="8">
-                        <TextBlock Text="НАВИГАЦИЯ" FontWeight="Bold" Margin="0,8"
-                                   Style="{StaticResource SubHeaderTextStyle}"/>
+                <ScrollViewer Style="{StaticResource ScrollViewerStyle}"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                        <Button Content="Главная" Command="{Binding NavigateCommand}" 
-                                CommandParameter="Dashboard"
-                                Margin="0,2"
-                                Style="{StaticResource SecondaryButtonStyle}"/>
-                        <Button Content="Турниры" Command="{Binding NavigateCommand}" 
-                                CommandParameter="Tournaments"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Margin="0,2"/>
+                        <StackPanel Margin="8,25,8,8">
+                            <Button Command="{Binding ToggleMenuCommand}" Style="{StaticResource PrimaryButtonStyle}"
+                                    Margin="0,2" ToolTip="Меню" HorizontalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="Menu" Width="24" Height="24" Foreground="{StaticResource WhiteBrush}"
+                                                             VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Меню" Foreground="{StaticResource WhiteBrush}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                               Visibility="{Binding IsMenuCollapsed, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                                </Grid>
+                            </Button>
 
-                        <ItemsControl ItemsSource="{Binding MenuItems}" Margin="0,10,0,0">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Content="{Binding Title}" 
-                                            Command="{Binding Command}" 
-                                            Style="{StaticResource SecondaryButtonStyle}"
-                                            Margin="0,2"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+                            <Button Command="{Binding NavigateCommand}" CommandParameter="Dashboard" Margin="0,2"
+                                    Style="{StaticResource PrimaryButtonStyle}" ToolTip="Главная" HorizontalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="ViewDashboard" Width="24" Height="24" Foreground="{StaticResource WhiteBrush}"
+                                                             VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Главная" Foreground="{StaticResource WhiteBrush}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                               Visibility="{Binding IsMenuCollapsed, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                                </Grid>
+                            </Button>
+
+                            <Button Command="{Binding NavigateCommand}" CommandParameter="Tournaments" Style="{StaticResource PrimaryButtonStyle}"
+                                    Margin="0,2" ToolTip="Турниры" HorizontalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <materialDesign:PackIcon Kind="Trophy" Width="24" Height="24" Foreground="{StaticResource WhiteBrush}"
+                                                             VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Турниры" Foreground="{StaticResource WhiteBrush}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                               Visibility="{Binding IsMenuCollapsed, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                                </Grid>
+                            </Button>
+
+                            <ItemsControl ItemsSource="{Binding MenuItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding Command}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,2"
+                                                ToolTip="{Binding Title}" HorizontalContentAlignment="Stretch">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="40"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <materialDesign:PackIcon Kind="{Binding Icon}" Width="24" Height="24" Foreground="{StaticResource WhiteBrush}"
+                                                                         VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Title}" Foreground="{StaticResource WhiteBrush}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                           Visibility="{Binding DataContext.IsMenuCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <Button Grid.Row="1" Margin="8" Command="{Binding LogoutCommand}" Style="{StaticResource PrimaryButtonStyle}"
+                                Background="{StaticResource ErrorBrush}"  BorderBrush="{StaticResource WhiteBrush}" ToolTip="Выход из аккаунта"
+                                HorizontalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <materialDesign:PackIcon Kind="Logout" Width="24" Height="24" Foreground="{StaticResource WhiteBrush}"
+                                                         VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Выйти" Foreground="{StaticResource WhiteBrush}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                           Visibility="{Binding IsMenuCollapsed, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                            </Grid>
+                        </Button>
+                    </Grid>
                 </ScrollViewer>
             </Border>
 
-            <ContentControl Grid.Column="1" Grid.Row="1" Content="{Binding CurrentView}"
-                            Background="{StaticResource SecondaryBrush}"/>
+            <Border Grid.Column="1" Grid.Row="1" CornerRadius="4">
+                <ContentControl Content="{Binding CurrentView}" Background="{StaticResource SecondaryBrush}"/>
+            </Border>
         </Grid>
     </Grid>
 </Window>

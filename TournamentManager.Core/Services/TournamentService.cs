@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 
 namespace TournamentManager.Core.Services
@@ -6,7 +7,6 @@ namespace TournamentManager.Core.Services
     public class TournamentService : IService<TournamentDto>
     {
         private readonly HttpClient _client;
-        private readonly string _url = "https://localhost:7074/api/Tournaments/";
 
         public TournamentService(HttpClient client)
         {

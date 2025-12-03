@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TournamentManager.Core;
+using TournamentManager.Core.Models;
 
 #nullable disable
 
@@ -46,19 +46,19 @@ namespace TournamentManager.Core.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedDate = new DateTime(2025, 10, 18, 14, 54, 44, 487, DateTimeKind.Utc).AddTicks(9479),
+                            CreatedDate = new DateTime(2025, 11, 9, 23, 34, 37, 157, DateTimeKind.Utc).AddTicks(6539),
                             Name = "Организатор"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedDate = new DateTime(2025, 10, 18, 14, 54, 44, 487, DateTimeKind.Utc).AddTicks(9995),
+                            CreatedDate = new DateTime(2025, 11, 9, 23, 34, 37, 157, DateTimeKind.Utc).AddTicks(7015),
                             Name = "Судья"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedDate = new DateTime(2025, 10, 18, 14, 54, 44, 487, DateTimeKind.Utc).AddTicks(9997),
+                            CreatedDate = new DateTime(2025, 11, 9, 23, 34, 37, 157, DateTimeKind.Utc).AddTicks(7017),
                             Name = "Участник"
                         });
                 });
@@ -96,8 +96,8 @@ namespace TournamentManager.Core.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
 
                     b.HasKey("Id");
 

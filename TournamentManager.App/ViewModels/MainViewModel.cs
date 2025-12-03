@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Windows;
 using TournamentManager.Client.Views;
+using TournamentManager.Core.DTOs.Categories;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
@@ -14,22 +17,38 @@ namespace TournamentManager.Client.ViewModels
     {
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
+        private readonly SecureStorage _secureStorage;
+        private readonly IService<CategoryDto> _categoryService;
+        private readonly ITournamentCategoryService _tournamentCategoryService;
+        private readonly IUserService _userService;
+        private readonly IParticipantService _participantService;
 
         [ObservableProperty]
-        private UserInfo _currentUser;
+        private UserInfo currentUser;
 
         [ObservableProperty]
-        private object _currentView;
+        private object currentView;
 
         [ObservableProperty]
-        private ObservableCollection<MenuItem> _menuItems;
+        private ObservableCollection<MenuItem> menuItems;
 
-        public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService, UserInfo user)
+        [ObservableProperty]
+        private bool isMenuCollapsed = false;
+
+        public MainViewModel(ApiService apiService,IService<TournamentDto> tournamentService,
+            IService<CategoryDto> categoryService, UserInfo user, SecureStorage secureStorage, 
+            ITournamentCategoryService tournamentCategoryService, IUserService userService,
+            IParticipantService participantService)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
-            CurrentUser = user;
+            _secureStorage = secureStorage;
+            _categoryService = categoryService;
+            _tournamentCategoryService = tournamentCategoryService;
+            _userService = userService;
+            _participantService = participantService;
 
+            CurrentUser = _apiService.GetStoredUser();
             CurrentView = new DashboardView { DataContext = new DashboardViewModel(_apiService, CurrentUser) };
 
             InitializeNavigation();
@@ -39,33 +58,33 @@ namespace TournamentManager.Client.ViewModels
         {
             MenuItems = new ObservableCollection<MenuItem>();
 
-            switch (CurrentUser.Role)
+            if (CurrentUser.IsOrganizer)
             {
-                case "Организатор":
-                    MenuItems.Add(new MenuItem("Управление заявками", new RelayCommand(() => Navigate("Applications"))));
-                    MenuItems.Add(new MenuItem("Управление пользователями", new RelayCommand(() => Navigate("Users"))));
-                    MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports"))));
-                    break;
-
-                case "Судья":
-                    MenuItems.Add(new MenuItem("Мои площадки", new RelayCommand(() => Navigate("MyMatches"))));
-                    MenuItems.Add(new MenuItem("Судьи", new RelayCommand(() => Navigate("Judges"))));
-                    break;
-
-                case "Участник":
-                    MenuItems.Add(new MenuItem("Мои заявки", new RelayCommand(() => Navigate("MyApplications"))));
-                    MenuItems.Add(new MenuItem("Мои результаты", new RelayCommand(() => Navigate("MyResults"))));
-                    break;
+                MenuItems.Add(new MenuItem("Заявки", new RelayCommand(() => Navigate("Applications")), "ClipboardList"));
+                MenuItems.Add(new MenuItem("Пользователи", new RelayCommand(() => Navigate("Users")), "AccountGroup"));
+                MenuItems.Add(new MenuItem("Отчёты", new RelayCommand(() => Navigate("Reports")), "ChartBar"));
+            }
+            else
+            {
+                MenuItems.Add(new MenuItem("Мои площадки", new RelayCommand(() => Navigate("MyMatches")), "Stadium"));
+                MenuItems.Add(new MenuItem("Судьи", new RelayCommand(() => Navigate("Judges")), "Gavel"));
             }
         }
 
         [RelayCommand]
         private void Navigate(string viewName)
         {
+            if (viewName == "CreateTournament" && !CurrentUser.IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут управлять турнирами.", "Ошибка доступа");
+                return;
+            }
+
             CurrentView = viewName switch
             {
                 "Dashboard" => new DashboardView(),
-                "Tournaments" => new TournamentsView { DataContext = new TournamentsViewModel(_apiService, _tournamentService) },
+                "Tournaments" => new TournamentsView { DataContext = new TournamentsViewModel(_apiService, _tournamentService, this) },
+                "CreateTournament" => new TournamentCreationView { DataContext = new TournamentCreationViewModel(_tournamentService, this) },
                 "Applications" => new PlaceholderView("Заявки"),
                 "Users" => new PlaceholderView("Пользователи"),
                 "Reports" => new PlaceholderView("Отчеты"),
@@ -78,18 +97,27 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
+        private void ToggleMenu()
+        {
+            IsMenuCollapsed = !IsMenuCollapsed;
+        }
+
+        [RelayCommand]
         private void Logout()
         {
             _apiService.ClearToken();
-            Application.Current.Properties["User"] = null;
-            Application.Current.Properties["Token"] = null;
 
-            var loginWindow = new LoginWindow();
-            var apiService = new ApiService();
-            var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
-            var tournamentService = new TournamentService(httpClient);
-            loginWindow.DataContext = new LoginViewModel(apiService, tournamentService);
+            var loginWindow = App.ServiceProvider.GetService<LoginWindow>();
+            var tournamentService = App.ServiceProvider.GetService<IService<TournamentDto>>();
+            var categoryService = App.ServiceProvider.GetService<IService<CategoryDto>>();
+            var secureStorage = App.ServiceProvider.GetService<SecureStorage>();
+            var apiService = App.ServiceProvider.GetService<ApiService>();
+            var tournamentCategoryService = App.ServiceProvider.GetService<ITournamentCategoryService>();
+            var userService = App.ServiceProvider.GetService<IUserService>();
+            var participantService = App.ServiceProvider.GetService<IParticipantService>();
+
+            loginWindow.DataContext = new LoginViewModel(apiService, tournamentService, secureStorage, 
+                categoryService, tournamentCategoryService, userService, participantService);
 
             loginWindow.Show();
 
@@ -107,17 +135,56 @@ namespace TournamentManager.Client.ViewModels
                 }
             }
         }
+
+        public void NavigateToEditTournament(TournamentDto tournament)
+        {
+            if (tournament == null)
+                return;
+
+            if (!CurrentUser.IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут редактировать турниры.", "Ошибка доступа");
+                return;
+            }
+
+            CurrentView = new TournamentEditionView
+            {
+                DataContext = new TournamentEditionViewModel(tournament, _tournamentService, this)
+            };
+        }
+
+        public void NavigateToTournamentDetails(TournamentDto tournament)
+        {
+            if (tournament == null)
+                return;
+
+            CurrentView = new TournamentDetailsView
+            {
+                DataContext = new TournamentDetailsViewModel(tournament, _apiService, this, _categoryService,
+                    _tournamentCategoryService, _userService, _participantService)
+            };
+        }
+
+        public void NavigateToBrackets(TournamentDto tournament)
+        {
+            CurrentView = new BracketsView
+            {
+                DataContext = new BracketsViewModel(_apiService, tournament, CurrentUser.IsOrganizer)
+            };
+        }
     }
 
     public class MenuItem
     {
         public string Title { get; set; }
+        public string Icon { get; set; }
         public IRelayCommand Command { get; set; }
 
-        public MenuItem(string title, IRelayCommand command)
+        public MenuItem(string title, IRelayCommand command, string icon)
         {
             Title = title;
             Command = command;
+            Icon = icon;
         }
     }
 }

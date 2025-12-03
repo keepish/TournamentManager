@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Windows;
 using TournamentManager.Core.DTOs.Tournaments;
+using TournamentManager.Core.Enums;
 using TournamentManager.Core.Services;
 
 namespace TournamentManager.Client.ViewModels
@@ -11,18 +12,23 @@ namespace TournamentManager.Client.ViewModels
     {
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
+        private readonly MainViewModel _mainViewModel;
+
+        private ObservableCollection<TournamentDto> _allTournaments = new();
 
         [ObservableProperty]
         private ObservableCollection<TournamentDto> _tournaments = new();
-
-        [ObservableProperty]
-        private TournamentDto? _selectedTournament;
 
         [ObservableProperty]
         private bool isLoading;
 
         [ObservableProperty]
         private string searchText = string.Empty;
+
+        [ObservableProperty]
+        private string _selectedStatusFilter = "Все";
+
+        public bool IsOrganizer => _mainViewModel.CurrentUser.IsOrganizer;
 
         public ObservableCollection<string> StatusFilters { get; } = new()
         {
@@ -32,13 +38,14 @@ namespace TournamentManager.Client.ViewModels
             "Завершенный"
         };
 
-        [ObservableProperty]
-        private string _selectedStatusFilter = "Все";
 
-        public TournamentsViewModel(ApiService apiService, IService<TournamentDto> tournamentService)
+        public TournamentsViewModel(ApiService apiService,
+            IService<TournamentDto> tournamentService,
+            MainViewModel mainViewModel)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
+            _mainViewModel = mainViewModel;
 
             LoadTournaments();
         }
@@ -47,18 +54,18 @@ namespace TournamentManager.Client.ViewModels
         private async Task LoadTournaments()
         {
             IsLoading = true;
-
+        
             try
             {
                 var tournaments = await _tournamentService.GetAllAsync();
 
                 if (tournaments is not null)
                 {
-                    Tournaments.Clear();
+                    _allTournaments.Clear();
                     foreach (var tournament in tournaments)
                     {
                         if (tournament is not null)
-                            Tournaments.Add(tournament);
+                            _allTournaments.Add(tournament);
                     }
                 }
 
@@ -75,36 +82,62 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
-        private void CreateTournament()
+        private void ResetFilters()
         {
-            MessageBox.Show("Переход к созданию турнира", "Создание турнира");
+            SearchText = string.Empty;
+            SelectedStatusFilter = StatusFilters[0];
+
+            ApplyFilters();
         }
 
         [RelayCommand]
-        private void EditTournament()
+        private void CreateTournament()
         {
-            if (SelectedTournament is null)
+            if (!IsOrganizer)
             {
-                MessageBox.Show("Выберите турнир для редактирования", "Внимание");
-
+                MessageBox.Show("Доступ запрещен. Только организаторы могут создавать турниры.", "Ошибка доступа");
                 return;
             }
 
-            MessageBox.Show($"Редактирование турнира: {SelectedTournament.Name}", "Редактирование");
+            _mainViewModel.NavigateCommand.Execute("CreateTournament");
         }
 
         [RelayCommand]
-        private async Task DeleteTournament()
+        private void EditTournament(TournamentDto tournament)
         {
-            if (SelectedTournament is null)
+            if (tournament is null)
+            {
+                MessageBox.Show("Выберите турнир для редактирования", "Внимание");
+                return;
+            }
+
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут редактировать турниры.", "Ошибка доступа");
+                return;
+            }
+
+            _mainViewModel.NavigateToEditTournament(tournament);
+        }
+
+        [RelayCommand]
+        private async Task DeleteTournament(TournamentDto tournament)
+        {
+            if (tournament is null)
             {
                 MessageBox.Show("Выберите турнир для удаления", "Внимание");
 
                 return;
             }
 
+            if (!IsOrganizer)
+            {
+                MessageBox.Show("Доступ запрещен. Только организаторы могут удалять турниры.", "Ошибка доступа");
+                return;
+            }
+
             var result = MessageBox.Show(
-                $"Вы уверены, что хотите удалить турнир \"{SelectedTournament.Name}\"?",
+                $"Вы уверены, что хотите удалить турнир \"{tournament.Name}\"?",
                 "Подтверждение удаления",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question
@@ -114,10 +147,16 @@ namespace TournamentManager.Client.ViewModels
             {
                 try
                 {
-                    await _tournamentService.DeleteAsync(SelectedTournament.Id);
-
+                    await _tournamentService.DeleteAsync(tournament.Id);
                     MessageBox.Show("Турнир успешно удален", "Успех");
-                    await LoadTournaments();
+
+                    var tournamentToRemove = _allTournaments.FirstOrDefault(t => t.Id == tournament.Id);
+
+                    if (tournamentToRemove != null)
+                    {
+                        _allTournaments.Remove(tournamentToRemove);
+                        ApplyFilters();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -127,16 +166,15 @@ namespace TournamentManager.Client.ViewModels
         }
 
         [RelayCommand]
-        private void ViewTournamentDetails()
+        private void ViewTournamentDetails(TournamentDto tournament)
         {
-            if (SelectedTournament is null)
+            if (tournament is null)
             {
                 MessageBox.Show("Выберите турнир для просмотра", "Внимание");
-
                 return;
             }
 
-            MessageBox.Show($"Детали турнира: {SelectedTournament.Name}", "Просмотр");
+            _mainViewModel.NavigateToTournamentDetails(tournament);
         }
 
         partial void OnSearchTextChanged(string value)
@@ -149,14 +187,43 @@ namespace TournamentManager.Client.ViewModels
             ApplyFilters();
         }
 
+        private TournamentStatus GetTournamentStatus(TournamentDto tournament)
+        {
+            var now = DateTime.Now;
+
+            if (now < tournament.StartDate)
+                return TournamentStatus.Upcoming;
+            else if (now >= tournament.StartDate && now <= tournament.EndDate)
+                return TournamentStatus.Active;
+            else
+                return TournamentStatus.Completed;
+        }
+
+        private string GetTournamentStatusString(TournamentDto tournament)
+        {
+            return GetTournamentStatus(tournament) switch
+            {
+                TournamentStatus.Upcoming => "Предстоящий",
+                TournamentStatus.Active => "Активный",
+                TournamentStatus.Completed => "Завершенный",
+                _ => "Неизвестно"
+            };
+        }
+
         private void ApplyFilters()
         {
-            var filtred = Tournaments.Where(t =>
-                SelectedStatusFilter == "Все" || t.Status == SelectedStatusFilter
-            ).Where(t =>
-                string.IsNullOrEmpty(SearchText) ||
-                t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
-            ).ToList();
+            var filtred = _allTournaments.Where(t =>
+            {
+                var textMatch = string.IsNullOrEmpty(SearchText) ||
+                                t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                (t.Description?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true) ||
+                                (t.Address?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true);
+
+                var statusMatch = SelectedStatusFilter == "Все" || 
+                                GetTournamentStatusString(t) == SelectedStatusFilter;
+
+                return textMatch && statusMatch;
+            }).ToList();
 
             Tournaments.Clear();
             foreach (var tournament in filtred)
@@ -165,10 +232,9 @@ namespace TournamentManager.Client.ViewModels
             }
         }
 
-        public ObservableCollection<TournamentDto> FiltredTournaments => new(
-            Tournaments.Where(t =>
-                (SelectedStatusFilter == "Все" || t.Status == SelectedStatusFilter) &&
-                (string.IsNullOrEmpty(SearchText) || t.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)))
-            );
+        public string GetStatusForTournament(TournamentDto tournament)
+        {
+            return GetTournamentStatusString(tournament);
+        }
     }
 }

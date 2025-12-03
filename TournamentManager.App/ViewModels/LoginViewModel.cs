@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using TournamentManager.Client.Views;
+using TournamentManager.Core.DTOs.Categories;
+using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Models.Responses;
 using TournamentManager.Core.Services;
@@ -13,6 +15,11 @@ namespace TournamentManager.Client.ViewModels
     {
         private readonly ApiService _apiService;
         private readonly IService<TournamentDto> _tournamentService;
+        private readonly SecureStorage _secureStorage;
+        private readonly IService<CategoryDto> _categoryService;
+        private readonly ITournamentCategoryService _tournamentCategoryService;
+        private readonly IUserService _userService;
+        private readonly IParticipantService _participantService;
 
         [ObservableProperty]
         private string login;
@@ -23,10 +30,21 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private bool isLoading = false;
 
-        public LoginViewModel(ApiService apiService, IService<TournamentDto> tournamentService)
+        public LoginViewModel(ApiService apiService,
+            IService<TournamentDto> tournamentService,
+            SecureStorage secureStorage,
+            IService<CategoryDto> categoryService,
+            ITournamentCategoryService tournamentCategoryService,
+            IUserService userService,
+            IParticipantService participantService)
         {
             _apiService = apiService;
             _tournamentService = tournamentService;
+            _secureStorage = secureStorage;
+            _categoryService = categoryService;
+            _tournamentCategoryService = tournamentCategoryService;
+            _userService = userService;
+            _participantService = participantService;
         }
 
         [RelayCommand]
@@ -51,13 +69,17 @@ namespace TournamentManager.Client.ViewModels
                 var result = await _apiService.PostAsync<LoginResult>("/api/Auth/login", loginData);
 
                 _apiService.SetToken(result.Token);
+                _apiService.SaveUser(result.User);
 
-                Application.Current.Properties["User"] = result.User;
-                Application.Current.Properties["Token"] = result.Token;
+                _secureStorage.Save("AuthToken", result.Token);
 
-                var mainWindow = new MainWindow();
-                var mainViewModel = new MainViewModel(_apiService, _tournamentService, result.User);
-                
+                var userJson = System.Text.Json.JsonSerializer.Serialize(result.User);
+                _secureStorage.Save("UserData", userJson);
+
+                var mainWindow = App.ServiceProvider.GetService<MainWindow>();
+                var mainViewModel = new MainViewModel(_apiService, _tournamentService, _categoryService, result.User,
+                    _secureStorage, _tournamentCategoryService, _userService, _participantService);
+
                 mainWindow.DataContext = mainViewModel;
                 mainWindow.Show();
 

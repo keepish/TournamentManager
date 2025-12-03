@@ -5,7 +5,7 @@
 
     <ScrollViewer Style="{StaticResource ScrollViewerStyle}">
         <StackPanel Margin="20" Background="{StaticResource SecondaryBrush}">
-            <TextBlock Text="🏠 Главная панель" Margin="20"
+            <TextBlock Text="Главная панель" Margin="20"
                        Style="{StaticResource HeaderTextStyle}"/>
 
             <Border Style="{StaticResource CardStyle}" Margin="20">

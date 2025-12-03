@@ -13,16 +13,13 @@
             <materialDesign:PackIcon Kind="WindowMinimize" Foreground="White" Width="16" Height="16"/>
         </Button>
 
-        <Button x:Name="MaximizeRestoreButton" 
-                Style="{StaticResource SystemButtonStyle}"
+        <Button x:Name="MaximizeRestoreButton" Style="{StaticResource SystemButtonStyle}"
                 Click="MaximizeRestoreButton_Click">
             <materialDesign:PackIcon x:Name="MaximizeRestoreIcon" Kind="WindowMaximize" Foreground="White" Width="16" Height="16"/>
         </Button>
 
-        <Button x:Name="CloseButton" 
-                Style="{StaticResource SystemButtonStyle}"
-                Background="{StaticResource ErrorBrush}"
-                Click="CloseButton_Click">
+        <Button x:Name="CloseButton" Style="{StaticResource SystemButtonStyle}"
+                Background="{StaticResource ErrorBrush}" Click="CloseButton_Click">
             <materialDesign:PackIcon Kind="Close" Foreground="White" Width="16" Height="16"/>
         </Button>
     </StackPanel>

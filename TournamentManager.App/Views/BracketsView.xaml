@@ -10,7 +10,17 @@
     </Grid.RowDefinitions>
 
     <Border Grid.Row="0" Style="{StaticResource PanelStyle}" Padding="12">
-      <TextBlock Text="Турнирные сетки" Style="{StaticResource HeaderTextStyle}"/>
+      <DockPanel>
+        <TextBlock Text="Турнирные сетки" Style="{StaticResource HeaderTextStyle}" DockPanel.Dock="Left"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button Content="Завершить категорию"
+                  Style="{StaticResource PrimaryButtonStyle}"
+                  Margin="8,0,0,0"
+                  Command="{Binding DataContext.FinishCategoryCommand, ElementName=Root}"
+                  IsEnabled="{Binding ElementName=Root, Path=DataContext.IsOrganizer}"
+                  ToolTip="Фиксировать результаты и показать призовые места"/>
+        </StackPanel>
+      </DockPanel>
     </Border>
 
     <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="0">
@@ -24,140 +34,157 @@
         <TabControl.ContentTemplate>
           <DataTemplate>
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-              <ItemsControl ItemsSource="{Binding Rounds}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal"/>
-                  </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <StackPanel Width="340" Margin="8,16,8,16">
-                      <TextBlock Text="{Binding Title}" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,8"/>
-                      <ListBox ItemsSource="{Binding Items}"
-                               BorderThickness="0"
-                               ScrollViewer.CanContentScroll="True"
-                               VirtualizingPanel.IsVirtualizing="True"
-                               VirtualizingPanel.VirtualizationMode="Recycling">
-                        <ListBox.Resources>
-                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
-                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource TextPrimaryBrush}"/>
-                        </ListBox.Resources>
-                        <ListBox.ItemContainerStyle>
-                          <Style TargetType="ListBoxItem">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="0"/>
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Setter Property="OverridesDefaultStyle" Value="True"/>
-                            <Setter Property="Template">
-                              <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                  <Border Background="Transparent" BorderThickness="0">
-                                    <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
-                                  </Border>
-                                </ControlTemplate>
-                              </Setter.Value>
-                            </Setter>
-                          </Style>
-                        </ListBox.ItemContainerStyle>
-                        <ListBox.ItemsPanel>
-                          <ItemsPanelTemplate>
-                            <VirtualizingStackPanel/>
-                          </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        <ListBox.ItemTemplate>
-                          <DataTemplate>
-                            <Border Margin="0,0,0,8" Padding="10" Background="{StaticResource WhiteBrush}" CornerRadius="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                                    MinWidth="320" Height="160">
-                              <Grid VerticalAlignment="Center">
-                                <Grid.ColumnDefinitions>
-                                  <ColumnDefinition Width="*"/>
-                                  <ColumnDefinition Width="Auto"/>
-                                  <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                  <RowDefinition Height="*"/>
-                                  <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
+              <StackPanel>
+                <!-- Podium summary shown when category finished -->
+                <Border Style="{StaticResource PanelStyle}" Padding="12" Margin="0,0,0,8"
+                        Visibility="{Binding IsCategoryFinished, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  <TextBlock>
+                    <Run Text="Победители: "/>
+                    <Run Text="1 место: "/><Run Text="{Binding PodiumGold}"/>
+                    <Run Text=", 2 место: "/><Run Text="{Binding PodiumSilver}"/>
+                    <Run Text=", 3 место: "/><Run Text="{Binding PodiumBronze}"/>
+                  </TextBlock>
+                </Border>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="{Binding FirstParticipantName}"
-                                           Style="{StaticResource BodyTextStyle}" FontSize="12"
+                <ItemsControl ItemsSource="{Binding Rounds}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <StackPanel Width="340" Margin="8,16,8,16">
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,8"/>
+                        <ListBox ItemsSource="{Binding Items}"
+                                 BorderThickness="0"
+                                 ScrollViewer.CanContentScroll="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling">
+                          <ListBox.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource TextPrimaryBrush}"/>
+                          </ListBox.Resources>
+                          <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                              <Setter Property="Background" Value="Transparent"/>
+                              <Setter Property="BorderThickness" Value="0"/>
+                              <Setter Property="Padding" Value="0"/>
+                              <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                              <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                              <Setter Property="VerticalContentAlignment" Value="Center"/>
+                              <Setter Property="OverridesDefaultStyle" Value="True"/>
+                              <Setter Property="Template">
+                                <Setter.Value>
+                                  <ControlTemplate TargetType="ListBoxItem">
+                                    <Border Background="Transparent" BorderThickness="0">
+                                      <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                    </Border>
+                                  </ControlTemplate>
+                                </Setter.Value>
+                              </Setter>
+                            </Style>
+                          </ListBox.ItemContainerStyle>
+                          <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                              <VirtualizingStackPanel/>
+                            </ItemsPanelTemplate>
+                          </ListBox.ItemsPanel>
+                          <ListBox.ItemTemplate>
+                            <DataTemplate>
+                              <Border Margin="0,0,0,8" Padding="10" Background="{StaticResource WhiteBrush}" CornerRadius="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      MinWidth="320" Height="160">
+                                <Grid VerticalAlignment="Center">
+                                  <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                  </Grid.ColumnDefinitions>
+                                  <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                  </Grid.RowDefinitions>
+
+                                  <TextBlock Grid.Row="0" Grid.Column="0"
+                                             Text="{Binding FirstParticipantName}"
+                                             Style="{StaticResource BodyTextStyle}" FontSize="12"
+                                             VerticalAlignment="Center"
+                                             TextTrimming="CharacterEllipsis"
+                                             ToolTip="{Binding FirstParticipantName}"/>
+                                  <TextBlock Grid.Row="1" Grid.Column="0"
+                                             Text="{Binding SecondParticipantName}"
+                                             Style="{StaticResource BodyTextStyle}" FontSize="12"
+                                             VerticalAlignment="Center"
+                                             TextTrimming="CharacterEllipsis"
+                                             ToolTip="{Binding SecondParticipantName}"/>
+
+                                  <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
+                                              VerticalAlignment="Center"
+                                              Margin="8,0"
+                                              Orientation="Vertical">
+                                    <StackPanel.Style>
+                                      <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding SecondParticipantName}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                          </DataTrigger>
+                                          <DataTrigger Binding="{Binding SecondParticipantName.Length}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                          </DataTrigger>
+                                          <!-- Hide action buttons when category is finished -->
+                                          <DataTrigger Binding="{Binding DataContext.IsCategoryFinished, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </StackPanel.Style>
+                                    <Button Style="{StaticResource IconButtonStyle}"
+                                            ToolTipService.ShowDuration="2000"
+                                            ToolTip="Начать"
+                                            Command="{Binding DataContext.StartMatchCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}">
+                                      <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path Data="M6,4 L20,12 6,20 Z" Fill="{StaticResource TextPrimaryBrush}"/>
+                                      </Viewbox>
+                                    </Button>
+                                    <Button Style="{StaticResource IconButtonStyle}"
+                                            ToolTipService.ShowDuration="2000"
+                                            ToolTip="Завершить"
+                                            Command="{Binding DataContext.FinishMatchCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}">
+                                      <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path Data="M18,6 L6,18 M6,6 L18,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/>
+                                      </Viewbox>
+                                    </Button>
+                                  </StackPanel>
+
+                                  <TextBox Grid.Row="0" Grid.Column="2"
+                                           Width="90" MinWidth="80"
+                                           Margin="8,2,0,2"
                                            VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"
-                                           ToolTip="{Binding FirstParticipantName}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="{Binding SecondParticipantName}"
-                                           Style="{StaticResource BodyTextStyle}" FontSize="12"
+                                           TextAlignment="Center"
+                                           Text="{Binding FirstParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                           Style="{StaticResource TextBoxStyle}"
+                                           IsEnabled="{Binding DataContext.IsCategoryFinished, ElementName=Root, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                  <TextBox Grid.Row="1" Grid.Column="2"
+                                           Width="90" MinWidth="80"
+                                           Margin="8,2,0,2"
                                            VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"
-                                           ToolTip="{Binding SecondParticipantName}"/>
-
-                                <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
-                                            VerticalAlignment="Center"
-                                            Margin="8,0"
-                                            Orientation="Vertical">
-                                  <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                      <Setter Property="Visibility" Value="Visible"/>
-                                      <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SecondParticipantName}" Value="{x:Null}">
-                                          <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SecondParticipantName.Length}" Value="0">
-                                          <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                      </Style.Triggers>
-                                    </Style>
-                                  </StackPanel.Style>
-                                  <Button Style="{StaticResource IconButtonStyle}"
-                                          ToolTipService.ShowDuration="2000"
-                                          ToolTip="Начать"
-                                          Command="{Binding DataContext.StartMatchCommand, ElementName=Root}"
-                                          CommandParameter="{Binding}">
-                                    <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                      <Path Data="M6,4 L20,12 6,20 Z" Fill="{StaticResource TextPrimaryBrush}"/>
-                                    </Viewbox>
-                                  </Button>
-                                  <Button Style="{StaticResource IconButtonStyle}"
-                                          ToolTipService.ShowDuration="2000"
-                                          ToolTip="Завершить"
-                                          Command="{Binding DataContext.FinishMatchCommand, ElementName=Root}"
-                                          CommandParameter="{Binding}">
-                                    <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                      <Path Data="M18,6 L6,18 M6,6 L18,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/>
-                                    </Viewbox>
-                                  </Button>
-                                </StackPanel>
-
-                                <TextBox Grid.Row="0" Grid.Column="2"
-                                         Width="90" MinWidth="80"
-                                         Margin="8,2,0,2"
-                                         VerticalAlignment="Center"
-                                         TextAlignment="Center"
-                                         Text="{Binding FirstParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource TextBoxStyle}"
-                                         IsEnabled="{Binding CanEdit}"/>
-                                <TextBox Grid.Row="1" Grid.Column="2"
-                                         Width="90" MinWidth="80"
-                                         Margin="8,2,0,2"
-                                         VerticalAlignment="Center"
-                                         TextAlignment="Center"
-                                         Text="{Binding SecondParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource TextBoxStyle}"
-                                         IsEnabled="{Binding CanEdit}"/>
-                              </Grid>
-                            </Border>
-                          </DataTemplate>
-                        </ListBox.ItemTemplate>
-                      </ListBox>
-                    </StackPanel>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
+                                           TextAlignment="Center"
+                                           Text="{Binding SecondParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                           Style="{StaticResource TextBoxStyle}"
+                                           IsEnabled="{Binding DataContext.IsCategoryFinished, ElementName=Root, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                </Grid>
+                              </Border>
+                            </DataTemplate>
+                          </ListBox.ItemTemplate>
+                        </ListBox>
+                      </StackPanel>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
             </ScrollViewer>
           </DataTemplate>
         </TabControl.ContentTemplate>

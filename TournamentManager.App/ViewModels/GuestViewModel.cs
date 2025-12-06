@@ -48,7 +48,6 @@ namespace TournamentManager.Client.ViewModels
         [RelayCommand]
         private void Enter()
         {
-            // simply close guest window and return to login
             CloseAction?.Invoke();
         }
 

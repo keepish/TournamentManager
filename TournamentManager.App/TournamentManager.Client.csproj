@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
 	<RootNamespace>TournamentManager.Client</RootNamespace>
 	<AssemblyName>TournamentManager.Client</AssemblyName>
+	<ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="EPPlus" Version="8.3.0" />
     <PackageReference Include="MaterialDesignColors" Version="5.3.0" />
@@ -34,10 +39,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TournamentManager.Core\TournamentManager.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\Icons\" />
   </ItemGroup>
 
 </Project>

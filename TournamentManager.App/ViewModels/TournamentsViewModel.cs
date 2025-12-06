@@ -71,9 +71,9 @@ namespace TournamentManager.Client.ViewModels
 
                 ApplyFilters();
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка загрузки турниров: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка загрузки турниров", "Ошибка");
             }
             finally
             {
@@ -158,9 +158,9 @@ namespace TournamentManager.Client.ViewModels
                         ApplyFilters();
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    MessageBox.Show($"Ошибка удаления турнира: {ex.Message}", "Ошибка");
+                    MessageBox.Show($"Ошибка удаления турнира", "Ошибка");
                 }
             }
         }

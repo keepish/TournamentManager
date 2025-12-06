@@ -66,15 +66,12 @@ namespace TournamentManager.Client.ViewModels
             IsLoading = true;
             try
             {
-                // Load all users
                 var all = await _userService.GetAllAsync() ?? new List<UserDto?>();
                 var allUsers = all.Where(u => u != null).Select(u => u!).ToList();
 
-                // Load organizers (users present in Tournament table via OrganizerId)
                 var organizers = await _userService.GetOrganizersAsync() ?? new List<UserDto?>();
                 var organizerIds = organizers.Where(o => o != null).Select(o => o!.Id).ToHashSet();
 
-                // Keep only users that are NOT present in Tournament table (i.e., not organizers)
                 var candidates = allUsers
                     .Where(u => !organizerIds.Contains(u.Id))
                     .GroupBy(u => u.Id)
@@ -93,9 +90,9 @@ namespace TournamentManager.Client.ViewModels
                 else
                     MessageBox.Show("Нет доступных пользователей для назначения судьёй (пользователи отсутствуют в таблице Tournament)", "Информация");
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка загрузки списка пользователей {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка загрузки списка пользователей", "Ошибка");
             }
             finally
             {

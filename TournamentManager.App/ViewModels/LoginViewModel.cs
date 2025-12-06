@@ -88,7 +88,7 @@ namespace TournamentManager.Client.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка входа", "Ошибка");
             }
             finally
             {

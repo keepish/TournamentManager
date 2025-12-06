@@ -34,7 +34,6 @@ namespace TournamentManager.Client.ViewModels
             _tournament = tournament;
             IsOrganizer = isOrganizer;
 
-            // Determine editability from current time within tournament dates (Active)
             var now = DateTime.Now;
             IsTournamentEditable = now >= _tournament.StartDate && now <= _tournament.EndDate;
 
@@ -92,7 +91,6 @@ namespace TournamentManager.Client.ViewModels
                     Brackets.Add(cb);
                 }
 
-                // restore selection
                 if (oldIndex >= 0 && oldIndex < Brackets.Count)
                 {
                     SelectedBracketIndex = oldIndex;
@@ -102,9 +100,9 @@ namespace TournamentManager.Client.ViewModels
                     SelectedBracketIndex = Brackets.Count > 0 ? 0 : -1;
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка загрузки сетки: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка загрузки сетки", "Ошибка");
             }
             finally
             {
@@ -133,9 +131,9 @@ namespace TournamentManager.Client.ViewModels
                 await _apiService.PutAsync<object>($"api/Matches/{dto.Id}", dto);
                 MessageBox.Show("Результат сохранен", "Успех");
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Не удалось сохранить результат: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Не удалось сохранить результат", "Ошибка");
             }
         }
 
@@ -166,9 +164,9 @@ namespace TournamentManager.Client.ViewModels
                 await _apiService.PostAsync<object>($"api/Matches/{match.MatchId}/advance", new { });
                 await LoadBrackets();
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Не удалось продвинуть победителя: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Не удалось продвинуть победителя", "Ошибка");
             }
         }
 
@@ -212,7 +210,6 @@ namespace TournamentManager.Client.ViewModels
 
         public void ComputePodium()
         {
-            // Find final: last round with a pair
             var final = Rounds.LastOrDefault(r => r.Items.Any(i => i.SecondParticipantTournamentCategoryId.HasValue));
             if (final != null)
             {
@@ -231,7 +228,6 @@ namespace TournamentManager.Client.ViewModels
                     }
                 }
             }
-            // Find bronze round added as "Матч за 3-е место"
             var bronzeRound = Rounds.LastOrDefault(r => r.Title.Contains("3-е место"));
             if (bronzeRound != null)
             {
@@ -305,7 +301,7 @@ namespace TournamentManager.Client.ViewModels
             while (current.Count > 0)
             {
                 var roundItems = new ObservableCollection<MatchItemViewModel>();
-                var usedInRound = new HashSet<int>(); // enforce uniqueness per round
+                var usedInRound = new HashSet<int>();
 
                 if (actualByRound.TryGetValue(roundIndex, out var actual) && actual.Count > 0)
                 {
@@ -315,7 +311,7 @@ namespace TournamentManager.Client.ViewModels
                         int a = m.FirstParticipantTournamentCategoryId;
                         int b = m.SecondParticipantTournamentCategoryId ?? 0;
                         if (usedInRound.Contains(a) || (b != 0 && usedInRound.Contains(b)))
-                            continue; // skip duplicates to enforce single match per participant per round
+                            continue;
 
                         var cm = new MatchItemViewModel
                         {

@@ -61,9 +61,9 @@ namespace TournamentManager.Client.ViewModels
 
                 _mainViewModel.NavigateCommand.Execute("Tournaments");
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка при обновлении турнира: {ex.Message}",
+                MessageBox.Show($"Ошибка при обновлении турнира",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally

@@ -61,7 +61,6 @@ namespace TournamentManager.Client.ViewModels
             LoadParticipants();
         }
 
-        // Служебный метод: определяет, что участник не является пустой строкой-плейсхолдером в DataGrid
         private static bool IsRealParticipant(ParticipantDto p)
         {
             if (p == null) return false;
@@ -86,9 +85,9 @@ namespace TournamentManager.Client.ViewModels
                         if (participant != null)
                             Participants.Add(participant);
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка загрузки участников: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка загрузки участников", "Ошибка");
             }
             finally
             {
@@ -109,7 +108,6 @@ namespace TournamentManager.Client.ViewModels
             {
                 IsLoading = true;
 
-                // Регистрация и формирование пар выполняется на сервере
                 var endpoint = $"api/Tournaments/{_tournament.Id}/register-participants";
                 var registrationResult = await _apiService.PostAsync<TournamentRegistrationResultDto>(endpoint, new { });
 
@@ -117,12 +115,11 @@ namespace TournamentManager.Client.ViewModels
                 var matches = registrationResult.TotalMatchesCreated;
                 MessageBox.Show($"Регистрация завершена. Участников добавлено: {total}. Создано пар: {matches}.", "Успех");
 
-                // Обновляем список участников
                 await LoadParticipants();
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка регистрации участников: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка регистрации участников", "Ошибка");
             }
             finally
             {
@@ -167,9 +164,9 @@ namespace TournamentManager.Client.ViewModels
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка при импорте участников: {ex.Message}", "Ошибка импорта");
+                MessageBox.Show($"Ошибка при импорте участников", "Ошибка импорта");
             }
             finally
             {
@@ -256,9 +253,9 @@ namespace TournamentManager.Client.ViewModels
                             if (participant != null && !string.IsNullOrWhiteSpace(participant.Name) && !string.IsNullOrWhiteSpace(participant.Surname))
                                 participants.Add(participant);
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            System.Diagnostics.Debug.WriteLine($"Ошибка парсинга строки {row}: {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine($"Ошибка парсинга строки {row}");
                         }
                     }
                 }
@@ -278,9 +275,9 @@ namespace TournamentManager.Client.ViewModels
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка при работе с Excel: {ex.Message}\n\nУбедитесь, что Excel установлен на компьютере.", "Ошибка Excel");
+                MessageBox.Show($"Ошибка при работе с Excel\n\nУбедитесь, что Excel установлен на компьютере.", "Ошибка Excel");
             }
 
             return participants;
@@ -312,7 +309,6 @@ namespace TournamentManager.Client.ViewModels
 
                 if (!string.IsNullOrEmpty(genderValue))
                 {
-                    // 1 — мужской, 0 — женский
                     var g = genderValue.ToLower();
                     if (g == "1" || g == "мужской" || g == "м")
                         participant.Gender = 1UL;
@@ -397,9 +393,9 @@ namespace TournamentManager.Client.ViewModels
                     MessageBox.Show($"Участники успешно экспортированы в файл: {saveFileDialog.FileName}", "Экспорт завершен");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка при экспорте участников: {ex.Message}", "Ошибка экспорта");
+                MessageBox.Show($"Ошибка при экспорте участников", "Ошибка экспорта");
             }
             finally
             {
@@ -628,7 +624,6 @@ namespace TournamentManager.Client.ViewModels
                 if (string.IsNullOrWhiteSpace(participant.Name))
                     errors.Add($"Строка {rowNumber}: Имя обязательно");
 
-                // Пол: 1 — мужской, 0 — женский
                 if (participant.Gender != 0UL && participant.Gender != 1UL)
                     errors.Add($"Строка {rowNumber}: Укажите пол (1 - мужской, 0 - женский)");
 
@@ -698,22 +693,20 @@ namespace TournamentManager.Client.ViewModels
 
             try
             {
-                // Если участник есть в БД, удаляем из сервиса
                 if (participant.Id > 0)
                 {
                     await _participantService.DeleteAsync(participant.Id);
                 }
 
-                // Удаляем из локальной коллекции, если ещё присутствует
                 if (Participants.Contains(participant))
                 {
                     Participants.Remove(participant);
                     HasUnsavedChanges = true;
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Ошибка удаления участника: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка удаления участника", "Ошибка");
             }
         }
     }

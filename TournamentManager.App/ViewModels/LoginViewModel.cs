@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 using System.Windows;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Categories;
@@ -93,6 +94,17 @@ namespace TournamentManager.Client.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        [RelayCommand]
+        private void GuestLogin()
+        {
+            var guestWindow = new GuestWindow();
+            var vm = new GuestViewModel(_tournamentService);
+            vm.CloseAction = () => guestWindow.Close();
+            guestWindow.DataContext = vm;
+            guestWindow.Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is LoginWindow);
+            guestWindow.ShowDialog();
         }
 
         private void CloseLoginWindow()

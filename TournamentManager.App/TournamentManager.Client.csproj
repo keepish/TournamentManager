@@ -36,4 +36,8 @@
     <ProjectReference Include="..\TournamentManager.Core\TournamentManager.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\Icons\" />
+  </ItemGroup>
+
 </Project>

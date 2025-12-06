@@ -254,7 +254,6 @@ namespace TournamentManager.Client.ViewModels
                 return;
             }
 
-            // Local helpers
             (int id, string name) DecideWinnerLocal(MatchItemViewModel m)
             {
                 if (m.SecondParticipantTournamentCategoryId == null)
@@ -298,7 +297,6 @@ namespace TournamentManager.Client.ViewModels
                 participants = participants.Distinct().OrderBy(x => x.id).ToList();
             }
 
-            // Main loop until champion
             var current = new List<(int id, string name)>(participants);
             var builtRounds = new List<BracketRoundViewModel>();
             ObservableCollection<MatchItemViewModel>? semifinalRound = null;
@@ -307,17 +305,22 @@ namespace TournamentManager.Client.ViewModels
             while (current.Count > 0)
             {
                 var roundItems = new ObservableCollection<MatchItemViewModel>();
+                var usedInRound = new HashSet<int>(); // enforce uniqueness per round
 
-                // Prefer overlay of actual matches for this round
                 if (actualByRound.TryGetValue(roundIndex, out var actual) && actual.Count > 0)
                 {
                     int ord = 1;
                     foreach (var m in actual)
                     {
+                        int a = m.FirstParticipantTournamentCategoryId;
+                        int b = m.SecondParticipantTournamentCategoryId ?? 0;
+                        if (usedInRound.Contains(a) || (b != 0 && usedInRound.Contains(b)))
+                            continue; // skip duplicates to enforce single match per participant per round
+
                         var cm = new MatchItemViewModel
                         {
                             MatchId = m.MatchId,
-                            FirstParticipantTournamentCategoryId = m.FirstParticipantTournamentCategoryId,
+                            FirstParticipantTournamentCategoryId = a,
                             SecondParticipantTournamentCategoryId = m.SecondParticipantTournamentCategoryId,
                             FirstParticipantName = m.FirstParticipantName,
                             SecondParticipantName = m.SecondParticipantName,
@@ -329,20 +332,23 @@ namespace TournamentManager.Client.ViewModels
                             Order = ord++
                         };
                         roundItems.Add(cm);
+                        usedInRound.Add(a);
+                        if (b != 0) usedInRound.Add(b);
                     }
                 }
                 else
                 {
-                    // Synthesize matches from current participants
                     int ord = 1;
                     int count = current.Count;
                     bool hasBye = (count % 2) == 1;
-                    int pairs = count / 2; // integer division
+                    int pairs = count / 2;
                     int idx = 0;
                     for (int p = 0; p < pairs; p++)
                     {
                         var a = current[idx++];
                         var b = current[idx++];
+                        if (usedInRound.Contains(a.id) || usedInRound.Contains(b.id))
+                            continue;
                         roundItems.Add(new MatchItemViewModel
                         {
                             MatchId = 0,
@@ -357,49 +363,55 @@ namespace TournamentManager.Client.ViewModels
                             Round = roundIndex,
                             Order = ord++
                         });
+                        usedInRound.Add(a.id);
+                        usedInRound.Add(b.id);
                     }
                     if (hasBye)
                     {
                         var bye = current.Last();
-                        roundItems.Add(new MatchItemViewModel
+                        if (!usedInRound.Contains(bye.id))
                         {
-                            MatchId = 0,
-                            FirstParticipantTournamentCategoryId = bye.id,
-                            SecondParticipantTournamentCategoryId = null,
-                            FirstParticipantName = bye.name,
-                            SecondParticipantName = null,
-                            FirstParticipantScore = 0,
-                            SecondParticipantScore = 0,
-                            IsStarted = false,
-                            IsFinished = false,
-                            Round = roundIndex,
-                            Order = pairs + 1
-                        });
+                            roundItems.Add(new MatchItemViewModel
+                            {
+                                MatchId = 0,
+                                FirstParticipantTournamentCategoryId = bye.id,
+                                SecondParticipantTournamentCategoryId = null,
+                                FirstParticipantName = bye.name,
+                                SecondParticipantName = null,
+                                FirstParticipantScore = 0,
+                                SecondParticipantScore = 0,
+                                IsStarted = false,
+                                IsFinished = false,
+                                Round = roundIndex,
+                                Order = pairs + 1
+                            });
+                            usedInRound.Add(bye.id);
+                        }
                     }
                 }
 
                 var roundVm = new BracketRoundViewModel($"Раунд {roundIndex}", roundItems);
                 builtRounds.Add(roundVm);
 
-                // Track semifinal round (the round before final): when next round will have 2 participants and current had exactly 2 real matches (no byes)
-                // Semifinal condition: roundItems contains exactly 2 items and both have two participants
                 if (roundItems.Count == 2 && roundItems.All(i => i.SecondParticipantTournamentCategoryId.HasValue))
                 {
                     semifinalRound = roundItems;
                 }
 
-                // Compute next participants from winners
                 var next = new List<(int id, string name)>();
+                var usedNext = new HashSet<int>();
                 foreach (var m in roundItems)
                 {
-                    // bye member goes through automatically
                     if (m.SecondParticipantTournamentCategoryId == null)
                     {
-                        next.Add((m.FirstParticipantTournamentCategoryId, m.FirstParticipantName));
+                        if (!usedNext.Contains(m.FirstParticipantTournamentCategoryId))
+                        {
+                            next.Add((m.FirstParticipantTournamentCategoryId, m.FirstParticipantName));
+                            usedNext.Add(m.FirstParticipantTournamentCategoryId);
+                        }
                         continue;
                     }
 
-                    // Use decided winner; equal scores are not allowed by rule, but in case of placeholder, stop progression
                     if (m.MatchId == 0 && m.FirstParticipantScore == m.SecondParticipantScore)
                     {
                         next.Clear();
@@ -407,14 +419,17 @@ namespace TournamentManager.Client.ViewModels
                     }
 
                     var w = DecideWinnerLocal(m);
-                    next.Add(w);
+                    if (!usedNext.Contains(w.id))
+                    {
+                        next.Add(w);
+                        usedNext.Add(w.id);
+                    }
                 }
 
                 if (next.Count == 0)
                     break;
                 if (next.Count == 1)
                 {
-                    // Final already decided; champion found
                     current = next;
                     break;
                 }
@@ -422,11 +437,9 @@ namespace TournamentManager.Client.ViewModels
                 roundIndex++;
             }
 
-            // Commit built rounds to Rounds
             foreach (var r in builtRounds)
                 Rounds.Add(r);
 
-            // Bronze match: only if semifinal existed with two real matches (no byes)
             if (semifinalRound != null)
             {
                 var losers = new List<(int id, string name)>();
@@ -435,28 +448,32 @@ namespace TournamentManager.Client.ViewModels
                     if (!m.SecondParticipantTournamentCategoryId.HasValue)
                     {
                         losers.Clear();
-                        break; // bye present: no bronze match
+                        break;
                     }
-                    losers.Add(DecideLoserLocal(m));
+                    var l = DecideLoserLocal(m);
+                    if (!losers.Any(x => x.id == l.id) && l.id != 0)
+                        losers.Add(l);
                 }
 
                 if (losers.Count == 2)
                 {
-                    var bronzeItems = new ObservableCollection<MatchItemViewModel>();
-                    bronzeItems.Add(new MatchItemViewModel
+                    var bronzeItems = new ObservableCollection<MatchItemViewModel>
                     {
-                        MatchId = 0,
-                        FirstParticipantTournamentCategoryId = losers[0].id,
-                        SecondParticipantTournamentCategoryId = losers[1].id,
-                        FirstParticipantName = losers[0].name,
-                        SecondParticipantName = losers[1].name,
-                        FirstParticipantScore = 0,
-                        SecondParticipantScore = 0,
-                        IsStarted = false,
-                        IsFinished = false,
-                        Round = builtRounds.Count + 1,
-                        Order = 1
-                    });
+                        new MatchItemViewModel
+                        {
+                            MatchId = 0,
+                            FirstParticipantTournamentCategoryId = losers[0].id,
+                            SecondParticipantTournamentCategoryId = losers[1].id,
+                            FirstParticipantName = losers[0].name,
+                            SecondParticipantName = losers[1].name,
+                            FirstParticipantScore = 0,
+                            SecondParticipantScore = 0,
+                            IsStarted = false,
+                            IsFinished = false,
+                            Round = builtRounds.Count + 1,
+                            Order = 1
+                        }
+                    };
                     Rounds.Add(new BracketRoundViewModel("Матч за 3-е место", bronzeItems));
                 }
             }

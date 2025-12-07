@@ -8,7 +8,7 @@ namespace TournamentManager.Core.Services
     {
         private readonly HttpClient _httpClient;
         private readonly SecureStorage _secureStorage;
-        private const string BaseUrl = "https://localhost:7074/";
+        private const string BaseUrl = "http://localhost:7074/";
 
         public ApiService(SecureStorage secureStorage)
         {

@@ -137,6 +137,12 @@ namespace TournamentManager.Client.ViewModels
         private void MoveRight(MatchItemViewModel match)
         {
             if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0) return;
+            // Участник уже перемещён — повторный перенос запрещён
+            if (match.FirstMoved)
+            {
+                MessageBox.Show("Этот участник уже перемещён в следующий раунд.", "Внимание");
+                return;
+            }
             // Разрешить перенос первого участника только если второй ещё не переносился
             if (match.SecondMoved)
             {
@@ -240,6 +246,12 @@ namespace TournamentManager.Client.ViewModels
         private void MoveRightSecond(MatchItemViewModel match)
         {
             if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0 || !match.SecondParticipantTournamentCategoryId.HasValue) return;
+            // Участник уже перемещён — повторный перенос запрещён
+            if (match.SecondMoved)
+            {
+                MessageBox.Show("Этот участник уже перемещён в следующий раунд.", "Внимание");
+                return;
+            }
             // Разрешить перенос второго участника только если первый ещё не переносился
             if (match.FirstMoved)
             {

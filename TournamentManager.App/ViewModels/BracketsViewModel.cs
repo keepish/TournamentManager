@@ -120,78 +120,7 @@ namespace TournamentManager.Client.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async Task SaveMatchScore(MatchItemViewModel match)
-        {
-            if (!IsTournamentEditable) return;
-            if (match == null || match.MatchId == 0)
-                return;
-
-            try
-            {
-                var dto = new MatchDto
-                {
-                    Id = match.MatchId,
-                    FirstParticipantId = match.FirstParticipantTournamentCategoryId,
-                    SecondParticipantId = match.SecondParticipantTournamentCategoryId,
-                    FirstParticipantScore = match.FirstParticipantScore,
-                    SecondParticipantScore = match.SecondParticipantScore
-                };
-
-                await _apiService.PutAsync<object>($"api/Matches/{dto.Id}", dto);
-                MessageBox.Show("Результат сохранен", "Успех");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Не удалось сохранить результат: {ex.Message}", "Ошибка");
-            }
-        }
-
-        [RelayCommand]
-        private void StartMatch(MatchItemViewModel match)
-        {
-            if (!IsTournamentEditable) return;
-            if (match == null || match.IsFinished || match.MatchId == 0 || SelectedBracketIndex < 0) return;
-            var category = Brackets[SelectedBracketIndex];
-            if (category.IsCategoryFinished) return;
-            match.IsStarted = true;
-        }
-
-        [RelayCommand]
-        private async Task FinishMatch(MatchItemViewModel match)
-        {
-            if (!IsTournamentEditable) return;
-            if (match == null || !match.IsStarted || match.IsFinished || match.MatchId == 0 || SelectedBracketIndex < 0) return;
-            var category = Brackets[SelectedBracketIndex];
-            if (category.IsCategoryFinished) return;
-
-            match.IsFinished = true;
-
-            await SaveMatchScore(match);
-
-            try
-            {
-                await _apiService.PostAsync<object>($"api/Matches/{match.MatchId}/advance", new { });
-                await LoadBrackets();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Не удалось продвинуть победителя: {ex.Message}", "Ошибка");
-            }
-        }
-
-        [RelayCommand]
-        private void EditMatch(MatchItemViewModel match)
-        {
-            if (!IsTournamentEditable) return;
-            if (!IsOrganizer || match == null || match.MatchId == 0 || SelectedBracketIndex < 0) return;
-            var category = Brackets[SelectedBracketIndex];
-            if (category.IsCategoryFinished) return;
-            if (!match.IsFinished) return;
-
-            match.IsFinished = false;
-            match.IsStarted = true;
-        }
+        // Команды начать/завершить и сетевые вызовы сохранены из логики. Все изменения выполняются локально, серверная фиксация только при закрытии категории.
 
         [RelayCommand]
         private void FinishCategory()

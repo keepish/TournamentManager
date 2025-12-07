@@ -7,24 +7,12 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
     <Border Grid.Row="0" Style="{StaticResource PanelStyle}" Padding="12">
       <DockPanel>
         <TextBlock Text="Турнирные сетки" Style="{StaticResource HeaderTextStyle}" DockPanel.Dock="Left"/>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-          <Button Content="Назад"
-                  Style="{StaticResource SecondaryButtonStyle}"
-                  Command="{Binding DataContext.BackCommand, ElementName=Root}"
-                  Margin="0,0,8,0"
-                  ToolTip="Вернуться к деталям турнира"/>
-          <Button Content="Завершить категорию"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  Margin="8,0,0,0"
-                  Command="{Binding DataContext.FinishCategoryCommand, ElementName=Root}"
-                  IsEnabled="{Binding ElementName=Root, Path=DataContext.IsTournamentEditable}"
-                  ToolTip="Фиксировать результаты и показать призовые места"/>
-        </StackPanel>
       </DockPanel>
     </Border>
 
@@ -123,50 +111,7 @@
                                              TextTrimming="CharacterEllipsis"
                                              ToolTip="{Binding SecondParticipantName}"/>
 
-                                  <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
-                                              VerticalAlignment="Center"
-                                              Margin="8,0"
-                                              Orientation="Vertical">
-                                    <StackPanel.Style>
-                                      <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <Style.Triggers>
-                                          <DataTrigger Binding="{Binding SecondParticipantName}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                          </DataTrigger>
-                                          <DataTrigger Binding="{Binding SecondParticipantName.Length}" Value="0">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                          </DataTrigger>
-                                          <!-- Hide action buttons when category is finished -->
-                                          <DataTrigger Binding="{Binding DataContext.IsCategoryFinished, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                          </DataTrigger>
-                                          <!-- Hide action buttons if tournament not editable -->
-                                          <DataTrigger Binding="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                          </DataTrigger>
-                                        </Style.Triggers>
-                                      </Style>
-                                    </StackPanel.Style>
-                                    <Button Style="{StaticResource IconButtonStyle}"
-                                            ToolTipService.ShowDuration="2000"
-                                            ToolTip="Начать"
-                                            Command="{Binding DataContext.StartMatchCommand, ElementName=Root}"
-                                            CommandParameter="{Binding}">
-                                      <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <Path Data="M6,4 L20,12 6,20 Z" Fill="{StaticResource TextPrimaryBrush}"/>
-                                      </Viewbox>
-                                    </Button>
-                                    <Button Style="{StaticResource IconButtonStyle}"
-                                            ToolTipService.ShowDuration="2000"
-                                            ToolTip="Завершить"
-                                            Command="{Binding DataContext.FinishMatchCommand, ElementName=Root}"
-                                            CommandParameter="{Binding}">
-                                      <Viewbox Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <Path Data="M18,6 L6,18 M6,6 L18,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/>
-                                      </Viewbox>
-                                    </Button>
-                                  </StackPanel>
+                                  <!-- Кнопки начать/завершить удалены. Изменения выполняются локально, сервер фиксируется только при закрытии категории. -->
 
                                   <TextBox Grid.Row="0" Grid.Column="2"
                                            Width="90" MinWidth="80"
@@ -199,5 +144,21 @@
         </TabControl.ContentTemplate>
       </TabControl>
     </Border>
+
+    <!-- Нижняя панель действий -->
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,20,0,0">
+      <Button Content="Назад"
+              Style="{StaticResource SecondaryButtonStyle}"
+              Command="{Binding DataContext.BackCommand, ElementName=Root}"
+              Height="40"
+              Margin="0,0,12,0"
+              ToolTip="Вернуться к деталям турнира"/>
+      <Button Content="Завершить категорию"
+              Style="{StaticResource PrimaryButtonStyle}"
+              Height="40"
+              Command="{Binding DataContext.FinishCategoryCommand, ElementName=Root}"
+              IsEnabled="{Binding ElementName=Root, Path=DataContext.IsTournamentEditable}"
+              ToolTip="Фиксировать результаты и показать призовые места"/>
+    </StackPanel>
   </Grid>
 </UserControl>

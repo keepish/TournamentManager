@@ -1,0 +1,56 @@
+services:
+  db:
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    container_name: tournament-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mysql_tournament_data:/var/lib/mysql
+
+  api:
+    build:
+      context: .
+      dockerfile: TournamentManager.Api/Dockerfile
+    container_name: tournament-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__DefaultConnection: Server=db;Port=3306;Database=${DB_NAME};User=${DB_USER};Password=${DB_PASSWORD}
+      JWT_Key: ${JWT_KEY:-SuperSecretKeyForMyAppForAuthorizationTournament}
+      JWT_Issuer: ${JWT_ISSUER:-TournamentManager.Api}
+      JWT_Audience: ${JWT_AUDIENCE:-TournamentManager.Client}
+      ASPNETCORE_URLS: http://+:8080
+      APPLY_MIGRATIONS_ON_STARTUP: "true"
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:7074}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "7074:8080"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: tournament-manager-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+      UPLOAD_LIMIT: 256M
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+
+volumes:
+  mysql_tournament_data:
+    name: ${DB_VOLUME_NAME}

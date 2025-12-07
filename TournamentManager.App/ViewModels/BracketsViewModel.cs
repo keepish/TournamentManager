@@ -151,18 +151,36 @@ namespace TournamentManager.Client.ViewModels
             if (nextRoundIndex > category.Rounds.Count) return;
 
             var nextRound = category.Rounds[nextRoundIndex - 1];
-            var target = nextRound.Items.FirstOrDefault(i => string.IsNullOrEmpty(i.FirstParticipantName) && !i.FirstParticipantTournamentCategoryId.Equals(match.FirstParticipantTournamentCategoryId));
-            if (target == null)
+            // ќпредел€ем индекс бо€ в следующем раунде: ближайший соответствующий (по пор€дку пар)
+            var targetMatchIndex = Math.Max(1, (match.Order + 1) / 2); // ceil(Order/2)
+            if (targetMatchIndex > nextRound.Items.Count) targetMatchIndex = nextRound.Items.Count;
+            var target = nextRound.Items[targetMatchIndex - 1];
+            // «аполн€ем слот первого участника
+            if (string.IsNullOrEmpty(target.FirstParticipantName) || target.FirstParticipantTournamentCategoryId == 0)
             {
-                target = nextRound.Items.FirstOrDefault(i => !i.SecondParticipantTournamentCategoryId.HasValue && string.IsNullOrEmpty(i.SecondParticipantName));
-                if (target == null) return;
+                target.FirstParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
+                target.FirstParticipantName = match.FirstParticipantName;
+            }
+            else if (!target.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(target.SecondParticipantName))
+            {
                 target.SecondParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
                 target.SecondParticipantName = match.FirstParticipantName;
             }
             else
             {
-                target.FirstParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
-                target.FirstParticipantName = match.FirstParticipantName;
+                // если оба слота зан€ты, ищем ближайший следующий свободный
+                var fallback = nextRound.Items.FirstOrDefault(i => i.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(i.FirstParticipantName) || !i.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(i.SecondParticipantName));
+                if (fallback == null) return;
+                if (fallback.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(fallback.FirstParticipantName))
+                {
+                    fallback.FirstParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
+                    fallback.FirstParticipantName = match.FirstParticipantName;
+                }
+                else
+                {
+                    fallback.SecondParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
+                    fallback.SecondParticipantName = match.FirstParticipantName;
+                }
             }
             // ќставл€ем им€ в исходной позиции
             match.FirstMoved = true;
@@ -232,19 +250,35 @@ namespace TournamentManager.Client.ViewModels
             var currentRoundIndex = match.Round;
             if (currentRoundIndex >= category.Rounds.Count) return;
             var nextRound = category.Rounds[currentRoundIndex];
-
-            var target = nextRound.Items.FirstOrDefault(i => string.IsNullOrEmpty(i.FirstParticipantName));
-            if (target == null)
+            // »ндекс бо€ в следующем раунде аналогично: ceil(Order/2)
+            var targetMatchIndex = Math.Max(1, (match.Order + 1) / 2);
+            if (targetMatchIndex > nextRound.Items.Count) targetMatchIndex = nextRound.Items.Count;
+            var target = nextRound.Items[targetMatchIndex - 1];
+            // «аполн€ем слот второго участника
+            if (!target.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(target.SecondParticipantName))
             {
-                target = nextRound.Items.FirstOrDefault(i => !i.SecondParticipantTournamentCategoryId.HasValue && string.IsNullOrEmpty(i.SecondParticipantName));
-                if (target == null) return;
                 target.SecondParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId;
                 target.SecondParticipantName = match.SecondParticipantName;
             }
-            else
+            else if (target.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(target.FirstParticipantName))
             {
                 target.FirstParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId.Value;
                 target.FirstParticipantName = match.SecondParticipantName;
+            }
+            else
+            {
+                var fallback = nextRound.Items.FirstOrDefault(i => !i.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(i.SecondParticipantName) || i.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(i.FirstParticipantName));
+                if (fallback == null) return;
+                if (!fallback.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(fallback.SecondParticipantName))
+                {
+                    fallback.SecondParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId;
+                    fallback.SecondParticipantName = match.SecondParticipantName;
+                }
+                else
+                {
+                    fallback.FirstParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId.Value;
+                    fallback.FirstParticipantName = match.SecondParticipantName;
+                }
             }
             match.SecondMoved = true;
         }

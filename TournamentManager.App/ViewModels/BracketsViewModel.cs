@@ -131,6 +131,143 @@ namespace TournamentManager.Client.ViewModels
             category.ComputePodium();
             category.IsCategoryFinished = true;
         }
+
+        // Перемещение первого участника вправо (в следующий раунд)
+        [RelayCommand]
+        private void MoveRight(MatchItemViewModel match)
+        {
+            if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0) return;
+            var category = Brackets[SelectedBracketIndex];
+            var currentRoundIndex = match.Round;
+            if (currentRoundIndex >= category.Rounds.Count) return; // последний раунд
+
+            var nextRoundIndex = currentRoundIndex + 1;
+            if (nextRoundIndex > category.Rounds.Count) return;
+
+            var nextRound = category.Rounds[nextRoundIndex - 1];
+            var target = nextRound.Items.FirstOrDefault(i => string.IsNullOrEmpty(i.FirstParticipantName) && !i.FirstParticipantTournamentCategoryId.Equals(match.FirstParticipantTournamentCategoryId));
+            if (target == null)
+            {
+                target = nextRound.Items.FirstOrDefault(i => !i.SecondParticipantTournamentCategoryId.HasValue && string.IsNullOrEmpty(i.SecondParticipantName));
+                if (target == null) return;
+                target.SecondParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
+                target.SecondParticipantName = match.FirstParticipantName;
+            }
+            else
+            {
+                target.FirstParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
+                target.FirstParticipantName = match.FirstParticipantName;
+            }
+            // Оставляем имя в исходной позиции
+        }
+
+        // Перемещение первого участника влево (в предыдущий раунд на исходную позицию)
+        [RelayCommand]
+        private void MoveLeft(MatchItemViewModel match)
+        {
+            if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0) return;
+            var category = Brackets[SelectedBracketIndex];
+            var currentRoundIndex = match.Round;
+            if (currentRoundIndex <= 1) return; // первый раунд
+
+            var prevRoundIndex = currentRoundIndex - 1;
+            var prevRound = category.Rounds[prevRoundIndex - 1];
+            // найти исходную позицию по Id
+            var origin = prevRound.Items.FirstOrDefault(i => i.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId || i.SecondParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId);
+            if (origin != null)
+            {
+                if (origin.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
+                {
+                    origin.FirstParticipantName = match.FirstParticipantName;
+                }
+                else if (origin.SecondParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
+                {
+                    origin.SecondParticipantName = match.FirstParticipantName;
+                }
+                // удалить из текущего раунда
+                if (match != null)
+                {
+                    // очистить из слота, если он был скопирован
+                    var currentRound = category.Rounds[currentRoundIndex - 1];
+                    foreach (var itm in currentRound.Items)
+                    {
+                        if (itm.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
+                        {
+                            itm.FirstParticipantTournamentCategoryId = 0;
+                            itm.FirstParticipantName = string.Empty;
+                            break;
+                        }
+                        if (itm.SecondParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
+                        {
+                            itm.SecondParticipantTournamentCategoryId = null;
+                            itm.SecondParticipantName = null;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Аналогичные команды для второго участника
+        [RelayCommand]
+        private void MoveRightSecond(MatchItemViewModel match)
+        {
+            if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0 || !match.SecondParticipantTournamentCategoryId.HasValue) return;
+            var category = Brackets[SelectedBracketIndex];
+            var currentRoundIndex = match.Round;
+            if (currentRoundIndex >= category.Rounds.Count) return;
+            var nextRound = category.Rounds[currentRoundIndex];
+
+            var target = nextRound.Items.FirstOrDefault(i => string.IsNullOrEmpty(i.FirstParticipantName));
+            if (target == null)
+            {
+                target = nextRound.Items.FirstOrDefault(i => !i.SecondParticipantTournamentCategoryId.HasValue && string.IsNullOrEmpty(i.SecondParticipantName));
+                if (target == null) return;
+                target.SecondParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId;
+                target.SecondParticipantName = match.SecondParticipantName;
+            }
+            else
+            {
+                target.FirstParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId.Value;
+                target.FirstParticipantName = match.SecondParticipantName;
+            }
+        }
+
+        [RelayCommand]
+        private void MoveLeftSecond(MatchItemViewModel match)
+        {
+            if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0 || !match.SecondParticipantTournamentCategoryId.HasValue) return;
+            var category = Brackets[SelectedBracketIndex];
+            var currentRoundIndex = match.Round;
+            if (currentRoundIndex <= 1) return;
+            var prevRound = category.Rounds[currentRoundIndex - 2];
+            var origin = prevRound.Items.FirstOrDefault(i => i.FirstParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId || i.SecondParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId);
+            if (origin != null)
+            {
+                if (origin.FirstParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
+                    origin.FirstParticipantName = match.SecondParticipantName;
+                else if (origin.SecondParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
+                    origin.SecondParticipantName = match.SecondParticipantName;
+
+                // очистить текущий слот
+                var currentRound = category.Rounds[currentRoundIndex - 1];
+                foreach (var itm in currentRound.Items)
+                {
+                    if (itm.FirstParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
+                    {
+                        itm.FirstParticipantTournamentCategoryId = 0;
+                        itm.FirstParticipantName = string.Empty;
+                        break;
+                    }
+                    if (itm.SecondParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
+                    {
+                        itm.SecondParticipantTournamentCategoryId = null;
+                        itm.SecondParticipantName = null;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     public partial class CategoryBracketItemViewModel : ObservableObject

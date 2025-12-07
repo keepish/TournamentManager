@@ -104,12 +104,42 @@
                                              VerticalAlignment="Center"
                                              TextTrimming="CharacterEllipsis"
                                              ToolTip="{Binding FirstParticipantName}"/>
+                                  <!-- Стрелки управления для первого участника -->
+                                  <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Left">
+                                    <Button Style="{StaticResource IconButtonStyle}"
+                                            ToolTip="Влево"
+                                            Command="{Binding DataContext.MoveLeftCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}" Visibility="{Binding Round, Converter={StaticResource RoundToLeftVisibilityConverter}}">
+                                      <Viewbox Width="12" Height="12"><Path Data="M12,6 L6,12 12,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>
+                                    </Button>
+                                    <Button Style="{StaticResource IconButtonStyle}"
+                                            ToolTip="Вправо"
+                                            Command="{Binding DataContext.MoveRightCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}">
+                                      <Viewbox Width="12" Height="12"><Path Data="M6,6 L12,12 6,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>
+                                    </Button>
+                                  </StackPanel>
                                   <TextBlock Grid.Row="1" Grid.Column="0"
                                              Text="{Binding SecondParticipantName}"
                                              Style="{StaticResource BodyTextStyle}" FontSize="12"
                                              VerticalAlignment="Center"
                                              TextTrimming="CharacterEllipsis"
                                              ToolTip="{Binding SecondParticipantName}"/>
+                                  <!-- Стрелки управления для второго участника -->
+                                  <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Left">
+                                    <Button Style="{StaticResource IconButtonStyle}"
+                                            ToolTip="Влево"
+                                            Command="{Binding DataContext.MoveLeftSecondCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}" Visibility="{Binding Round, Converter={StaticResource RoundToLeftVisibilityConverter}}">
+                                      <Viewbox Width="12" Height="12"><Path Data="M12,6 L6,12 12,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>
+                                    </Button>
+                                    <Button Style="{StaticResource IconButtonStyle}"
+                                            ToolTip="Вправо"
+                                            Command="{Binding DataContext.MoveRightSecondCommand, ElementName=Root}"
+                                            CommandParameter="{Binding}">
+                                      <Viewbox Width="12" Height="12"><Path Data="M6,6 L12,12 6,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>
+                                    </Button>
+                                  </StackPanel>
 
                                   <!-- Кнопки начать/завершить удалены. Изменения выполняются локально, сервер фиксируется только при закрытии категории. -->
 

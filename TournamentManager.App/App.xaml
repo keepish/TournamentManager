@@ -14,6 +14,7 @@
             <converters:CollapsedMenuWidthConverter x:Key="CollapsedMenuWidthConverter"/>
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:RoundToLeftVisibilityConverter x:Key="RoundToLeftVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

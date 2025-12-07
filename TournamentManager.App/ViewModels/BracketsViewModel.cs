@@ -12,6 +12,7 @@ namespace TournamentManager.Client.ViewModels
     {
         private readonly ApiService _apiService;
         private readonly TournamentDto _tournament;
+        private readonly MainViewModel _mainViewModel;
 
         [ObservableProperty]
         private bool isOrganizer;
@@ -28,10 +29,11 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty]
         private bool isTournamentEditable;
 
-        public BracketsViewModel(ApiService apiService, TournamentDto tournament, bool isOrganizer)
+        public BracketsViewModel(ApiService apiService, TournamentDto tournament, bool isOrganizer, MainViewModel mainViewModel)
         {
             _apiService = apiService;
             _tournament = tournament;
+            _mainViewModel = mainViewModel;
             IsOrganizer = isOrganizer;
 
             // Determine editability from current time within tournament dates (Active)
@@ -40,6 +42,12 @@ namespace TournamentManager.Client.ViewModels
 
             SelectedBracketIndex = 0;
             LoadBracketsCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private void Back()
+        {
+            _mainViewModel.NavigateToTournamentDetails(_tournament);
         }
 
         [RelayCommand]

@@ -13,6 +13,11 @@
       <DockPanel>
         <TextBlock Text="Турнирные сетки" Style="{StaticResource HeaderTextStyle}" DockPanel.Dock="Left"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button Content="Назад"
+                  Style="{StaticResource SecondaryButtonStyle}"
+                  Command="{Binding DataContext.BackCommand, ElementName=Root}"
+                  Margin="0,0,8,0"
+                  ToolTip="Вернуться к деталям турнира"/>
           <Button Content="Завершить категорию"
                   Style="{StaticResource PrimaryButtonStyle}"
                   Margin="8,0,0,0"

@@ -169,7 +169,7 @@ namespace TournamentManager.Client.ViewModels
         {
             CurrentView = new BracketsView
             {
-                DataContext = new BracketsViewModel(_apiService, tournament, CurrentUser.IsOrganizer)
+                DataContext = new BracketsViewModel(_apiService, tournament, CurrentUser.IsOrganizer, this)
             };
         }
     }

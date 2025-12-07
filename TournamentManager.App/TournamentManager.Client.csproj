@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
 	<RootNamespace>TournamentManager.Client</RootNamespace>
 	<AssemblyName>TournamentManager.Client</AssemblyName>
+	<ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,10 @@
       <Isolated>false</Isolated>
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icon.ico" />
   </ItemGroup>
 
   <ItemGroup>

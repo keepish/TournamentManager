@@ -137,6 +137,12 @@ namespace TournamentManager.Client.ViewModels
         private void MoveRight(MatchItemViewModel match)
         {
             if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0) return;
+            // –азрешить перенос первого участника только если второй ещЄ не переносилс€
+            if (match.SecondMoved)
+            {
+                MessageBox.Show("»з одного поединка можно перенести только одного участника.", "¬нимание");
+                return;
+            }
             var category = Brackets[SelectedBracketIndex];
             var currentRoundIndex = match.Round;
             if (currentRoundIndex >= category.Rounds.Count) return; // последний раунд
@@ -159,6 +165,7 @@ namespace TournamentManager.Client.ViewModels
                 target.FirstParticipantName = match.FirstParticipantName;
             }
             // ќставл€ем им€ в исходной позиции
+            match.FirstMoved = true;
         }
 
         // ѕеремещение первого участника влево (в предыдущий раунд на исходную позицию)
@@ -195,12 +202,14 @@ namespace TournamentManager.Client.ViewModels
                         {
                             itm.FirstParticipantTournamentCategoryId = 0;
                             itm.FirstParticipantName = string.Empty;
+                            match.FirstMoved = false;
                             break;
                         }
                         if (itm.SecondParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
                         {
                             itm.SecondParticipantTournamentCategoryId = null;
                             itm.SecondParticipantName = null;
+                            match.FirstMoved = false;
                             break;
                         }
                     }
@@ -213,6 +222,12 @@ namespace TournamentManager.Client.ViewModels
         private void MoveRightSecond(MatchItemViewModel match)
         {
             if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0 || !match.SecondParticipantTournamentCategoryId.HasValue) return;
+            // –азрешить перенос второго участника только если первый ещЄ не переносилс€
+            if (match.FirstMoved)
+            {
+                MessageBox.Show("»з одного поединка можно перенести только одного участника.", "¬нимание");
+                return;
+            }
             var category = Brackets[SelectedBracketIndex];
             var currentRoundIndex = match.Round;
             if (currentRoundIndex >= category.Rounds.Count) return;
@@ -231,6 +246,7 @@ namespace TournamentManager.Client.ViewModels
                 target.FirstParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId.Value;
                 target.FirstParticipantName = match.SecondParticipantName;
             }
+            match.SecondMoved = true;
         }
 
         [RelayCommand]
@@ -257,12 +273,14 @@ namespace TournamentManager.Client.ViewModels
                     {
                         itm.FirstParticipantTournamentCategoryId = 0;
                         itm.FirstParticipantName = string.Empty;
+                        match.SecondMoved = false;
                         break;
                     }
                     if (itm.SecondParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
                     {
                         itm.SecondParticipantTournamentCategoryId = null;
                         itm.SecondParticipantName = null;
+                        match.SecondMoved = false;
                         break;
                     }
                 }
@@ -456,6 +474,8 @@ namespace TournamentManager.Client.ViewModels
         [ObservableProperty] private bool isFinished;
         [ObservableProperty] private int round;
         [ObservableProperty] private int order;
+        [ObservableProperty] private bool firstMoved;
+        [ObservableProperty] private bool secondMoved;
 
         public bool CanEdit => IsStarted && !IsFinished && MatchId != 0;
         partial void OnIsStartedChanged(bool value) => OnPropertyChanged(nameof(CanEdit));

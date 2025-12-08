@@ -112,6 +112,51 @@ namespace TournamentManager.Client.ViewModels
                                 cb.IsCategoryFinished = true;
                             }
                         }
+                        // Явная обработка случая: 2 раунда и 2 пары — бронза проигравший первого боя при неполном втором
+                        if (cb.Rounds.Count >= 2)
+                        {
+                            var penultimate = cb.Rounds[cb.Rounds.Count - 2];
+                            if (penultimate.Items.Count == 2)
+                            {
+                                var firstSemi = penultimate.Items[0];
+                                var secondSemi = penultimate.Items[1];
+                                bool firstComplete = firstSemi.FirstParticipantTournamentCategoryId != 0 && firstSemi.SecondParticipantTournamentCategoryId.HasValue;
+                                bool secondIncomplete = secondSemi.FirstParticipantTournamentCategoryId == 0 || !secondSemi.SecondParticipantTournamentCategoryId.HasValue;
+                                var fin = cb.Rounds.Last().Items.LastOrDefault();
+                                bool finalHasBoth = fin != null && fin.SecondParticipantTournamentCategoryId.HasValue && fin.FirstParticipantTournamentCategoryId != 0;
+                                if (firstComplete && secondIncomplete && finalHasBoth)
+                                {
+                                    int finalistA = fin?.FirstParticipantTournamentCategoryId ?? 0;
+                                    int finalistB = fin?.SecondParticipantTournamentCategoryId ?? 0;
+                                    int aId = firstSemi.FirstParticipantTournamentCategoryId;
+                                    int bId = firstSemi.SecondParticipantTournamentCategoryId!.Value;
+                                    int bronzeId = (aId == finalistA || aId == finalistB) ? bId : aId;
+                                    var bronzeName = (bronzeId == aId) ? firstSemi.FirstParticipantName : (firstSemi.SecondParticipantName ?? string.Empty);
+                                    cb.PodiumBronze = bronzeName;
+
+                                    var hasBronzeRound = cb.Rounds.Any(r => r.Title.Contains("3-е место"));
+                                    if (!hasBronzeRound)
+                                    {
+                                        var bronzeItems = new ObservableCollection<MatchItemViewModel>();
+                                        bronzeItems.Add(new MatchItemViewModel
+                                        {
+                                            MatchId = 0,
+                                            FirstParticipantTournamentCategoryId = bronzeId,
+                                            SecondParticipantTournamentCategoryId = null,
+                                            FirstParticipantName = bronzeName,
+                                            SecondParticipantName = null,
+                                            FirstParticipantScore = 0,
+                                            SecondParticipantScore = 0,
+                                            IsStarted = false,
+                                            IsFinished = false,
+                                            Round = cb.Rounds.Count + 1,
+                                            Order = 1
+                                        });
+                                        cb.Rounds.Add(new BracketRoundViewModel("Матч за 3-е место", bronzeItems));
+                                    }
+                                }
+                            }
+                        }
                     }
                     Brackets.Add(cb);
                 }
@@ -194,16 +239,18 @@ namespace TournamentManager.Client.ViewModels
                 {
                     var firstSemi = penultimate.Items[0];
                     var secondSemi = penultimate.Items[1];
-                    bool firstComplete = firstSemi.SecondParticipantTournamentCategoryId.HasValue;
-                    bool secondIncomplete = !secondSemi.SecondParticipantTournamentCategoryId.HasValue;
-                    if (firstComplete && secondIncomplete)
+                    bool firstComplete = firstSemi.FirstParticipantTournamentCategoryId != 0 && firstSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    bool secondIncomplete = secondSemi.FirstParticipantTournamentCategoryId == 0 || !secondSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    var fin = category.Rounds.Last().Items.LastOrDefault();
+                    bool finalHasBoth = fin != null && fin.SecondParticipantTournamentCategoryId.HasValue && fin.FirstParticipantTournamentCategoryId != 0;
+                    if (firstComplete && secondIncomplete && finalHasBoth)
                     {
-                        var bronzeId = (firstSemi.FirstParticipantScore > firstSemi.SecondParticipantScore)
-                            ? firstSemi.SecondParticipantTournamentCategoryId!.Value
-                            : firstSemi.FirstParticipantTournamentCategoryId;
-                        var bronzeName = (firstSemi.FirstParticipantScore > firstSemi.SecondParticipantScore)
-                            ? (firstSemi.SecondParticipantName ?? string.Empty)
-                            : firstSemi.FirstParticipantName;
+                        int finalistA = fin?.FirstParticipantTournamentCategoryId ?? 0;
+                        int finalistB = fin?.SecondParticipantTournamentCategoryId ?? 0;
+                        int aId = firstSemi.FirstParticipantTournamentCategoryId;
+                        int bId = firstSemi.SecondParticipantTournamentCategoryId!.Value;
+                        int bronzeId = (aId == finalistA || aId == finalistB) ? bId : aId;
+                        var bronzeName = (bronzeId == aId) ? firstSemi.FirstParticipantName : (firstSemi.SecondParticipantName ?? string.Empty);
                         category.PodiumBronze = bronzeName;
 
                         // Добавить визуальный раунд "Матч за 3-е место", если его нет
@@ -772,8 +819,8 @@ namespace TournamentManager.Client.ViewModels
                 {
                     var firstSemi = penultimate.Items[0];
                     var secondSemi = penultimate.Items[1];
-                    bool firstComplete = firstSemi.SecondParticipantTournamentCategoryId.HasValue;
-                    bool secondIncomplete = !secondSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    bool firstComplete = firstSemi.FirstParticipantTournamentCategoryId != 0 && firstSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    bool secondIncomplete = secondSemi.FirstParticipantTournamentCategoryId == 0 || !secondSemi.SecondParticipantTournamentCategoryId.HasValue;
                     if (firstComplete && secondIncomplete)
                     {
                         // Определяем проигравшего первого полуфинала

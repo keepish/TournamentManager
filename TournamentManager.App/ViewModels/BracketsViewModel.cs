@@ -426,37 +426,35 @@ namespace TournamentManager.Client.ViewModels
                 if (origin.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
                 {
                     origin.FirstParticipantName = match.FirstParticipantName;
+                    origin.FirstMoved = false;
                 }
                 else if (origin.SecondParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
                 {
                     origin.SecondParticipantName = match.FirstParticipantName;
+                    origin.SecondMoved = false;
                 }
-                // удалить из текущего раунда
-                if (match != null)
+                // Сбросить флаг переноса у исходного боя
+                match.FirstMoved = false;
+                // Очистить слот в текущем раунде (куда переносили из предыдущего)
+                var currentRound = category.Rounds[currentRoundIndex - 1];
+                foreach (var itm in currentRound.Items)
                 {
-                    // очистить из слота, если он был скопирован
-                    var currentRound = category.Rounds[currentRoundIndex - 1];
-                    foreach (var itm in currentRound.Items)
+                    if (itm.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
                     {
-                        if (itm.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
-                        {
-                            itm.FirstParticipantTournamentCategoryId = 0;
-                            itm.FirstParticipantName = string.Empty;
-                            match.FirstMoved = false;
-                            break;
-                        }
-                        if (itm.SecondParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
-                        {
-                            itm.SecondParticipantTournamentCategoryId = null;
-                            itm.SecondParticipantName = null;
-                            match.FirstMoved = false;
-                            break;
-                        }
+                        itm.FirstParticipantTournamentCategoryId = 0;
+                        itm.FirstParticipantName = string.Empty;
+                        break;
                     }
-            // Сохраняем драфт состояния незакрытой сетки
-            SaveLocalState();
-            SaveLocalMatches(Brackets[SelectedBracketIndex]);
+                    if (itm.SecondParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
+                    {
+                        itm.SecondParticipantTournamentCategoryId = null;
+                        itm.SecondParticipantName = null;
+                        break;
+                    }
                 }
+                // Сохраняем драфт состояния незакрытой сетки
+                SaveLocalState();
+                SaveLocalMatches(Brackets[SelectedBracketIndex]);
             }
         }
 
@@ -523,11 +521,20 @@ namespace TournamentManager.Client.ViewModels
             if (origin != null)
             {
                 if (origin.FirstParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
+                {
                     origin.FirstParticipantName = match.SecondParticipantName;
+                    origin.FirstMoved = false;
+                }
                 else if (origin.SecondParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
+                {
                     origin.SecondParticipantName = match.SecondParticipantName;
+                    origin.SecondMoved = false;
+                }
 
-                // очистить текущий слот
+                // Сбросить флаг переноса у исходного боя
+                match.SecondMoved = false;
+
+                // очистить слот в текущем раунде (куда переносили из предыдущего)
                 var currentRound = category.Rounds[currentRoundIndex - 1];
                 foreach (var itm in currentRound.Items)
                 {
@@ -535,20 +542,18 @@ namespace TournamentManager.Client.ViewModels
                     {
                         itm.FirstParticipantTournamentCategoryId = 0;
                         itm.FirstParticipantName = string.Empty;
-                        match.SecondMoved = false;
                         break;
                     }
                     if (itm.SecondParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
                     {
                         itm.SecondParticipantTournamentCategoryId = null;
                         itm.SecondParticipantName = null;
-                        match.SecondMoved = false;
                         break;
                     }
                 }
-            // Сохраняем драфт состояния незакрытой сетки
-            SaveLocalState();
-            SaveLocalMatches(Brackets[SelectedBracketIndex]);
+                // Сохраняем драфт состояния незакрытой сетки
+                SaveLocalState();
+                SaveLocalMatches(Brackets[SelectedBracketIndex]);
             }
         }
     }

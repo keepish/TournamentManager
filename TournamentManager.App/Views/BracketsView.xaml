@@ -106,6 +106,16 @@
                                              ToolTip="{Binding FirstParticipantName}"/>
                                   <!-- Стрелки управления для первого участника -->
                                   <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Left">
+                                    <StackPanel.Style>
+                                      <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding DataContext.IsCategoryFinished, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </StackPanel.Style>
                                     <Button Style="{StaticResource IconButtonStyle}"
                                             ToolTip="Влево"
                                             Command="{Binding DataContext.MoveLeftCommand, ElementName=Root}"
@@ -127,6 +137,16 @@
                                              ToolTip="{Binding SecondParticipantName}"/>
                                   <!-- Стрелки управления для второго участника -->
                                   <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Left">
+                                    <StackPanel.Style>
+                                      <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding DataContext.IsCategoryFinished, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </StackPanel.Style>
                                     <Button Style="{StaticResource IconButtonStyle}"
                                             ToolTip="Влево"
                                             Command="{Binding DataContext.MoveLeftSecondCommand, ElementName=Root}"
@@ -149,16 +169,36 @@
                                            VerticalAlignment="Center"
                                            TextAlignment="Center"
                                            Text="{Binding FirstParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                           Style="{StaticResource TextBoxStyle}"
-                                           IsEnabled="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                           >
+                                    <TextBox.Style>
+                                      <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxStyle}">
+                                        <Setter Property="IsEnabled" Value="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding DataContext.IsCategoryFinished, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </TextBox.Style>
+                                  </TextBox>
                                   <TextBox Grid.Row="1" Grid.Column="2"
                                            Width="90" MinWidth="80"
                                            Margin="8,2,0,2"
                                            VerticalAlignment="Center"
                                            TextAlignment="Center"
                                            Text="{Binding SecondParticipantScore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                           Style="{StaticResource TextBoxStyle}"
-                                           IsEnabled="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                           >
+                                    <TextBox.Style>
+                                      <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxStyle}">
+                                        <Setter Property="IsEnabled" Value="{Binding DataContext.IsTournamentEditable, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding DataContext.IsCategoryFinished, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </TextBox.Style>
+                                  </TextBox>
                                 </Grid>
                               </Border>
                             </DataTemplate>

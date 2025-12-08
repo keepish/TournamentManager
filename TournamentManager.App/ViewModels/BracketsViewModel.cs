@@ -5,6 +5,8 @@ using System.Windows;
 using TournamentManager.Core.DTOs.Tournaments;
 using TournamentManager.Core.Services;
 using TournamentManager.Core.DTOs.Matches;
+using System.Text.Json;
+using System.IO;
 
 namespace TournamentManager.Client.ViewModels
 {
@@ -97,8 +99,25 @@ namespace TournamentManager.Client.ViewModels
                     }
 
                     cb.BuildRoundsStructured();
+                    // Авто-определение закрытости категории и призовых мест при повторном открытии
+                    if (cb.Rounds.Count > 0)
+                    {
+                        var lastRound = cb.Rounds.Last();
+                        var final = lastRound.Items.LastOrDefault(i => i.SecondParticipantTournamentCategoryId.HasValue);
+                        if (final != null && final.SecondParticipantTournamentCategoryId.HasValue && final.FirstParticipantTournamentCategoryId != 0)
+                        {
+                            if (final.FirstParticipantScore != final.SecondParticipantScore)
+                            {
+                                cb.ComputePodium();
+                                cb.IsCategoryFinished = true;
+                            }
+                        }
+                    }
                     Brackets.Add(cb);
                 }
+
+                // Попытка восстановить локально сохранённое состояние (закрытость и подиум)
+                RestoreLocalState();
 
                 // restore selection
                 if (oldIndex >= 0 && oldIndex < Brackets.Count)
@@ -123,13 +142,211 @@ namespace TournamentManager.Client.ViewModels
         // Команды начать/завершить и сетевые вызовы сохранены из логики. Все изменения выполняются локально, серверная фиксация только при закрытии категории.
 
         [RelayCommand]
-        private void FinishCategory()
+        private async Task FinishCategory()
         {
             if (!IsTournamentEditable) return;
             if (SelectedBracketIndex < 0) return;
             var category = Brackets[SelectedBracketIndex];
-            category.ComputePodium();
+            if (category.Rounds.Count == 0)
+            {
+                MessageBox.Show("Нет данных для закрытия категории.", "Внимание");
+                return;
+            }
+
+            var lastRound = category.Rounds.Last();
+            if (lastRound.Items.Count == 0)
+            {
+                MessageBox.Show("Последний раунд пуст. Невозможно закрыть категорию.", "Внимание");
+                return;
+            }
+
+            var finalMatch = lastRound.Items.Last();
+            if (!finalMatch.SecondParticipantTournamentCategoryId.HasValue)
+            {
+                MessageBox.Show("Финальный поединок неполный. Невозможно закрыть категорию.", "Внимание");
+                return;
+            }
+
+            if (finalMatch.FirstParticipantScore == finalMatch.SecondParticipantScore)
+            {
+                MessageBox.Show("Невозможно сохранить изменения: в финале равное количество очков.", "Ошибка");
+                return;
+            }
+
+            if (finalMatch.FirstParticipantScore > finalMatch.SecondParticipantScore)
+            {
+                category.PodiumGold = finalMatch.FirstParticipantName;
+                category.PodiumSilver = finalMatch.SecondParticipantName ?? string.Empty;
+            }
+            else
+            {
+                category.PodiumGold = finalMatch.SecondParticipantName ?? string.Empty;
+                category.PodiumSilver = finalMatch.FirstParticipantName;
+            }
+
+            // Сохранить все локально проведённые матчи в БД
+            try
+            {
+                foreach (var round in category.Rounds)
+                {
+                    foreach (var m in round.Items)
+                    {
+                        if (m.MatchId <= 0) continue; // пропускаем плейсхолдеры
+                        var dto = new MatchDto
+                        {
+                            Id = m.MatchId,
+                            FirstParticipantId = m.FirstParticipantTournamentCategoryId,
+                            SecondParticipantId = m.SecondParticipantTournamentCategoryId,
+                            FirstParticipantScore = m.FirstParticipantScore,
+                            SecondParticipantScore = m.SecondParticipantScore
+                        };
+                        await _apiService.PutAsync<object>($"api/Matches/{dto.Id}", dto);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения матчей: {ex.Message}", "Ошибка");
+                return;
+            }
+
             category.IsCategoryFinished = true;
+
+            // Сохранить локально состояние закрытой категории
+            SaveLocalState();
+
+            // Сохранить локально все поединки (со значениями счетов) выбранной категории
+            SaveLocalMatches(category);
+        }
+
+        // Локальное сохранение состояния сеток (закрытость и подиум) в %AppData%\TournamentManager\brackets
+        private void SaveLocalState()
+        {
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TournamentManager", "brackets");
+                Directory.CreateDirectory(dir);
+                var path = Path.Combine(dir, $"tournament_{_tournament.Id}.json");
+                var state = Brackets.Select(b => new BracketState
+                {
+                    TournamentCategoryId = b.TournamentCategoryId,
+                    CategoryId = b.CategoryId,
+                    IsFinished = b.IsCategoryFinished,
+                    PodiumGold = b.PodiumGold,
+                    PodiumSilver = b.PodiumSilver,
+                    PodiumBronze = b.PodiumBronze
+                }).ToList();
+                var json = JsonSerializer.Serialize(state);
+                File.WriteAllText(path, json);
+            }
+            catch { }
+        }
+
+        private void RestoreLocalState()
+        {
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TournamentManager", "brackets");
+                var path = Path.Combine(dir, $"tournament_{_tournament.Id}.json");
+                if (!File.Exists(path)) return;
+                var json = File.ReadAllText(path);
+                var states = JsonSerializer.Deserialize<List<BracketState>>(json) ?? new List<BracketState>();
+                foreach (var s in states)
+                {
+                    var cb = Brackets.FirstOrDefault(b => b.TournamentCategoryId == s.TournamentCategoryId && b.CategoryId == s.CategoryId);
+                    if (cb == null) continue;
+                    cb.IsCategoryFinished = s.IsFinished;
+                    cb.PodiumGold = s.PodiumGold;
+                    cb.PodiumSilver = s.PodiumSilver;
+                    cb.PodiumBronze = s.PodiumBronze;
+
+                    // Восстановить счета матчей из локального бэкапа, если он существует
+                    RestoreLocalMatches(cb);
+                }
+            }
+            catch { }
+        }
+
+        private void SaveLocalMatches(CategoryBracketItemViewModel category)
+        {
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TournamentManager", "brackets");
+                Directory.CreateDirectory(dir);
+                var path = Path.Combine(dir, $"tournament_{_tournament.Id}_cat_{category.TournamentCategoryId}.matches.json");
+                var matches = new List<PersistedMatch>();
+                foreach (var r in category.Rounds)
+                {
+                    foreach (var m in r.Items)
+                    {
+                        matches.Add(new PersistedMatch
+                        {
+                            MatchId = m.MatchId,
+                            Round = m.Round,
+                            Order = m.Order,
+                            FirstParticipantTournamentCategoryId = m.FirstParticipantTournamentCategoryId,
+                            SecondParticipantTournamentCategoryId = m.SecondParticipantTournamentCategoryId,
+                            FirstParticipantName = m.FirstParticipantName,
+                            SecondParticipantName = m.SecondParticipantName,
+                            FirstParticipantScore = m.FirstParticipantScore,
+                            SecondParticipantScore = m.SecondParticipantScore
+                        });
+                    }
+                }
+                var json = JsonSerializer.Serialize(matches);
+                File.WriteAllText(path, json);
+            }
+            catch { }
+        }
+
+        private void RestoreLocalMatches(CategoryBracketItemViewModel category)
+        {
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TournamentManager", "brackets");
+                var path = Path.Combine(dir, $"tournament_{_tournament.Id}_cat_{category.TournamentCategoryId}.matches.json");
+                if (!File.Exists(path)) return;
+                var json = File.ReadAllText(path);
+                var persisted = JsonSerializer.Deserialize<List<PersistedMatch>>(json) ?? new List<PersistedMatch>();
+                foreach (var pm in persisted)
+                {
+                    var round = category.Rounds.FirstOrDefault(r => r.Items.Any(i => i.Round == pm.Round && i.Order == pm.Order));
+                    if (round == null) continue;
+                    var item = round.Items.FirstOrDefault(i => i.Round == pm.Round && i.Order == pm.Order);
+                    if (item == null) continue;
+                    item.MatchId = pm.MatchId;
+                    item.FirstParticipantTournamentCategoryId = pm.FirstParticipantTournamentCategoryId;
+                    item.SecondParticipantTournamentCategoryId = pm.SecondParticipantTournamentCategoryId;
+                    item.FirstParticipantName = pm.FirstParticipantName;
+                    item.SecondParticipantName = pm.SecondParticipantName;
+                    item.FirstParticipantScore = pm.FirstParticipantScore;
+                    item.SecondParticipantScore = pm.SecondParticipantScore;
+                }
+            }
+            catch { }
+        }
+
+        private class PersistedMatch
+        {
+            public int MatchId { get; set; }
+            public int Round { get; set; }
+            public int Order { get; set; }
+            public int FirstParticipantTournamentCategoryId { get; set; }
+            public int? SecondParticipantTournamentCategoryId { get; set; }
+            public string FirstParticipantName { get; set; } = string.Empty;
+            public string? SecondParticipantName { get; set; }
+            public int FirstParticipantScore { get; set; }
+            public int SecondParticipantScore { get; set; }
+        }
+
+        private class BracketState
+        {
+            public int TournamentCategoryId { get; set; }
+            public int CategoryId { get; set; }
+            public bool IsFinished { get; set; }
+            public string? PodiumGold { get; set; }
+            public string? PodiumSilver { get; set; }
+            public string? PodiumBronze { get; set; }
         }
 
         // Перемещение первого участника вправо (в следующий раунд)

@@ -1,0 +1,30 @@
+﻿<Window x:Class="TournamentManager.Client.Views.TournamentsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TournamentManager.Client.Views"
+        mc:Ignorable="d"
+        Title="TournamentsWindow" Height="450" Width="800" 
+        WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Турниры" Style="{StaticResource HeaderTextStyle}" HorizontalAlignment="Center"/>
+
+        <ListBox Grid.Row="1" ItemsSource="{Binding Tournaments}" HorizontalAlignment="Center" Width="400">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Button Grid.Row="2" Content="Войти" Command="{Binding OpenLoginCommand}"
+            Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right"/>
+    </Grid>
+</Window>

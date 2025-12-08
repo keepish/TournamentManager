@@ -106,5 +106,19 @@ namespace TournamentManager.Client.ViewModels
                 }
             }
         }
+
+        [RelayCommand]
+        private void OpenGuest()
+        {
+            var tournamentsWindow = new TournamentsWindow
+            {
+                ResizeMode = ResizeMode.NoResize
+            };
+
+            var vm = new GuestTournamentsViewModel(_tournamentService);
+            tournamentsWindow.DataContext = vm;
+
+            tournamentsWindow.Show();
+        }
     }
 }

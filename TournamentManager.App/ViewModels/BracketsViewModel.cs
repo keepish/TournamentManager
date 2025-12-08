@@ -118,6 +118,8 @@ namespace TournamentManager.Client.ViewModels
 
                 // Попытка восстановить локально сохранённое состояние (закрытость и подиум)
                 RestoreLocalState();
+                // Сохранить текущий драфт состояния (на случай незакрытой сетки)
+                SaveLocalState();
 
                 // restore selection
                 if (oldIndex >= 0 && oldIndex < Brackets.Count)
@@ -407,6 +409,9 @@ namespace TournamentManager.Client.ViewModels
             }
             // Оставляем имя в исходной позиции
             match.FirstMoved = true;
+            // Сохраняем драфт состояния незакрытой сетки
+            SaveLocalState();
+            SaveLocalMatches(Brackets[SelectedBracketIndex]);
         }
 
         // Перемещение первого участника влево (в предыдущий раунд на исходную позицию)
@@ -454,6 +459,9 @@ namespace TournamentManager.Client.ViewModels
                             break;
                         }
                     }
+            // Сохраняем драфт состояния незакрытой сетки
+            SaveLocalState();
+            SaveLocalMatches(Brackets[SelectedBracketIndex]);
                 }
             }
         }
@@ -510,6 +518,9 @@ namespace TournamentManager.Client.ViewModels
                 }
             }
             match.SecondMoved = true;
+            // Сохраняем драфт состояния незакрытой сетки
+            SaveLocalState();
+            SaveLocalMatches(Brackets[SelectedBracketIndex]);
         }
 
         [RelayCommand]
@@ -547,6 +558,9 @@ namespace TournamentManager.Client.ViewModels
                         break;
                     }
                 }
+            // Сохраняем драфт состояния незакрытой сетки
+            SaveLocalState();
+            SaveLocalMatches(Brackets[SelectedBracketIndex]);
             }
         }
     }

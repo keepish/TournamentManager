@@ -123,7 +123,7 @@
                                       <Viewbox Width="12" Height="12"><Path Data="M12,6 L6,12 12,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>
                                     </Button>
                                     <Button Style="{StaticResource IconButtonStyle}"
-                                            ToolTip="Вправо"
+                                            ToolTip="Вправо" Margin="0,15,0,0"
                                             Command="{Binding DataContext.MoveRightCommand, ElementName=Root}"
                                             CommandParameter="{Binding}">
                                       <Viewbox Width="12" Height="12"><Path Data="M6,6 L12,12 6,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>

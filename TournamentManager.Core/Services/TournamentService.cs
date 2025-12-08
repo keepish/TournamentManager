@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Json;
-using TournamentManager.Core.DTOs.TournamentCategories;
 using TournamentManager.Core.DTOs.Tournaments;
 
 namespace TournamentManager.Core.Services

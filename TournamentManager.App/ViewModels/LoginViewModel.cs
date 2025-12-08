@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
+using System.Net.Http;
 using TournamentManager.Client.Views;
 using TournamentManager.Core.DTOs.Categories;
 using TournamentManager.Core.DTOs.TournamentCategories;
@@ -62,8 +63,8 @@ namespace TournamentManager.Client.ViewModels
             {
                 var loginData = new
                 {
-                    login = Login,
-                    password = Password
+                    Login = Login,
+                    Password = Password
                 };
 
                 var result = await _apiService.PostAsync<LoginResult>("/api/Auth/login", loginData);
@@ -85,9 +86,13 @@ namespace TournamentManager.Client.ViewModels
 
                 CloseLoginWindow();
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
                 MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Неожиданная ошибка: {ex.Message}", "Ошибка");
             }
             finally
             {

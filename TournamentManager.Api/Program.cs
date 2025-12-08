@@ -111,6 +111,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Enable response compression if registered
+app.UseResponseCompression();
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

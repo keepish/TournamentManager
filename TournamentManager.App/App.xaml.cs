@@ -70,27 +70,27 @@ namespace TournamentManager.Client
 
             services.AddHttpClient<IService<TournamentDto>, TournamentService>((provider, client) =>
             {
-                client.BaseAddress = new Uri("http://localhost:7074/api/Tournaments/");
+                client.BaseAddress = new Uri("https://localhost:7074/api/Tournaments/");
             });
 
             services.AddHttpClient<IService<CategoryDto>, CategoryService>((provider, client) =>
             {
-                client.BaseAddress = new Uri("http://localhost:7074/api/Categories/");
+                client.BaseAddress = new Uri("https://localhost:7074/api/Categories/");
             });
 
             services.AddHttpClient<ITournamentCategoryService, TournamentCategoryService>((provider, client) =>
             {
-                client.BaseAddress = new Uri("http://localhost:7074/api/TournamentCategories/");
+                client.BaseAddress = new Uri("https://localhost:7074/api/TournamentCategories/");
             });
 
             services.AddHttpClient<IUserService, UserService>((provider, client) =>
             {
-                client.BaseAddress = new Uri("http://localhost:7074/api/Users/");
+                client.BaseAddress = new Uri("https://localhost:7074/api/Users/");
             });
 
             services.AddHttpClient<IParticipantService, ParticipantService>((provider, client) =>
             {
-                client.BaseAddress = new Uri("http://localhost:7074/api/Participants/");
+                client.BaseAddress = new Uri("https://localhost:7074/api/Participants/");
             });
 
             services.AddTransient<LoginViewModel>();

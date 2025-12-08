@@ -8,11 +8,19 @@ namespace TournamentManager.Core.Services
     {
         private readonly HttpClient _httpClient;
         private readonly SecureStorage _secureStorage;
-        private const string BaseUrl = "http://localhost:7074/";
+        private const string BaseUrl = "https://localhost:7074/";
 
         public ApiService(SecureStorage secureStorage)
         {
-            _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
+            var handler = new HttpClientHandler
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+            };
+            _httpClient = new HttpClient(handler)
+            {
+                BaseAddress = new Uri(BaseUrl),
+                Timeout = TimeSpan.FromSeconds(100)
+            };
             _secureStorage = secureStorage;
 
             LoadToken();

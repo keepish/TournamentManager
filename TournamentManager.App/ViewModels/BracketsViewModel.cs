@@ -356,12 +356,6 @@ namespace TournamentManager.Client.ViewModels
         private void MoveRight(MatchItemViewModel match)
         {
             if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0) return;
-            // Участник уже перемещён — повторный перенос запрещён
-            if (match.FirstMoved)
-            {
-                MessageBox.Show("Этот участник уже перемещён в следующий раунд.", "Внимание");
-                return;
-            }
             // Разрешить перенос первого участника только если второй ещё не переносился
             if (match.SecondMoved)
             {
@@ -381,12 +375,12 @@ namespace TournamentManager.Client.ViewModels
             if (targetMatchIndex > nextRound.Items.Count) targetMatchIndex = nextRound.Items.Count;
             var target = nextRound.Items[targetMatchIndex - 1];
             // Заполняем слот первого участника
-            if (string.IsNullOrEmpty(target.FirstParticipantName) || target.FirstParticipantTournamentCategoryId == 0)
+            if (string.IsNullOrEmpty(target.FirstParticipantName) || target.FirstParticipantTournamentCategoryId == 0 || target.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
             {
                 target.FirstParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
                 target.FirstParticipantName = match.FirstParticipantName;
             }
-            else if (!target.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(target.SecondParticipantName))
+            else if (!target.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(target.SecondParticipantName) || (target.SecondParticipantTournamentCategoryId.HasValue && target.SecondParticipantTournamentCategoryId.Value == match.FirstParticipantTournamentCategoryId))
             {
                 target.SecondParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
                 target.SecondParticipantName = match.FirstParticipantName;
@@ -394,9 +388,9 @@ namespace TournamentManager.Client.ViewModels
             else
             {
                 // если оба слота заняты, ищем ближайший следующий свободный
-                var fallback = nextRound.Items.FirstOrDefault(i => i.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(i.FirstParticipantName) || !i.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(i.SecondParticipantName));
+                var fallback = nextRound.Items.FirstOrDefault(i => i.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(i.FirstParticipantName) || i.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId || !i.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(i.SecondParticipantName) || (i.SecondParticipantTournamentCategoryId.HasValue && i.SecondParticipantTournamentCategoryId.Value == match.FirstParticipantTournamentCategoryId));
                 if (fallback == null) return;
-                if (fallback.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(fallback.FirstParticipantName))
+                if (fallback.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(fallback.FirstParticipantName) || fallback.FirstParticipantTournamentCategoryId == match.FirstParticipantTournamentCategoryId)
                 {
                     fallback.FirstParticipantTournamentCategoryId = match.FirstParticipantTournamentCategoryId;
                     fallback.FirstParticipantName = match.FirstParticipantName;
@@ -471,12 +465,6 @@ namespace TournamentManager.Client.ViewModels
         private void MoveRightSecond(MatchItemViewModel match)
         {
             if (!IsTournamentEditable || match == null || SelectedBracketIndex < 0 || !match.SecondParticipantTournamentCategoryId.HasValue) return;
-            // Участник уже перемещён — повторный перенос запрещён
-            if (match.SecondMoved)
-            {
-                MessageBox.Show("Этот участник уже перемещён в следующий раунд.", "Внимание");
-                return;
-            }
             // Разрешить перенос второго участника только если первый ещё не переносился
             if (match.FirstMoved)
             {
@@ -492,21 +480,21 @@ namespace TournamentManager.Client.ViewModels
             if (targetMatchIndex > nextRound.Items.Count) targetMatchIndex = nextRound.Items.Count;
             var target = nextRound.Items[targetMatchIndex - 1];
             // Заполняем слот второго участника
-            if (!target.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(target.SecondParticipantName))
+            if (!target.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(target.SecondParticipantName) || (target.SecondParticipantTournamentCategoryId.HasValue && target.SecondParticipantTournamentCategoryId.Value == match.SecondParticipantTournamentCategoryId))
             {
                 target.SecondParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId;
                 target.SecondParticipantName = match.SecondParticipantName;
             }
-            else if (target.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(target.FirstParticipantName))
+            else if (target.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(target.FirstParticipantName) || target.FirstParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId)
             {
                 target.FirstParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId.Value;
                 target.FirstParticipantName = match.SecondParticipantName;
             }
             else
             {
-                var fallback = nextRound.Items.FirstOrDefault(i => !i.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(i.SecondParticipantName) || i.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(i.FirstParticipantName));
+                var fallback = nextRound.Items.FirstOrDefault(i => !i.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(i.SecondParticipantName) || (i.SecondParticipantTournamentCategoryId.HasValue && i.SecondParticipantTournamentCategoryId.Value == match.SecondParticipantTournamentCategoryId) || i.FirstParticipantTournamentCategoryId == 0 || string.IsNullOrEmpty(i.FirstParticipantName) || i.FirstParticipantTournamentCategoryId == match.SecondParticipantTournamentCategoryId);
                 if (fallback == null) return;
-                if (!fallback.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(fallback.SecondParticipantName))
+                if (!fallback.SecondParticipantTournamentCategoryId.HasValue || string.IsNullOrEmpty(fallback.SecondParticipantName) || (fallback.SecondParticipantTournamentCategoryId.HasValue && fallback.SecondParticipantTournamentCategoryId.Value == match.SecondParticipantTournamentCategoryId))
                 {
                     fallback.SecondParticipantTournamentCategoryId = match.SecondParticipantTournamentCategoryId;
                     fallback.SecondParticipantName = match.SecondParticipantName;

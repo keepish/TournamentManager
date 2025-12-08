@@ -186,6 +186,51 @@ namespace TournamentManager.Client.ViewModels
                 category.PodiumSilver = finalMatch.FirstParticipantName;
             }
 
+            // Автоприсвоение бронзы по правилу: в предпоследнем раунде 2 боя, первый полный, второй неполный — бронза проигравший первого боя
+            if (category.Rounds.Count >= 2)
+            {
+                var penultimate = category.Rounds[category.Rounds.Count - 2];
+                if (penultimate.Items.Count == 2)
+                {
+                    var firstSemi = penultimate.Items[0];
+                    var secondSemi = penultimate.Items[1];
+                    bool firstComplete = firstSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    bool secondIncomplete = !secondSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    if (firstComplete && secondIncomplete)
+                    {
+                        var bronzeId = (firstSemi.FirstParticipantScore > firstSemi.SecondParticipantScore)
+                            ? firstSemi.SecondParticipantTournamentCategoryId!.Value
+                            : firstSemi.FirstParticipantTournamentCategoryId;
+                        var bronzeName = (firstSemi.FirstParticipantScore > firstSemi.SecondParticipantScore)
+                            ? (firstSemi.SecondParticipantName ?? string.Empty)
+                            : firstSemi.FirstParticipantName;
+                        category.PodiumBronze = bronzeName;
+
+                        // Добавить визуальный раунд "Матч за 3-е место", если его нет
+                        var hasBronzeRound = category.Rounds.Any(r => r.Title.Contains("3-е место"));
+                        if (!hasBronzeRound)
+                        {
+                            var bronzeItems = new ObservableCollection<MatchItemViewModel>();
+                            bronzeItems.Add(new MatchItemViewModel
+                            {
+                                MatchId = 0,
+                                FirstParticipantTournamentCategoryId = bronzeId,
+                                SecondParticipantTournamentCategoryId = null,
+                                FirstParticipantName = bronzeName,
+                                SecondParticipantName = null,
+                                FirstParticipantScore = 0,
+                                SecondParticipantScore = 0,
+                                IsStarted = false,
+                                IsFinished = false,
+                                Round = category.Rounds.Count + 1,
+                                Order = 1
+                            });
+                            category.Rounds.Add(new BracketRoundViewModel("Матч за 3-е место", bronzeItems));
+                        }
+                    }
+                }
+            }
+
             // Сохранить все локально проведённые матчи в БД
             try
             {
@@ -717,6 +762,52 @@ namespace TournamentManager.Client.ViewModels
             }
 
             OnPropertyChanged(nameof(Rounds));
+
+            // Добавление матча за 3-е место сразу после финала при особом условии:
+            // В предпоследнем раунде осталось 2 поединка и второй неполный, а первый полный — бронзу получает проигравший первого поединка
+            if (Rounds.Count >= 2)
+            {
+                var penultimate = Rounds[Rounds.Count - 2];
+                if (penultimate.Items.Count == 2)
+                {
+                    var firstSemi = penultimate.Items[0];
+                    var secondSemi = penultimate.Items[1];
+                    bool firstComplete = firstSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    bool secondIncomplete = !secondSemi.SecondParticipantTournamentCategoryId.HasValue;
+                    if (firstComplete && secondIncomplete)
+                    {
+                        // Определяем проигравшего первого полуфинала
+                        var bronzeId = (firstSemi.FirstParticipantScore > firstSemi.SecondParticipantScore)
+                            ? firstSemi.SecondParticipantTournamentCategoryId!.Value
+                            : firstSemi.FirstParticipantTournamentCategoryId;
+                        var bronzeName = (firstSemi.FirstParticipantScore > firstSemi.SecondParticipantScore)
+                            ? (firstSemi.SecondParticipantName ?? string.Empty)
+                            : firstSemi.FirstParticipantName;
+
+                        // Записываем бронзу в свойства категории
+                        PodiumBronze = bronzeName;
+
+                        // Отрисовываем раунд "Матч за 3-е место" сразу после финала: одиночный слот с бронзовым призёром
+                        var bronzeItems = new ObservableCollection<MatchItemViewModel>();
+                        bronzeItems.Add(new MatchItemViewModel
+                        {
+                            MatchId = 0,
+                            FirstParticipantTournamentCategoryId = bronzeId,
+                            SecondParticipantTournamentCategoryId = null,
+                            FirstParticipantName = bronzeName,
+                            SecondParticipantName = null,
+                            FirstParticipantScore = 0,
+                            SecondParticipantScore = 0,
+                            IsStarted = false,
+                            IsFinished = false,
+                            Round = Rounds.Count + 1,
+                            Order = 1
+                        });
+                        Rounds.Add(new BracketRoundViewModel("Матч за 3-е место", bronzeItems));
+                        OnPropertyChanged(nameof(Rounds));
+                    }
+                }
+            }
         }
     }
 

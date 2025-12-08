@@ -105,7 +105,7 @@
                                              TextTrimming="CharacterEllipsis"
                                              ToolTip="{Binding FirstParticipantName}"/>
                                   <!-- Стрелки управления для первого участника -->
-                                  <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Left">
+                                  <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
                                     <StackPanel.Style>
                                       <Style TargetType="StackPanel">
                                         <Setter Property="Visibility" Value="Visible"/>
@@ -123,7 +123,7 @@
                                       <Viewbox Width="12" Height="12"><Path Data="M12,6 L6,12 12,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>
                                     </Button>
                                     <Button Style="{StaticResource IconButtonStyle}"
-                                            ToolTip="Вправо" Margin="0,15,0,0"
+                                            ToolTip="Вправо"
                                             Command="{Binding DataContext.MoveRightCommand, ElementName=Root}"
                                             CommandParameter="{Binding}">
                                       <Viewbox Width="12" Height="12"><Path Data="M6,6 L12,12 6,18" StrokeThickness="2" Stroke="{StaticResource TextPrimaryBrush}"/></Viewbox>
@@ -136,7 +136,7 @@
                                              TextTrimming="CharacterEllipsis"
                                              ToolTip="{Binding SecondParticipantName}"/>
                                   <!-- Стрелки управления для второго участника -->
-                                  <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Left">
+                                  <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
                                     <StackPanel.Style>
                                       <Style TargetType="StackPanel">
                                         <Setter Property="Visibility" Value="Visible"/>
